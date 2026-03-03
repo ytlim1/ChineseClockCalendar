@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>农历万年历 - 跨月查看版</title>
+    <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.min.js"></script>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        body { background-color: #f5f3ef; font-family: "Microsoft YaHei", sans-serif; display: flex; flex-direction: column; align-items: center; padding-top: 40px; color: #333; }
+        .lang-switch { margin-bottom: 20px; cursor: pointer; padding: 8px 20px; border: 1px solid #b71c1c; color: #b71c1c; border-radius: 25px; background: #fff; font-size: 0.9em; transition: 0.3s; }
+        .lang-switch:hover { background: #b71c1c; color: #fff; }
+        
+        .lunar-card { background: #fff; padding: 30px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.08); width: 360px; text-align: center; border-top: 6px solid #b71c1c; }
+        
+        .solar-date { color: #888; font-size: 1.1em; margin-bottom: 5px; }
+        .digital-time { font-size: 2.2em; font-family: "Courier New", Courier, monospace; font-weight: bold; color: #b71c1c; margin: 5px 0; letter-spacing: 2px; }
+        .festival-tag { display: inline-block; background: #fff1f0; color: #cf1322; padding: 5px 15px; border-radius: 50px; font-size: 0.9em; font-weight: bold; margin: 10px 0; border: 1px solid #ffa39e; }
+        .lunar-main { font-size: 2.4em; font-weight: bold; margin: 5px 0; color: #1a1a1a; }
+        .shichen-box { font-size: 1.1em; color: #666; margin: 10px 0; background: #f9f9f9; padding: 5px 0; border-radius: 8px; }
+        
+        .countdown-box { margin-top: 20px; padding-top: 15px; border-top: 1px dashed #e8e8e8; font-size: 0.95em; color: #777; min-height: 50px;}
+        .days-highlight { color: #b71c1c; font-size: 1.4em; font-weight: bold; margin: 0 5px; }
+        .today-fest { color: #b71c1c; font-size: 1.2em; font-weight: bold; }
+
+        .calendar-link { margin-top: 15px; color: #b71c1c; cursor: pointer; font-size: 0.85em; text-decoration: underline; opacity: 0.7; }
+
+        /* 日历导航样式 */
+        #calendar-container { display: none; margin-top: 20px; border-top: 1px solid #eee; padding-top: 15px; }
+        .cal-nav { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; font-weight: bold; color: #b71c1c; }
+        .nav-btn { cursor: pointer; padding: 0 10px; font-size: 1.2em; user-select: none; }
+        
+        .cal-table { width: 100%; border-collapse: collapse; font-size: 0.85em; table-layout: fixed; }
+        .cal-table th { color: #999; padding-bottom: 8px; font-weight: normal; }
+        .cal-table td { padding: 6px 0; border-radius: 5px; vertical-align: top; height: 40px; }
+        .cal-today { background: #fff1f0; border: 1px solid #b71c1c; color: #b71c1c !important; font-weight: bold; }
+        .cal-lunar { font-size: 0.7em; display: block; color: #aaa; margin-top: 2px; font-weight: normal; }
+        .cal-today .cal-lunar { color: #b71c1c; }
+        .weekend { color: #cf1322; }
+    </style>
+</head>
+<body>
+
+<button class="lang-switch" onclick="toggleLang()" id="langBtn">切換為繁體</button>
+
+<div class="lunar-card">
+    <div id="solar-date" class="solar-date">---</div>
+    <div id="current-time" class="digital-time">00:00:00</div>
+    <div id="jieqi-tag" class="festival-tag">---</div>
+    <div id="lunar-main" class="lunar-main">---</div>
+    <div id="shichen-info" class="shichen-box">---</div>
+    
+    <div class="countdown-box" id="countdown-area">
+        <div id="counting-status">
+            <span id="txt-dist">距离</span> <span id="next-fest-name" style="font-weight:bold;color:#333;">---</span> <span id="txt-remain">还有</span>
+            <div style="margin-top:8px;"><span id="days-count" class="days-highlight">0</span> <span id="txt-day">天</span></div>
+        </div>
+        <div id="today-fest-status" class="today-fest" style="display:none;"></div>
+    </div>
+
+    <div class="calendar-link" onclick="toggleCalendar()" id="calLink">查看本月月历</div>
+
+    <div id="calendar-container">
+        <div class="cal-nav">
+            <span class="nav-btn" onclick="changeMonth(-1)">❮</span>
+            <span id="cal-title">2026年3月</span>
+            <span class="nav-btn" onclick="changeMonth(1)">❯</span>
+        </div>
+        <table class="cal-table">
+            <thead>
+                <tr>
+                    <th class="weekend">日</th><th>一</th><th>二</th><th>三</th><th>四</th><th>五</th><th class="weekend">六</th>
+                </tr>
+            </thead>
+            <tbody id="cal-body"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+const s2tData = {"农":"農","历":"曆","年":"年","节":"節","月":"月","日":"日","礼":"禮","拜":"拜","距离":"距離","还有":"還有","天":"天","春节":"春節","元宵节":"元宵節","端午节":"端午節","中秋节":"中秋節","重阳节":"重陽節","时":"時","今":"今","当前时辰":"當前時辰","今日":"今日","今日节气":"今日節氣","查看本月月历":"查看本月月曆","隐藏月历":"隱藏月曆"};
+let isTraditional = false;
+let isCalVisible = false;
+let viewYear, viewMonth; // 当前查看的年和月
+
+function translate(text) {
+    if (!text || !isTraditional) return text;
+    return text.split('').map(char => s2tData[char] || char).join('');
+}
+
+function toggleLang() {
+    isTraditional = !isTraditional;
+    document.getElementById('langBtn').innerText = isTraditional ? "切换为简体" : "切換為繁體";
+    updateDisplay();
+}
+
+function toggleCalendar() {
+    isCalVisible = !isCalVisible;
+    const container = document.getElementById('calendar-container');
+    container.style.display = isCalVisible ? "block" : "none";
+    if (isCalVisible) {
+        const now = new Date();
+        viewYear = now.getFullYear();
+        viewMonth = now.getMonth() + 1;
+        renderCalendar();
+    }
+    updateDisplay();
+}
+
+function changeMonth(step) {
+    viewMonth += step;
+    if (viewMonth > 12) { viewYear++; viewMonth = 1; }
+    if (viewMonth < 1) { viewYear--; viewMonth = 12; }
+    renderCalendar();
+}
+
+function updateDisplay() {
+    const now = new Date();
+    document.getElementById('current-time').innerText = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+
+    const solar = Solar.fromDate(now);
+    const lunar = solar.getLunar();
+
+    document.getElementById('solar-date').innerText = translate(`${solar.getYear()}年${solar.getMonth()}月${solar.getDay()}日 礼拜${solar.getWeekInChinese()}`);
+    document.getElementById('lunar-main').innerText = translate(`${lunar.getMonthInChinese()}月${lunar.getDayInChinese()}`);
+
+    try {
+        document.getElementById('shichen-info').innerText = translate(`当前时辰：${lunar.getEightChar().getTimeZhi()}时`);
+    } catch(e) {}
+
+    const jqToday = lunar.getJieQi() || lunar.getPrevJieQi().getName();
+    document.getElementById('jieqi-tag').innerText = translate(`今日节气：${jqToday}`);
+
+    document.getElementById('txt-dist').innerText = translate("距离");
+    document.getElementById('txt-remain').innerText = translate("还有");
+    document.getElementById('txt-day').innerText = translate("天");
+    document.getElementById('calLink').innerText = isCalVisible ? translate("隐藏月历") : translate("查看本月月历");
+    
+    findNext(lunar);
+}
+
+function renderCalendar() {
+    document.getElementById('cal-title').innerText = translate(`${viewYear}年${viewMonth}月`);
+    const firstDay = new Date(viewYear, viewMonth - 1, 1).getDay();
+    const daysInMonth = new Date(viewYear, viewMonth, 0).getDate();
+    const now = new Date();
+    const realYear = now.getFullYear(), realMonth = now.getMonth() + 1, realDay = now.getDate();
+
+    let html = '<tr>';
+    for (let i = 0; i < firstDay; i++) html += '<td></td>';
+    
+    for (let day = 1; day <= daysInMonth; day++) {
+        if ((day + firstDay - 1) % 7 === 0 && day !== 1) html += '</tr><tr>';
+        
+        const s = Solar.fromYmd(viewYear, viewMonth, day);
+        const l = s.getLunar();
+        const isToday = (viewYear === realYear && viewMonth === realMonth && day === realDay);
+        const isWeekend = (new Date(viewYear, viewMonth - 1, day).getDay() % 6 === 0);
+        
+        // 农历逻辑：如果是初一显示月份，否则显示日期
+        const lunarShow = l.getDayInChinese() === '初一' ? l.getMonthInChinese()+'月' : l.getDayInChinese();
+        
+        html += `<td class="${isToday ? 'cal-today' : ''} ${isWeekend && !isToday ? 'weekend' : ''}">
+                    ${day}<span class="cal-lunar">${translate(lunarShow)}</span>
+                 </td>`;
+    }
+    html += '</tr>';
+    document.getElementById('cal-body').innerHTML = html;
+}
+
+function findNext(lunar) {
+    const targets = [{m:1,d:1,n:"春节"},{m:1,d:15,n:"元宵节"},{m:5,d:5,n:"端午节"},{m:8,d:15,n:"中秋节"}];
+    let min = 9999, target = null;
+    targets.forEach(f => {
+        let fs = Lunar.fromYmd(lunar.getYear(), f.m, f.d).getSolar();
+        let diff = fs.subtract(lunar.getSolar());
+        if (diff < 0) { fs = Lunar.fromYmd(lunar.getYear()+1, f.m, f.d).getSolar(); diff = fs.subtract(lunar.getSolar()); }
+        if (diff < min) { min = diff; target = f; }
+    });
+
+    const countArea = document.getElementById('counting-status'), todayArea = document.getElementById('today-fest-status');
+    if (target && min === 0) {
+        countArea.style.display = "none"; todayArea.style.display = "block";
+        todayArea.innerText = translate(`今日：${target.n}`);
+    } else if (target) {
+        countArea.style.display = "block"; todayArea.style.display = "none";
+        document.getElementById('next-fest-name').innerText = translate(target.n);
+        document.getElementById('days-count').innerText = min;
+    }
+}
+
+setInterval(updateDisplay, 1000);
+updateDisplay();
+</script>
+</body>
+</html>
