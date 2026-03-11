@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>农历万年历 - 功能修复版</title>
+    <title>农历万年历 - 最终修复版</title>
     <link rel="manifest" href="manifest.json">
     <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.min.js"></script>
     <style>
@@ -11,58 +11,28 @@
         body { background-color: var(--bg-gray); font-family: "Microsoft YaHei", sans-serif; display: flex; flex-direction: column; align-items: center; padding: 15px 0; color: #333; }
         
         .card { 
-            background: #fff; 
-            padding: 25px 20px; 
-            border-radius: 20px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
-            width: 340px; 
-            text-align: center; 
-            border-top: 6px solid var(--main-red); 
-            position: relative; 
-            box-sizing: border-box;
+            background: #fff; padding: 25px 20px; border-radius: 20px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08); width: 340px; 
+            text-align: center; border-top: 6px solid var(--main-red); 
+            position: relative; box-sizing: border-box;
         }
         
         .top-row {
-            display: flex;
-            align-items: center; 
-            justify-content: center; 
-            position: relative;
-            width: 100%;
-            height: 32px; 
-            margin-bottom: 12px;
+            display: flex; align-items: center; justify-content: center; 
+            position: relative; width: 100%; height: 32px; margin-bottom: 12px;
         }
 
-        .solar-date { 
-            color: #888; 
-            font-size: 1.05em; 
-            margin: 0; 
-            padding: 0;
-            line-height: 1; 
-        }
+        .solar-date { color: #888; font-size: 1.05em; margin: 0; padding: 0; line-height: 1; }
 
-        /* 按钮高亮且加粗 */
         .lang-mini-btn { 
-            position: absolute;
-            right: 0;
-            top: 50%;
-            transform: translateY(-50%); 
-            font-size: 0.75em; 
-            font-weight: bold; 
-            padding: 3px 10px; 
-            background-color: var(--btn-bg); 
-            border: 1px solid var(--btn-border); 
-            border-radius: 6px; 
-            color: var(--fest-red); 
-            cursor: pointer; 
-            line-height: 1.2;
-            transition: all 0.2s;
-            box-shadow: 0 2px 4px rgba(207, 19, 34, 0.1);
+            position: absolute; right: 0; top: 50%; transform: translateY(-50%); 
+            font-size: 0.75em; font-weight: bold; padding: 3px 10px; 
+            background-color: var(--btn-bg); border: 1px solid var(--btn-border); 
+            border-radius: 6px; color: var(--fest-red); cursor: pointer; 
+            line-height: 1.2; transition: all 0.2s; box-shadow: 0 2px 4px rgba(207, 19, 34, 0.1);
         }
         
-        .lang-mini-btn:active {
-            background-color: #ffccc7;
-            transform: translateY(-50%) scale(0.92);
-        }
+        .lang-mini-btn:active { background-color: #ffccc7; transform: translateY(-50%) scale(0.92); }
 
         .time { font-size: 2.8em; font-weight: bold; color: var(--main-red); margin: 5px 0; line-height: 1.1; }
         .jieqi-tag { display: inline-block; background: #fff1f0; color: var(--fest-red); padding: 2px 12px; border-radius: 50px; font-size: 0.9em; margin: 10px 0; border: 1px solid #ffa39e; }
@@ -73,7 +43,6 @@
         .countdown { margin: 15px 0; padding-top: 15px; border-top: 1px dashed #eee; color: #777; font-size: 0.95em; }
         .days { color: var(--main-red); font-size: 1.8em; font-weight: bold; }
         
-        /* 下方查看月历按钮也同步加粗 */
         .cal-btn { background: #fff; color: var(--main-red); border: 1px solid #eee; padding: 10px; border-radius: 12px; cursor: pointer; font-size: 1em; width: 100%; margin-top: 10px; font-weight: bold; }
 
         .calendar-wrapper { display: none; background: #fff; width: 340px; border-radius: 20px; padding: 15px 0; box-shadow: 0 10px 25px rgba(0,0,0,0.05); margin-top: 10px; border: 1px solid #eee; }
@@ -126,7 +95,6 @@
 let viewDate = new Date(); 
 let isTrad = false;
 
-// 修正后的精准字典
 const dict = {
     "S": "距离,还有,天,今日节气,当前时辰,查看月历,隐藏月历,礼拜,春节,端午节,中秋节,清明节,冬至,一,二,三,四,五,六,日",
     "T": "距離,還有,天,今日節氣,當前時辰,查看月曆,隱藏月曆,禮拜,春節,端午節,中秋節,清明節,冬至,一,二,三,四,五,六,日"
@@ -151,9 +119,9 @@ function toggleLang() {
 function toggleCalendar() {
     const wrapper = document.getElementById('calWrapper');
     const btn = document.getElementById('toggleBtn');
-    wrapper.classList.toggle('show');
-    // 修复这里的文字逻辑，确保切换时文字正确
-    btn.innerText = wrapper.classList.contains('show') ? s2t("隐藏月历") : s2t("查看月历");
+    const isShowing = wrapper.classList.toggle('show');
+    // 点击时立即更新文字，不再依赖 update()
+    btn.innerText = isShowing ? s2t("隐藏月历") : s2t("查看月历");
 }
 
 function changeMonth(delta) {
@@ -172,13 +140,12 @@ function update() {
     document.getElementById('jieqi-tag').innerText = s2t(`今日节气：${lunar.getJieQi() || lunar.getPrevJieQi().getName()}`);
     document.getElementById('shichen-info').innerText = s2t(`当前时辰：${lunar.getEightChar().getTimeZhi()}时`);
 
+    // 静态标签转换
     document.getElementById('lbl-dist').innerText = s2t("距离");
     document.getElementById('lbl-remain').innerText = s2t("还有");
     document.getElementById('lbl-day').innerText = s2t("天");
 
-    // 修复按钮文字在时钟更新时被重置的问题
-    const wrapper = document.getElementById('calWrapper');
-    document.getElementById('toggleBtn').innerText = wrapper.classList.contains('show') ? s2t("隐藏月历") : s2t("查看月历");
+    // 注意：update 函数内不再强制重写 toggleBtn 的文字，避免覆盖 toggleCalendar 的结果
 
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     let targets = [];
