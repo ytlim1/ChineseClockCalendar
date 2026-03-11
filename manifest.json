@@ -1,6 +1,6 @@
 {
-  "name": "Lunar Calendar",
-  "short_name": "农历万年历",
+  "name": "农历万年历",
+  "short_name": "万年历",
   "start_url": "index.html",
   "display": "standalone",
   "background_color": "#f5f3ef",
