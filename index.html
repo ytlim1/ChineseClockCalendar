@@ -3,31 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>农历万年历 - 最终全功能版</title>
+    <title>农历万年历 - 离线增强版</title>
     <link rel="manifest" href="manifest.json">
     <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.min.js"></script>
     <style>
         :root { --main-red: #b71c1c; --bg-gray: #f5f3ef; --fest-red: #cf1322; }
         body { background-color: var(--bg-gray); font-family: "Microsoft YaHei", sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px 0; color: #333; }
-        .card { background: #fff; padding: 30px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.08); width: 350px; text-align: center; border-top: 6px solid var(--main-red); z-index: 2; position: relative; }
+        
+        .card { background: #fff; padding: 30px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.08); width: 350px; text-align: center; border-top: 6px solid var(--main-red); margin-bottom: 20px; }
         .time { font-size: 2.5em; font-weight: bold; color: var(--main-red); margin: 10px 0; letter-spacing: 2px; }
         .jieqi-tag { display: inline-block; background: #fff1f0; color: var(--fest-red); padding: 4px 12px; border-radius: 50px; font-size: 0.9em; margin-bottom: 15px; border: 1px solid #ffa39e; }
         .lunar-main { font-size: 2.4em; font-weight: bold; margin: 5px 0; color: #1a1a1a; }
         .shichen-box { margin: 10px 0; background: #f9f9f9; padding: 8px; border-radius: 8px; color:#666; font-size: 0.95em; }
+        
+        /* 倒计时区 */
         .countdown { margin: 20px 0; padding-top: 15px; border-top: 1px dashed #ddd; color: #777; min-height: 80px; }
         .days { color: var(--main-red); font-size: 1.8em; font-weight: bold; margin: 0 5px; }
-        .cal-toggle { color: var(--main-red); text-decoration: underline; cursor: pointer; font-size: 0.9em; margin-top: 10px; display: block; }
+        
+        /* 月历开关按钮 */
+        .cal-btn { background: var(--main-red); color: white; border: none; padding: 10px 20px; border-radius: 25px; cursor: pointer; font-size: 0.9em; font-weight: bold; width: 100%; margin-top: 10px; }
 
-        /* 修复后的月历容器 CSS */
-        .calendar-wrapper { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; background: #fff; width: 350px; border-radius: 0 0 20px 20px; margin-top: -10px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
-        .calendar-wrapper.open { max-height: 600px; padding: 25px 0 15px; }
+        /* 月历容器：改为 display 切换，解决无法打开的问题 */
+        .calendar-wrapper { display: none; background: #fff; width: 350px; border-radius: 20px; padding: 20px 0; box-shadow: 0 10px 25px rgba(0,0,0,0.05); border: 1px solid #eee; }
+        .calendar-wrapper.show { display: block; }
         
         .cal-header { display: flex; justify-content: space-between; align-items: center; width: 85%; margin: 0 auto 15px; }
         .nav-btn { background: none; border: none; color: var(--main-red); font-size: 1.4em; cursor: pointer; padding: 0 15px; font-weight: bold; }
         
         table { width: 90%; margin: 0 auto; border-collapse: collapse; }
         th { color: var(--main-red); padding-bottom: 10px; font-size: 0.8em; }
-        td { height: 50px; text-align: center; border-radius: 8px; vertical-align: middle; }
+        td { height: 55px; text-align: center; border-radius: 8px; vertical-align: middle; border: 1px solid #fafafa; }
         .cur-day { background: var(--main-red) !important; color: #fff !important; }
         .is-fest { color: var(--fest-red) !important; font-weight: bold !important; }
         .cur-day .is-fest { color: #fff !important; }
@@ -48,7 +53,7 @@
         <div style="margin-top:8px;"><span id="fest-days" class="days">0</span> 天</div>
     </div>
 
-    <a class="cal-toggle" onclick="toggleCalendar()">查看/收起月历</a>
+    <button class="cal-btn" onclick="toggleCalendar()">查看 / 隐藏月历</button>
 </div>
 
 <div class="calendar-wrapper" id="calWrapper">
@@ -68,8 +73,8 @@ let viewDate = new Date();
 
 function toggleCalendar() {
     const wrapper = document.getElementById('calWrapper');
-    wrapper.classList.toggle('open');
-    if(wrapper.classList.contains('open')) renderCalendar(viewDate);
+    wrapper.classList.toggle('show');
+    renderCalendar(viewDate);
 }
 
 function changeMonth(delta) {
@@ -93,6 +98,7 @@ function update() {
     const sc = lunar.getEightChar().getTimeZhi();
     document.getElementById('shichen-info').innerText = `当前时辰：${sc}时`;
 
+    // 节日与阳历日期 (DD/MM)
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     let targets = [];
     const festConfigs = [
@@ -134,6 +140,7 @@ function renderCalendar(date) {
     const month = date.getMonth();
     const now = new Date();
     document.getElementById('cal-title').innerText = `${year}年 ${month + 1}月`;
+    
     const firstDay = new Date(year, month, 1).getDay();
     const lastDate = new Date(year, month + 1, 0).getDate();
     
@@ -144,8 +151,10 @@ function renderCalendar(date) {
         const sDate = Solar.fromYmd(year, month + 1, d);
         const lDate = sDate.getLunar();
         const jq = lDate.getJieQi(); 
+        
         const isToday = (d === now.getDate() && month === now.getMonth() && year === now.getFullYear()) ? "cur-day" : "";
         const isFest = (jq === "冬至" || jq === "清明" || lDate.getDayInChinese() === "初一") ? "is-fest" : "";
+        
         html += `<td class="${isToday}"><span style="font-size:1.1em">${d}</span><br><small class="${isFest}">${jq || lDate.getDayInChinese()}</small></td>`;
     }
     document.getElementById('calendar-body').innerHTML = html + '</tr>';
@@ -153,7 +162,7 @@ function renderCalendar(date) {
 
 setInterval(update, 1000);
 update();
-renderCalendar(viewDate);
+renderCalendar(viewDate); // 初始生成
 
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js');
