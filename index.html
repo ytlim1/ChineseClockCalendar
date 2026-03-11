@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>农历万年历 - 完美对齐版</title>
+    <title>农历万年历 - 按钮加粗版</title>
     <link rel="manifest" href="manifest.json">
     <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.min.js"></script>
     <style>
@@ -22,39 +22,46 @@
             box-sizing: border-box;
         }
         
-        /* 核心修复：顶部行容器 */
         .top-row {
             display: flex;
-            align-items: center; /* 强制所有子元素垂直居中对齐 */
-            justify-content: center; /* 让日期在中间 */
+            align-items: center; 
+            justify-content: center; 
             position: relative;
             width: 100%;
-            height: 32px; /* 稍微增加高度，给按钮留空间 */
+            height: 32px; 
             margin-bottom: 12px;
         }
 
         .solar-date { 
             color: #888; 
             font-size: 1.05em; 
-            margin: 0; /* 清除默认间距 */
+            margin: 0; 
             padding: 0;
-            line-height: 1; /* 统一行高 */
+            line-height: 1; 
         }
 
-        /* 按钮：使用绝对定位确保不影响日期的真正居中，但垂直方向通过 top 50% 修正 */
+        /* 按钮样式：加入加粗 font-weight: bold */
         .lang-mini-btn { 
             position: absolute;
             right: 0;
             top: 50%;
-            transform: translateY(-50%); /* 完美的垂直居中技巧 */
+            transform: translateY(-50%); 
             font-size: 0.75em; 
-            padding: 2px 8px; 
-            border: 1px solid #eee; 
-            border-radius: 4px; 
-            color: #999; 
+            font-weight: bold; /* 加粗文字 */
+            padding: 3px 10px; /* 稍微增加一点宽度更好看 */
+            border: 1px solid #ddd; /* 稍微加深边框颜色以匹配粗体 */
+            border-radius: 6px; 
+            color: #777; /* 稍微调深颜色，让加粗更明显 */
             cursor: pointer; 
             background: #fff;
             line-height: 1.2;
+            transition: all 0.2s; /* 增加点击时的过渡效果 */
+        }
+        
+        /* 增加一个点击反馈，让它更像按钮 */
+        .lang-mini-btn:active {
+            background-color: #f0f0f0;
+            transform: translateY(-50%) scale(0.95);
         }
 
         .time { font-size: 2.8em; font-weight: bold; color: var(--main-red); margin: 5px 0; line-height: 1.1; }
@@ -66,7 +73,7 @@
         .countdown { margin: 15px 0; padding-top: 15px; border-top: 1px dashed #eee; color: #777; font-size: 0.95em; }
         .days { color: var(--main-red); font-size: 1.8em; font-weight: bold; }
         
-        .cal-btn { background: #fff; color: var(--main-red); border: 1px solid #eee; padding: 10px; border-radius: 12px; cursor: pointer; font-size: 1em; width: 100%; margin-top: 10px; }
+        .cal-btn { background: #fff; color: var(--main-red); border: 1px solid #eee; padding: 10px; border-radius: 12px; cursor: pointer; font-size: 1em; width: 100%; margin-top: 10px; font-weight: bold; }
 
         .calendar-wrapper { display: none; background: #fff; width: 340px; border-radius: 20px; padding: 15px 0; box-shadow: 0 10px 25px rgba(0,0,0,0.05); margin-top: 10px; border: 1px solid #eee; }
         .calendar-wrapper.show { display: block; }
@@ -102,25 +109,13 @@
     <button class="cal-btn" id="toggleBtn" onclick="toggleCalendar()">查看月历</button>
 </div>
 
-<div class="calendar-wrapper" id="calWrapper">
-    <div class="cal-header">
-        <button class="nav-btn" onclick="changeMonth(-1)">&lt;</button>
-        <h4 id="cal-title" style="margin: 0;">---</h4>
-        <button class="nav-btn" onclick="changeMonth(1)">&gt;</button>
-    </div>
-    <table>
-        <thead><tr id="week-head"><th>日</th><th>一</th><th>二</th><th>三</th><th>四</th><th>五</th><th>六</th></tr></thead>
-        <tbody id="calendar-body"></tbody>
-    </table>
-</div>
-
 <script>
 let viewDate = new Date(); 
 let isTrad = false;
 
 const dict = {
     "S": "距离,还有,天,今日节气,当前时辰,查看月历,隐藏月历,礼拜,春节,端午节,中秋节,清明节,冬至,一,二,三,四,五,六,日",
-    "T": "距離,還有,天,今日節氣,當前時辰,查看月曆,隱藏月曆,禮拜,春節,端午節,中秋節,清明節,冬至,一,二,三,四,五,六,日"
+    "T": "距離,還有,天,今日節氣,當前時辰,距離,還有,天,今日節氣,當前時辰,查看月曆,隱藏月曆,禮拜,春節,端午節,中秋節,清明節,冬至,一,二,三,四,五,六,日"
 };
 
 function s2t(text) {
