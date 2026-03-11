@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>农历万年历 - 导航完整版</title>
+    <title>农历万年历 - 完整功能版</title>
     <link rel="manifest" href="manifest.json">
     <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.min.js"></script>
     <style>
@@ -18,11 +18,9 @@
         .days { color: var(--main-red); font-size: 1.8em; font-weight: bold; margin: 0 5px; }
         .cal-toggle { color: var(--main-red); text-decoration: underline; cursor: pointer; font-size: 0.9em; margin-top: 10px; display: block; }
 
-        /* 月历容器修复 */
-        .calendar-wrapper { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; background: #fff; width: 350px; border-radius: 0 0 20px 20px; margin-top: -10px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        .calendar-wrapper { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; background: #fff; width: 350px; border-radius: 0 0 20px( 20px; margin-top: -10px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
         .calendar-wrapper.open { max-height: 600px; padding: 25px 0 15px; }
         
-        /* 找回：导航按钮样式 */
         .cal-header { display: flex; justify-content: space-between; align-items: center; width: 85%; margin: 0 auto 15px; }
         .nav-btn { background: none; border: none; color: var(--main-red); font-size: 1.4em; cursor: pointer; padding: 0 15px; font-weight: bold; }
         
@@ -66,7 +64,7 @@
 </div>
 
 <script>
-let viewDate = new Date(); // 用于切换月份的全局变量
+let viewDate = new Date(); 
 
 function toggleCalendar() {
     const wrapper = document.getElementById('calWrapper');
@@ -74,7 +72,6 @@ function toggleCalendar() {
     if(wrapper.classList.contains('open')) renderCalendar(viewDate);
 }
 
-// 找回：月份切换函数
 function changeMonth(delta) {
     viewDate.setMonth(viewDate.getMonth() + delta);
     renderCalendar(viewDate);
@@ -98,7 +95,7 @@ function update() {
     const sc = lunar.getEightChar().getTimeZhi();
     document.getElementById('shichen-info').innerText = `当前时辰：${sc}时`;
 
-    // 倒计时（跨年扫描，防0天Bug）
+    // --- 找回：节日及其阳历日期备注 ---
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     let targets = [];
     const festConfigs = [
@@ -119,7 +116,11 @@ function update() {
             }
             if(sDate) {
                 const d = new Date(sDate.getYear(), sDate.getMonth() - 1, sDate.getDay());
-                if (d >= today) targets.push({ name: f.n, date: d });
+                if (d >= today) {
+                    // 格式化阳历日期为 (日/月)
+                    const dateTag = ` (${sDate.getDay()}/${sDate.getMonth()})`;
+                    targets.push({ name: f.n + dateTag, date: d });
+                }
             }
         });
     });
@@ -132,14 +133,11 @@ function update() {
     }
 }
 
-// 渲染指定月份的月历
 function renderCalendar(date) {
     const year = date.getFullYear();
     const month = date.getMonth();
     const now = new Date();
-    
     document.getElementById('cal-title').innerText = `${year}年 ${month + 1}月`;
-    
     const firstDay = new Date(year, month, 1).getDay();
     const lastDate = new Date(year, month + 1, 0).getDate();
     
@@ -147,14 +145,11 @@ function renderCalendar(date) {
     for (let i = 0; i < firstDay; i++) html += '<td></td>';
     for (let d = 1; d <= lastDate; d++) {
         if ((d + firstDay - 1) % 7 === 0 && d !== 1) html += '</tr><tr>';
-        
         const sDate = Solar.fromYmd(year, month + 1, d);
         const lDate = sDate.getLunar();
         const jq = lDate.getJieQi(); 
-        
         const isToday = (d === now.getDate() && month === now.getMonth() && year === now.getFullYear()) ? "cur-day" : "";
         const isFest = (jq === "冬至" || jq === "清明" || lDate.getDayInChinese() === "初一") ? "is-fest" : "";
-        
         html += `<td class="${isToday}"><span style="font-size:1.1em">${d}</span><br><small class="${isFest}">${jq || lDate.getDayInChinese()}</small></td>`;
     }
     document.getElementById('calendar-body').innerHTML = html + '</tr>';
@@ -162,7 +157,7 @@ function renderCalendar(date) {
 
 setInterval(update, 1000);
 update();
-renderCalendar(viewDate); // 初始化渲染当前月
+renderCalendar(viewDate);
 
 if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js');
