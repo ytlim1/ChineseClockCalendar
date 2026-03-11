@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>农历万年历 - 完美对称版</title>
+    <title>农历万年历 - 完美版</title>
     <link rel="manifest" href="manifest.json">
     <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.min.js"></script>
     <style>
         :root { --main-red: #b71c1c; --bg-gray: #f5f3ef; --fest-red: #cf1322; }
         body { background-color: var(--bg-gray); font-family: "Microsoft YaHei", sans-serif; display: flex; flex-direction: column; align-items: center; padding: 15px 0; color: #333; }
         
-        /* 核心卡片：必须是 relative 才能让内部按钮绝对定位 */
         .card { 
             background: #fff; 
             padding: 30px 20px; 
@@ -23,7 +22,7 @@
             box-sizing: border-box;
         }
         
-        /* 浮动切换按钮：脱离文档流，不挤压日期 */
+        /* 切换按钮：绝对定位在右上角 */
         .lang-mini-btn { 
             position: absolute;
             top: 15px;
@@ -38,7 +37,6 @@
             z-index: 100;
         }
 
-        /* 顶部日期：确保占满一行且文字居中 */
         .solar-date { 
             color: #888; 
             font-size: 1.05em; 
@@ -74,7 +72,7 @@
 <body>
 
 <div class="card">
-    <div class="lang-mini-btn" id="langBtn" onclick="toggleLang()">转繁</div>
+    <div class="lang-mini-btn" id="langBtn" onclick="toggleLang()">轉繁</div>
     
     <div id="solar-date" class="solar-date">---</div>
     
@@ -124,7 +122,8 @@ function s2t(text) {
 
 function toggleLang() {
     isTrad = !isTrad;
-    document.getElementById('langBtn').innerText = isTrad ? "转简" : "转繁";
+    // 按钮文字逻辑微调
+    document.getElementById('langBtn').innerText = isTrad ? "转简" : "轉繁";
     update();
     renderCalendar(viewDate);
 }
