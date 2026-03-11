@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>农历万年历 - 完整功能版</title>
+    <title>农历万年历 - 最终全功能版</title>
     <link rel="manifest" href="manifest.json">
     <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.min.js"></script>
     <style>
@@ -18,7 +18,8 @@
         .days { color: var(--main-red); font-size: 1.8em; font-weight: bold; margin: 0 5px; }
         .cal-toggle { color: var(--main-red); text-decoration: underline; cursor: pointer; font-size: 0.9em; margin-top: 10px; display: block; }
 
-        .calendar-wrapper { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; background: #fff; width: 350px; border-radius: 0 0 20px( 20px; margin-top: -10px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
+        /* 修复后的月历容器 CSS */
+        .calendar-wrapper { max-height: 0; overflow: hidden; transition: max-height 0.4s ease-out; background: #fff; width: 350px; border-radius: 0 0 20px 20px; margin-top: -10px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
         .calendar-wrapper.open { max-height: 600px; padding: 25px 0 15px; }
         
         .cal-header { display: flex; justify-content: space-between; align-items: center; width: 85%; margin: 0 auto 15px; }
@@ -30,7 +31,6 @@
         .cur-day { background: var(--main-red) !important; color: #fff !important; }
         .is-fest { color: var(--fest-red) !important; font-weight: bold !important; }
         .cur-day .is-fest { color: #fff !important; }
-        .other-month { opacity: 0.2; }
     </style>
 </head>
 <body>
@@ -87,15 +87,12 @@ function update() {
     document.getElementById('lunar-main').innerText = `${lunar.getMonthInChinese()}月${lunar.getDayInChinese()}`;
     document.getElementById('gz-year').innerText = `${lunar.getYearInGanZhi()}${lunar.getYearShengXiao()}年`;
 
-    // 今日节气
     const jq = lunar.getJieQi() || lunar.getPrevJieQi().getName();
     document.getElementById('jieqi-tag').innerText = `今日节气：${jq}`;
 
-    // 时辰信息
     const sc = lunar.getEightChar().getTimeZhi();
     document.getElementById('shichen-info').innerText = `当前时辰：${sc}时`;
 
-    // --- 找回：节日及其阳历日期备注 ---
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     let targets = [];
     const festConfigs = [
@@ -117,7 +114,6 @@ function update() {
             if(sDate) {
                 const d = new Date(sDate.getYear(), sDate.getMonth() - 1, sDate.getDay());
                 if (d >= today) {
-                    // 格式化阳历日期为 (日/月)
                     const dateTag = ` (${sDate.getDay()}/${sDate.getMonth()})`;
                     targets.push({ name: f.n + dateTag, date: d });
                 }
