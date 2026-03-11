@@ -3,48 +3,58 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>农历万年历 - 空间优化版</title>
+    <title>农历万年历 - 居中平衡版</title>
     <link rel="manifest" href="manifest.json">
     <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.min.js"></script>
     <style>
         :root { --main-red: #b71c1c; --bg-gray: #f5f3ef; --fest-red: #cf1322; }
         body { background-color: var(--bg-gray); font-family: "Microsoft YaHei", sans-serif; display: flex; flex-direction: column; align-items: center; padding: 15px 0; color: #333; }
         
-        .card { background: #fff; padding: 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); width: 340px; text-align: center; border-top: 5px solid var(--main-red); position: relative; }
+        .card { background: #fff; padding: 25px 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); width: 340px; text-align: center; border-top: 6px solid var(--main-red); position: relative; }
         
-        /* 1. 强制显眼的转换按钮：位于时间上方 */
+        /* 1. 优化切换按钮：绝对定位在右上角，不影响居中 */
         .lang-mini-btn { 
-            display: inline-block;
-            margin-bottom: 5px;
-            font-size: 0.8em; 
-            padding: 2px 12px; 
-            border: 2px solid var(--main-red); 
-            border-radius: 5px; 
-            color: var(--main-red); 
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 0.75em; 
+            padding: 2px 8px; 
+            border: 1px solid #ddd; 
+            border-radius: 4px; 
+            color: #888; 
             cursor: pointer; 
-            background: #fff;
-            font-weight: bold;
+            background: #fafafa;
+            z-index: 10;
         }
 
-        .time { font-size: 2.8em; font-weight: bold; color: var(--main-red); margin: 0; line-height: 1.1; }
-        .jieqi-tag { display: inline-block; background: #fff1f0; color: var(--fest-red); padding: 2px 10px; border-radius: 50px; font-size: 0.85em; margin: 10px 0; border: 1px solid #ffa39e; }
-        .lunar-main { font-size: 2.2em; font-weight: bold; margin: 2px 0; color: #111; }
-        .shichen-box { margin: 8px 0; background: #f9f9f9; padding: 6px; border-radius: 8px; color:#666; font-size: 0.9em; border: 1px solid #f0f0f0; }
-        
-        .countdown { margin: 15px 0; padding-top: 10px; border-top: 1px dashed #eee; color: #888; font-size: 0.9em; }
-        .days { color: var(--main-red); font-size: 1.6em; font-weight: bold; }
-        
-        .cal-btn { background: #fdfdfd; color: var(--main-red); border: 1px solid #eee; padding: 8px; border-radius: 12px; cursor: pointer; font-size: 0.9em; width: 100%; margin-top: 10px; }
+        /* 2. 日期强制居中 */
+        .solar-date { 
+            color: #888; 
+            font-size: 1.1em; 
+            margin-bottom: 5px; 
+            width: 100%;
+            text-align: center; 
+        }
 
-        /* 月历部分 */
+        .time { font-size: 2.8em; font-weight: bold; color: var(--main-red); margin: 5px 0; line-height: 1.1; }
+        .jieqi-tag { display: inline-block; background: #fff1f0; color: var(--fest-red); padding: 2px 12px; border-radius: 50px; font-size: 0.9em; margin: 10px 0; border: 1px solid #ffa39e; }
+        .lunar-main { font-size: 2.4em; font-weight: bold; margin: 5px 0; color: #111; }
+        .gz-text { color: var(--main-red); font-weight: bold; font-size: 1.2em; margin-bottom: 8px; }
+        .shichen-box { margin: 10px 0; background: #f9f9f9; padding: 8px; border-radius: 8px; color:#666; font-size: 0.95em; border: 1px solid #f0f0f0; }
+        
+        .countdown { margin: 15px 0; padding-top: 15px; border-top: 1px dashed #eee; color: #777; font-size: 1em; }
+        .days { color: var(--main-red); font-size: 1.8em; font-weight: bold; }
+        
+        .cal-btn { background: #fff; color: var(--main-red); border: 1px solid #eee; padding: 10px; border-radius: 12px; cursor: pointer; font-size: 1em; width: 100%; margin-top: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+
         .calendar-wrapper { display: none; background: #fff; width: 340px; border-radius: 20px; padding: 15px 0; box-shadow: 0 10px 25px rgba(0,0,0,0.05); margin-top: 10px; border: 1px solid #eee; }
         .calendar-wrapper.show { display: block; }
         .cal-header { display: flex; justify-content: space-between; align-items: center; width: 90%; margin: 0 auto 10px; }
         .nav-btn { background: none; border: none; color: var(--main-red); font-size: 1.2em; cursor: pointer; font-weight: bold; padding: 5px 15px; }
         
         table { width: 95%; margin: 0 auto; border-collapse: collapse; }
-        th { color: #999; padding-bottom: 8px; font-size: 0.75em; font-weight: normal; }
-        td { height: 48px; text-align: center; border-radius: 6px; vertical-align: middle; font-size: 0.95em; }
+        th { color: #999; padding-bottom: 8px; font-size: 0.8em; font-weight: normal; }
+        td { height: 50px; text-align: center; border-radius: 8px; vertical-align: middle; }
         .cur-day { background: var(--main-red) !important; color: #fff !important; }
         .is-fest { color: var(--fest-red) !important; font-weight: bold; }
     </style>
@@ -52,14 +62,14 @@
 <body>
 
 <div class="card">
-    <div id="solar-date" style="color:#888; font-size:0.95em; text-align: left; padding-left: 5px; margin-bottom: 5px;">---</div>
-    
     <div class="lang-mini-btn" id="langBtn" onclick="toggleLang()">转繁</div>
+    
+    <div id="solar-date" class="solar-date">---</div>
     
     <div id="clock" class="time">00:00:00</div>
     <div id="jieqi-tag" class="jieqi-tag">---</div>
     <div id="lunar-main" class="lunar-main">---</div>
-    <div id="gz-year" style="color:var(--main-red); font-weight:bold; font-size:1.1em;">---</div>
+    <div id="gz-year" class="gz-text">---</div>
     <div id="shichen-info" class="shichen-box">---</div>
 
     <div class="countdown">
@@ -73,7 +83,7 @@
 <div class="calendar-wrapper" id="calWrapper">
     <div class="cal-header">
         <button class="nav-btn" onclick="changeMonth(-1)">&lt;</button>
-        <h4 id="cal-title" style="margin: 0; font-size: 1.1em;">---</h4>
+        <h4 id="cal-title" style="margin: 0;">---</h4>
         <button class="nav-btn" onclick="changeMonth(1)">&gt;</button>
     </div>
     <table>
@@ -86,7 +96,6 @@
 let viewDate = new Date(); 
 let isTrad = false;
 
-// 2. 增强翻译字典
 const dict = {
     "S": "距离,还有,天,今日节气,当前时辰,查看月历,隐藏月历,礼拜,春节,端午节,中秋节,清明节,冬至,一,二,三,四,五,六,日",
     "T": "距離,還有,天,今日節氣,當前時辰,查看月曆,隱藏月曆,禮拜,春節,端午節,中秋節,清明節,冬至,一,二,三,四,五,六,日"
