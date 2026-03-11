@@ -3,24 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>农历万年历</title>
+    <title>农历万年历 - 稳定修复版</title>
     <link rel="manifest" href="manifest.json">
     <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.min.js"></script>
     <style>
         :root { --main-red: #b71c1c; --bg-gray: #f5f3ef; }
-        body { background-color: var(--bg-gray); font-family: sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px 0; }
+        body { background-color: var(--bg-gray); font-family: "Microsoft YaHei", sans-serif; display: flex; flex-direction: column; align-items: center; padding: 20px 0; }
         .card { background: #fff; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 350px; text-align: center; border-top: 6px solid var(--main-red); }
         .time { font-size: 2.5em; font-weight: bold; color: var(--main-red); margin: 10px 0; }
         .lunar-main { font-size: 2.4em; font-weight: bold; margin: 5px 0; }
         .countdown { margin: 20px 0; padding-top: 15px; border-top: 1px dashed #ddd; min-height: 80px; }
         .days { color: var(--main-red); font-size: 1.8em; font-weight: bold; }
+        .cal-toggle { color: var(--main-red); text-decoration: underline; cursor: pointer; display: block; margin-top: 10px; }
         .calendar-wrapper { max-height: 0; overflow: hidden; transition: 0.4s; background: #fff; width: 350px; border-radius: 0 0 20px 20px; margin-top: -10px; }
         .calendar-wrapper.open { max-height: 550px; padding: 20px 0; }
         table { width: 90%; margin: 0 auto; border-collapse: collapse; }
-        td { height: 45px; text-align: center; border-radius: 8px; font-size: 0.9em; }
+        td { height: 50px; text-align: center; border-radius: 8px; font-size: 0.9em; vertical-align: middle; }
         .cur-day { background: var(--main-red); color: #fff; font-weight: bold; }
         .is-fest { color: #cf1322; font-weight: bold; }
-        .other-month { opacity: 0.2; }
     </style>
 </head>
 <body>
@@ -32,43 +32,58 @@
     <div id="gz-year" style="color:var(--main-red); font-weight:bold;">---</div>
     <div class="countdown">
         距离 <span id="fest-name" style="font-weight:bold;">---</span> 还有
-        <div><span id="fest-days" class="days">0</span> 天</div>
+        <div style="margin-top:5px;"><span id="fest-days" class="days">0</span> 天</div>
     </div>
-    <a href="javascript:void(0)" onclick="document.getElementById('calWrapper').classList.toggle('open')">查看月历</a>
+    <span class="cal-toggle" onclick="document.getElementById('calWrapper').classList.toggle('open')">查看/收起月历</span>
 </div>
 
 <div class="calendar-wrapper" id="calWrapper">
-    <table id="calendar-table">
+    <table>
         <thead><tr><th>日</th><th>一</th><th>二</th><th>三</th><th>四</th><th>五</th><th>六</th></tr></thead>
         <tbody id="calendar-body"></tbody>
     </table>
 </div>
 
 <script>
-    // 自动寻找下个节日，解决 0 天问题
     function update() {
         const now = new Date();
         const solar = Solar.fromDate(now);
         const lunar = solar.getLunar();
+        
         document.getElementById('clock').innerText = now.toTimeString().split(' ')[0];
-        document.getElementById('solar-date').innerText = `${solar.getYear()}年${solar.getMonth()}月${solar.getDay()}日`;
+        document.getElementById('solar-date').innerText = `${solar.getYear()}年${solar.getMonth()}月${solar.getDay()}日 礼拜${solar.getWeekInChinese()}`;
         document.getElementById('lunar-main').innerText = `${lunar.getMonthInChinese()}月${lunar.getDayInChinese()}`;
         document.getElementById('gz-year').innerText = `${lunar.getYearInGanZhi()}${lunar.getYearShengXiao()}年`;
 
+        // 核心修复：跨年寻找节日
         const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
         let targets = [];
-        const fests = [{n:"春节",m:1,d:1,t:"l"}, {n:"端午",m:5,d:5,t:"l"}, {n:"冬至",jq:"冬至",t:"j"}];
-        [now.getFullYear(), now.getFullYear()+1].forEach(y => {
+        const fests = [
+            {n:"春节", m:1, d:1, type:"lunar"},
+            {n:"端午节", m:5, d:5, type:"lunar"},
+            {n:"中秋节", m:8, d:15, type:"lunar"},
+            {n:"清明节", jq:"清明", type:"jq"},
+            {n:"冬至", jq:"冬至", type:"jq"}
+        ];
+
+        [now.getFullYear(), now.getFullYear() + 1].forEach(year => {
             fests.forEach(f => {
-                let s = f.t==="l" ? Lunar.fromYmd(y,f.m,f.d).getSolar() : Solar.fromDate(new Date(y,0,1)).getLunar().getJieQiTable()[f.jq];
-                let d = new Date(s.getYear(), s.getMonth()-1, s.getDay());
-                if(d >= today) targets.push({n:f.n, d:d});
+                let s;
+                if (f.type === "lunar") {
+                    s = Lunar.fromYmd(year, f.m, f.d).getSolar();
+                } else {
+                    s = Solar.fromDate(new Date(year, 0, 1)).getLunar().getJieQiTable()[f.jq];
+                }
+                const d = new Date(s.getYear(), s.getMonth() - 1, s.getDay());
+                if (d >= today) targets.push({ name: f.n, date: d });
             });
         });
-        targets.sort((a,b) => a.d - b.d);
-        if(targets[0]) {
-            document.getElementById('fest-name').innerText = targets[0].n;
-            document.getElementById('fest-days').innerText = Math.ceil((targets[0].d - today)/(86400000));
+
+        targets.sort((a, b) => a.date - b.date);
+        if (targets[0]) {
+            const diff = Math.ceil((targets[0].date - today) / 86400000);
+            document.getElementById('fest-name').innerText = targets[0].name;
+            document.getElementById('fest-days').innerText = diff;
         }
     }
 
@@ -77,15 +92,18 @@
         const year = now.getFullYear(), month = now.getMonth();
         const firstDay = new Date(year, month, 1).getDay();
         const lastDate = new Date(year, month + 1, 0).getDate();
+        
         let html = '<tr>';
         for (let i = 0; i < firstDay; i++) html += '<td></td>';
         for (let d = 1; d <= lastDate; d++) {
-            if ((d + firstDay - 1) % 7 === 0) html += '</tr><tr>';
-            const lDate = Solar.fromYmd(year, month + 1, d).getLunar();
-            let jq = lDate.getJieQi(); // 核心：解决冬至显示问题
-            let isFest = (jq === "冬至" || lDate.getDayInChinese()==="初一") ? "is-fest" : "";
-            let isToday = d === now.getDate() ? "cur-day" : "";
-            html += `<td class="${isToday} ${isFest}">${d}<br><small>${jq || lDate.getDayInChinese()}</small></td>`;
+            if ((d + firstDay - 1) % 7 === 0 && d !== 1) html += '</tr><tr>';
+            const solar = Solar.fromYmd(year, month + 1, d);
+            const lunar = solar.getLunar();
+            const jq = lunar.getJieQi(); // 修复冬至显示的关键
+            const isFest = (jq === "冬至" || jq === "清明" || lunar.getDayInChinese() === "初一") ? "is-fest" : "";
+            const isToday = (d === now.getDate()) ? "cur-day" : "";
+            
+            html += `<td class="${isToday} ${isFest}">${d}<br><small>${jq || lunar.getDayInChinese()}</small></td>`;
         }
         document.getElementById('calendar-body').innerHTML = html + '</tr>';
     }
