@@ -3,49 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>农历万年历 - 居中平衡版</title>
+    <title>农历万年历 - 完美对称版</title>
     <link rel="manifest" href="manifest.json">
     <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.min.js"></script>
     <style>
         :root { --main-red: #b71c1c; --bg-gray: #f5f3ef; --fest-red: #cf1322; }
         body { background-color: var(--bg-gray); font-family: "Microsoft YaHei", sans-serif; display: flex; flex-direction: column; align-items: center; padding: 15px 0; color: #333; }
         
-        .card { background: #fff; padding: 25px 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); width: 340px; text-align: center; border-top: 6px solid var(--main-red); position: relative; }
+        /* 核心卡片：必须是 relative 才能让内部按钮绝对定位 */
+        .card { 
+            background: #fff; 
+            padding: 30px 20px; 
+            border-radius: 20px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08); 
+            width: 340px; 
+            text-align: center; 
+            border-top: 6px solid var(--main-red); 
+            position: relative; 
+            box-sizing: border-box;
+        }
         
-        /* 1. 优化切换按钮：绝对定位在右上角，不影响居中 */
+        /* 浮动切换按钮：脱离文档流，不挤压日期 */
         .lang-mini-btn { 
             position: absolute;
             top: 15px;
             right: 15px;
             font-size: 0.75em; 
             padding: 2px 8px; 
-            border: 1px solid #ddd; 
+            border: 1px solid #eee; 
             border-radius: 4px; 
-            color: #888; 
+            color: #999; 
             cursor: pointer; 
-            background: #fafafa;
-            z-index: 10;
+            background: #fff;
+            z-index: 100;
         }
 
-        /* 2. 日期强制居中 */
+        /* 顶部日期：确保占满一行且文字居中 */
         .solar-date { 
             color: #888; 
-            font-size: 1.1em; 
-            margin-bottom: 5px; 
+            font-size: 1.05em; 
+            margin: 0 auto 10px;
             width: 100%;
-            text-align: center; 
+            display: block;
+            text-align: center;
         }
 
         .time { font-size: 2.8em; font-weight: bold; color: var(--main-red); margin: 5px 0; line-height: 1.1; }
         .jieqi-tag { display: inline-block; background: #fff1f0; color: var(--fest-red); padding: 2px 12px; border-radius: 50px; font-size: 0.9em; margin: 10px 0; border: 1px solid #ffa39e; }
         .lunar-main { font-size: 2.4em; font-weight: bold; margin: 5px 0; color: #111; }
-        .gz-text { color: var(--main-red); font-weight: bold; font-size: 1.2em; margin-bottom: 8px; }
+        .gz-text { color: var(--main-red); font-weight: bold; font-size: 1.15em; margin-bottom: 8px; }
         .shichen-box { margin: 10px 0; background: #f9f9f9; padding: 8px; border-radius: 8px; color:#666; font-size: 0.95em; border: 1px solid #f0f0f0; }
         
-        .countdown { margin: 15px 0; padding-top: 15px; border-top: 1px dashed #eee; color: #777; font-size: 1em; }
+        .countdown { margin: 15px 0; padding-top: 15px; border-top: 1px dashed #eee; color: #777; font-size: 0.95em; }
         .days { color: var(--main-red); font-size: 1.8em; font-weight: bold; }
         
-        .cal-btn { background: #fff; color: var(--main-red); border: 1px solid #eee; padding: 10px; border-radius: 12px; cursor: pointer; font-size: 1em; width: 100%; margin-top: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); }
+        .cal-btn { background: #fff; color: var(--main-red); border: 1px solid #eee; padding: 10px; border-radius: 12px; cursor: pointer; font-size: 1em; width: 100%; margin-top: 10px; }
 
         .calendar-wrapper { display: none; background: #fff; width: 340px; border-radius: 20px; padding: 15px 0; box-shadow: 0 10px 25px rgba(0,0,0,0.05); margin-top: 10px; border: 1px solid #eee; }
         .calendar-wrapper.show { display: block; }
