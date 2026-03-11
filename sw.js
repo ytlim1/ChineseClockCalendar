@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lunar-v3';
+const CACHE_NAME = 'calendar-cache-v2';
 const ASSETS = [
   'index.html',
   'manifest.json',
