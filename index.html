@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>农历万年历 - 繁体全修正版</title>
+    <title>农历万年历 - 按钮繁体修正</title>
     <link rel="manifest" href="manifest.json">
     <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.min.js"></script>
     <style>
@@ -31,7 +31,7 @@
             border-radius: 6px; color: var(--fest-red); cursor: pointer; 
             line-height: 1.2; transition: all 0.2s; box-shadow: 0 2px 4px rgba(207, 19, 34, 0.1);
         }
-        
+
         .time { font-size: 2.8em; font-weight: bold; color: var(--main-red); margin: 5px 0; line-height: 1.1; }
         .jieqi-tag { display: inline-block; background: #fff1f0; color: var(--fest-red); padding: 2px 12px; border-radius: 50px; font-size: 0.9em; margin: 10px 0; border: 1px solid #ffa39e; }
         .lunar-main { font-size: 2.4em; font-weight: bold; margin: 5px 0; color: #111; }
@@ -41,7 +41,9 @@
         .countdown { margin: 15px 0; padding-top: 15px; border-top: 1px dashed #eee; color: #777; font-size: 0.95em; }
         .days { color: var(--main-red); font-size: 1.8em; font-weight: bold; }
         
-        .cal-btn { background: #fff; color: var(--main-red); border: 1px solid #eee; padding: 10px; border-radius: 12px; cursor: pointer; font-size: 1em; width: 100%; margin-top: 10px; font-weight: bold; }
+        /* 底部月历按钮样式 */
+        .cal-btn { background: #fff; color: var(--main-red); border: 1px solid #eee; padding: 10px; border-radius: 12px; cursor: pointer; font-size: 1em; width: 100%; margin-top: 10px; font-weight: bold; transition: all 0.2s; }
+        .cal-btn:active { background-color: #f9f9f9; transform: scale(0.98); }
 
         .calendar-wrapper { display: none; background: #fff; width: 340px; border-radius: 20px; padding: 15px 0; box-shadow: 0 10px 25px rgba(0,0,0,0.05); margin-top: 10px; border: 1px solid #eee; }
         .calendar-wrapper.show { display: block; }
@@ -93,19 +95,16 @@
 let viewDate = new Date(); 
 let isTrad = false;
 
-// 扩展示例：增加所有可能出现的简体字
+// 强化版字典，专门处理按钮和日期字词
 const dict = {
-    "S": "距离,还有,天,今日节气,当前时辰,查看月历,隐藏月历,礼拜,春节,端午节,中秋节,清明节,冬至,惊蛰,马,戌,时,历,腊,月,处,钟,阳",
-    "T": "距離,還有,天,今日節氣,當前時辰,查看月曆,隱藏月曆,禮拜,春節,端午節,中秋節,清明節,冬至,驚蟄,馬,戌,時,曆,臘,月,處,鐘,陽"
+    "S": "查看月历,隐藏月历,距离,还有,天,今日节气,当前时辰,礼拜,春节,端午节,中秋节,清明节,冬至,惊蛰,马,戌,历,时,月,腊,钟",
+    "T": "查看月曆,隱藏月曆,距離,還有,天,今日節氣,當前時辰,禮拜,春節,端午節,中秋節,清明節,冬至,驚蟄,馬,戌,曆,時,月,臘,鐘"
 };
 
 function s2t(text) {
     if (!isTrad || !text) return text;
     let sArr = dict.S.split(','), tArr = dict.T.split(','), res = text;
     sArr.forEach((s, i) => { res = res.replace(new RegExp(s, 'g'), tArr[i]); });
-    // 自动补全月份转换
-    const nums = ["正","二","三","四","五","六","七","八","九","十","冬","腊"], numsT = ["正","二","三","四","五","六","七","八","九","十","冬","臘"];
-    nums.forEach((n, i) => { res = res.replace(new RegExp(n + "月", 'g'), numsT[i] + "月"); });
     return res;
 }
 
@@ -120,6 +119,7 @@ function toggleCalendar() {
     const wrapper = document.getElementById('calWrapper');
     const btn = document.getElementById('toggleBtn');
     const isShowing = wrapper.classList.toggle('show');
+    // 核心修复点：切换时通过 s2t 函数强制进行繁简转换
     btn.innerText = isShowing ? s2t("隐藏月历") : s2t("查看月历");
 }
 
@@ -142,6 +142,11 @@ function update() {
     document.getElementById('lbl-dist').innerText = s2t("距离");
     document.getElementById('lbl-remain').innerText = s2t("还有");
     document.getElementById('lbl-day').innerText = s2t("天");
+
+    // 状态保持：确保时钟跳动时按钮文字的繁简状态也是正确的
+    const wrapper = document.getElementById('calWrapper');
+    const btn = document.getElementById('toggleBtn');
+    btn.innerText = wrapper.classList.contains('show') ? s2t("隐藏月历") : s2t("查看月历");
 
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     let targets = [];
