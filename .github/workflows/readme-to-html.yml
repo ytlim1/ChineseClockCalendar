@@ -12,21 +12,22 @@ jobs:
     permissions:
       contents: write
     steps:
+      # 升级到 v4 以支持最新的 Node.js 运行环境
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      # 解决 127 错误：手动安装 pandoc
       - name: Install Pandoc
         run: |
           sudo apt-get update
           sudo apt-get install -y pandoc
 
-      # 转换并注入简单的 CSS 让它在手机上更好看
       - name: Build HTML using Pandoc
         run: |
           pandoc README.md -s -o README.html \
           --metadata title="Project Help" \
-          -V header-includes='<style>body{max-width:800px;margin:40px auto;padding:0 20px;line-height:1.6;font-family:sans-serif;color:#333}img{max-width:100%}</style>'
+          -V header-includes='<style>body{max-width:800px;margin:40px auto;padding:0 20px;line-height:1.6;font-family:sans-serif;color:#333}img{max-width:100%}code{background:#f4f4f4;padding:2px 5px;border-radius:3px}</style>'
 
       - name: Commit and Push HTML
         run: |
@@ -35,6 +36,7 @@ jobs:
           
           if [ -f README.html ]; then
             git add README.html
+            # 只有在内容有变动时才提交，避免重复记录
             git commit -m "Auto-update README.html (Timestamp: $(date))" || echo "No changes to commit"
             git push origin main
           else
