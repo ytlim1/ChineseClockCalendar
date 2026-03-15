@@ -15,21 +15,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # 使用一个极其稳定的转换工具
-      - name: Build HTML from Markdown
-        uses: focalpoint/markdown-action@v0.1.1
-        with:
-          input_file: "README.md"
-          output_file: "README.html"
+      # 使用 Ubuntu 系统自带的 pandoc，不依赖外部 Action 插件
+      - name: Build HTML using Pandoc
+        run: |
+          pandoc README.md -s -o README.html --metadata title="Project Help"
 
       - name: Commit and Push HTML
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           
-          # 检查文件是否生成
           if [ -f README.html ]; then
             git add README.html
+            # 只有在内容真的改变时才提交
             git commit -m "Auto-update README.html (Timestamp: $(date))" || echo "No changes to commit"
             git push origin main
           else
