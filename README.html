@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Project Help</title>
+  <style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <style>body{max-width:800px;margin:40px auto;padding:0 20px;line-height:1.6;font-family:sans-serif;color:#333}img{max-width:100%}</style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Project Help</h1>
+</header>
+<h1 id="chinese-lunar-clock-calendar-pwa">🏮 Chinese Lunar Clock &amp;
+Calendar (PWA)</h1>
+<p>A minimalist and elegant web application that bridges the gap between
+the Gregorian calendar and traditional Chinese timekeeping. This project
+is built as a <strong>Progressive Web App (PWA)</strong>, allowing it to
+function seamlessly as a native-like app on your mobile device.</p>
+<p><strong>🔗 Live Demo:</strong> <a
+href="https://ytlim1.github.io/ChineseClockCalendar/">https://ytlim1.github.io/ChineseClockCalendar/</a></p>
+<hr />
+<h3 id="key-features">✨ Key Features</h3>
+<ul>
+<li><strong>Real-time Traditional Timekeeping</strong>: Displays the
+current time alongside the traditional <strong>12 Shichen
+(时辰)</strong> (e.g., Zi, Chou, Yin) based on solar time.</li>
+<li><strong>Dual Calendar Support</strong>: Simultaneous display of
+Solar (Gregorian) and Lunar (Chinese) dates.</li>
+<li><strong>Solar Term Tracking</strong>: Automatically identifies and
+displays the current of the <strong>24 Solar Terms (节气)</strong>.</li>
+<li><strong>Festival Countdown</strong>: Features a dynamic countdown to
+major traditional festivals such as the Spring Festival, Lantern
+Festival, Dragon Boat Festival, and Mid-Autumn Festival.</li>
+<li><strong>One-Click Localization</strong>: Instantly toggle the entire
+interface between <strong>Simplified</strong> and <strong>Traditional
+Chinese</strong>.</li>
+<li><strong>Interactive Monthly View</strong>: Includes a built-in
+calendar with “Previous” and “Next” navigation to look up any lunar
+date.</li>
+<li><strong>Offline Capability</strong>: Once visited, the app can be
+used offline thanks to Service Worker caching.</li>
+</ul>
+<hr />
+<h3 id="mobile-installation-pwa">📲 Mobile Installation (PWA)</h3>
+<p>Since this app is a PWA, you can install it on your home screen
+without using the App Store or Google Play:</p>
+<h4 id="for-ios-safari"><strong>For iOS (Safari)</strong></h4>
+<ol type="1">
+<li>Open the <a
+href="https://ytlim1.github.io/ChineseClockCalendar/">Live Demo</a> in
+Safari.</li>
+<li>Tap the <strong>Share</strong> icon (the square with an upward
+arrow).</li>
+<li>Scroll down and select <strong>“Add to Home Screen”</strong>.</li>
+</ol>
+<h4 id="for-android-chrome"><strong>For Android (Chrome)</strong></h4>
+<ol type="1">
+<li>Open the <a
+href="https://ytlim1.github.io/ChineseClockCalendar/">Live Demo</a> in
+Chrome.</li>
+<li>Tap the <strong>three dots</strong> in the top-right corner.</li>
+<li>Select <strong>“Install App”</strong> or <strong>“Add to Home
+Screen”</strong>.</li>
+</ol>
+<hr />
+<h3 id="technical-stack">🛠️ Technical Stack</h3>
+<ul>
+<li><strong>Algorithm Engine</strong>: Powered by the <a
+href="https://6tail.cn/calendar/api.html">lunar-javascript</a> library
+for high-precision lunar calculations.</li>
+<li><strong>Frontend</strong>: Pure HTML5, CSS3, and Vanilla JavaScript
+(ES6+).</li>
+<li><strong>PWA Core</strong>: Uses <code>manifest.json</code> and
+<code>sw.js</code> (Service Workers) for app-like behavior and offline
+access.</li>
+</ul>
+<hr />
+<h3 id="license">📄 License</h3>
+<p>This project is open-source and available under the <strong>MIT
+License</strong>.</p>
+<hr />
+<h3 id="preview">💡 Preview</h3>
+<figure>
+<img src="Chinese_ClockCalendar_screenshot.png" alt="App Screenshot" />
+<figcaption aria-hidden="true">App Screenshot</figcaption>
+</figure>
+<hr />
+<h1 id="chinese-lunar-clock-calendar-pwa-1">🏮 Chinese Lunar Clock &amp;
+Calendar (PWA)</h1>
+<p>一个极简、优雅的 Web
+应用，旨在连接公历与传统农历时辰。它不仅是一个万年历，更是一个可以安装在手机上的
+<strong>Progressive Web App (PWA)</strong>。</p>
+<p><strong>🔗 访问链接:</strong> <a
+href="https://ytlim1.github.io/ChineseClockCalendar/">https://ytlim1.github.io/ChineseClockCalendar/</a></p>
+<hr />
+<h3 id="核心功能">✨ 核心功能</h3>
+<ul>
+<li><strong>实时时辰显示</strong>: 除了公历时间，还同步显示当前的传统
+<strong>12 时辰</strong>（如：子时、丑时等）。</li>
+<li><strong>双历对照</strong>:
+同时显示公历（阳历）日期与农历（阴历）日期。</li>
+<li><strong>节气追踪</strong>: 自动计算并显示当前所属的 <strong>24
+节气</strong>。</li>
+<li><strong>节日倒计时</strong>:
+智能计算并展示距离春节、元宵节、端午节、中秋节的剩余天数。</li>
+<li><strong>简繁切换</strong>:
+支持一键在简体中文与繁体中文之间切换。</li>
+<li><strong>交互式月历</strong>:
+内置动态月历，支持查看过去与未来的月份。</li>
+</ul>
+<hr />
+<h3 id="手机安装指南-pwa">📲 手机安装指南 (PWA)</h3>
+<p>本项目作为 Progressive Web App
+开发，无需通过应用商店，即可直接“安装”到手机桌面：</p>
+<h4 id="ios-iphoneipad"><strong>iOS (iPhone/iPad)</strong></h4>
+<ol type="1">
+<li>使用 <strong>Safari</strong> 浏览器打开 <a
+href="https://ytlim1.github.io/ChineseClockCalendar/">Live
+Demo</a>。</li>
+<li>点击底部的 <strong>分享</strong> 按钮（方框加向上箭头的图标）。</li>
+<li>向上滑动菜单，选择 <strong>“添加到主屏幕”</strong>。</li>
+</ol>
+<h4 id="android"><strong>Android</strong></h4>
+<ol type="1">
+<li>使用 <strong>Chrome</strong> 浏览器打开 <a
+href="https://ytlim1.github.io/ChineseClockCalendar/">Live
+Demo</a>。</li>
+<li>点击右上角的 <strong>三个点</strong> 菜单按钮。</li>
+<li>选择 <strong>“安装应用”</strong> 或
+<strong>“添加到主屏幕”</strong>。</li>
+</ol>
+<hr />
+<h3 id="技术栈">🛠️ 技术栈</h3>
+<ul>
+<li><strong>核心算法</strong>: 基于 <a
+href="https://6tail.cn/calendar/api.html">lunar-javascript</a>
+高精度历法库。</li>
+<li><strong>开发模式</strong>: HTML5 + CSS3 + Vanilla JavaScript
+(ES6+)。</li>
+<li><strong>离线能力</strong>: 使用 Service Workers 实现 PWA
+离线缓存。</li>
+</ul>
+<hr />
+<h3 id="开源协议">📄 开源协议</h3>
+<p>本项目基于 <strong>MIT 协议</strong> 开源。欢迎交流与改进。</p>
+<hr />
+<h3 id="运行截图">💡 运行截图</h3>
+<p>*(你可以将你的截图文件上传到仓库，然后在此处添加图片链接，例如: [App
+Demo](# 🏮 Chinese Lunar Clock &amp; Calendar (PWA)</p>
+<p>一个极简、优雅的 Web
+应用，旨在连接公历与传统农历时辰。它不仅是一个万年历，更是一个可以安装在手机上的
+<strong>Progressive Web App (PWA)</strong>。</p>
+<p><strong>🔗 访问链接:</strong> <a
+href="https://ytlim1.github.io/ChineseClockCalendar/">https://ytlim1.github.io/ChineseClockCalendar/</a></p>
+<hr />
+<h3 id="核心功能-1">✨ 核心功能</h3>
+<ul>
+<li><strong>实时时辰显示</strong>: 除了公历时间，还同步显示当前的传统
+<strong>12 时辰</strong>（如：子时、丑时等）。</li>
+<li><strong>双历对照</strong>:
+同时显示公历（阳历）日期与农历（阴历）日期。</li>
+<li><strong>节气追踪</strong>: 自动计算并显示当前所属的 <strong>24
+节气</strong>。</li>
+<li><strong>节日倒计时</strong>:
+智能计算并展示距离春节、元宵节、端午节、中秋节的剩余天数。</li>
+<li><strong>简繁切换</strong>:
+支持一键在简体中文与繁体中文之间切换。</li>
+<li><strong>交互式月历</strong>:
+内置动态月历，支持查看过去与未来的月份。</li>
+</ul>
+<hr />
+<h3 id="手机安装指南-pwa-1">📲 手机安装指南 (PWA)</h3>
+<p>本项目作为 Progressive Web App
+开发，无需通过应用商店，即可直接“安装”到手机桌面：</p>
+<h4 id="ios-iphoneipad-1"><strong>iOS (iPhone/iPad)</strong></h4>
+<ol type="1">
+<li>使用 <strong>Safari</strong> 浏览器打开 <a
+href="https://ytlim1.github.io/ChineseClockCalendar/">Live
+Demo</a>。</li>
+<li>点击底部的 <strong>分享</strong> 按钮（方框加向上箭头的图标）。</li>
+<li>向上滑动菜单，选择 <strong>“添加到主屏幕”</strong>。</li>
+</ol>
+<h4 id="android-1"><strong>Android</strong></h4>
+<ol type="1">
+<li>使用 <strong>Chrome</strong> 浏览器打开 <a
+href="https://ytlim1.github.io/ChineseClockCalendar/">Live
+Demo</a>。</li>
+<li>点击右上角的 <strong>三个点</strong> 菜单按钮。</li>
+<li>选择 <strong>“安装应用”</strong> 或
+<strong>“添加到主屏幕”</strong>。</li>
+</ol>
+<hr />
+<h3 id="技术栈-1">🛠️ 技术栈</h3>
+<ul>
+<li><strong>核心算法</strong>: 基于 <a
+href="https://6tail.cn/calendar/api.html">lunar-javascript</a>
+高精度历法库。</li>
+<li><strong>开发模式</strong>: HTML5 + CSS3 + Vanilla JavaScript
+(ES6+)。</li>
+<li><strong>离线能力</strong>: 使用 Service Workers 实现 PWA
+离线缓存。</li>
+</ul>
+<hr />
+<h3 id="开源协议-1">📄 开源协议</h3>
+<p>本项目基于 <strong>MIT 协议</strong> 开源。欢迎交流与改进。</p>
+<hr />
+<h3 id="运行截图-1">💡 运行截图</h3>
+<figure>
+<img src="Chinese_ClockCalendar_screenshot.png" alt="App Screenshot" />
+<figcaption aria-hidden="true">App Screenshot</figcaption>
+</figure>
+</body>
+</html>
