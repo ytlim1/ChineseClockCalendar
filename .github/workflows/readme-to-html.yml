@@ -14,30 +14,25 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 0 # 获取完整历史，防止推送失败
 
-      - name: Convert Markdown to HTML
-        uses: alex-page/github-project-pages-action@v2
+      # 使用一个极其稳定的转换工具
+      - name: Build HTML from Markdown
+        uses: focalpoint/markdown-action@v0.1.1
         with:
-          theme: 'github'
-          input: 'README.md'
-          output: 'README.html'
+          input_file: "README.md"
+          output_file: "README.html"
 
       - name: Commit and Push HTML
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           
-          # 检查文件是否存在
-          if [ ! -f README.html ]; then
-            echo "错误：README.html 未能生成！"
+          # 检查文件是否生成
+          if [ -f README.html ]; then
+            git add README.html
+            git commit -m "Auto-update README.html (Timestamp: $(date))" || echo "No changes to commit"
+            git push origin main
+          else
+            echo "README.html generation failed"
             exit 1
           fi
-          
-          git add README.html
-          # 强制创建一个提交，即使文件内容没变（加一个时间戳注释）
-          git commit -m "Auto-update README.html (Timestamp: $(date))" || echo "没有检测到内容变化"
-          
-          # 尝试推送，如果失败会显示具体原因
-          git push origin main
