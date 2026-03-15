@@ -15,10 +15,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # 使用 Ubuntu 系统自带的 pandoc，不依赖外部 Action 插件
+      # 解决 127 错误：手动安装 pandoc
+      - name: Install Pandoc
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pandoc
+
+      # 转换并注入简单的 CSS 让它在手机上更好看
       - name: Build HTML using Pandoc
         run: |
-          pandoc README.md -s -o README.html --metadata title="Project Help"
+          pandoc README.md -s -o README.html \
+          --metadata title="Project Help" \
+          -V header-includes='<style>body{max-width:800px;margin:40px auto;padding:0 20px;line-height:1.6;font-family:sans-serif;color:#333}img{max-width:100%}</style>'
 
       - name: Commit and Push HTML
         run: |
@@ -27,7 +35,6 @@ jobs:
           
           if [ -f README.html ]; then
             git add README.html
-            # 只有在内容真的改变时才提交
             git commit -m "Auto-update README.html (Timestamp: $(date))" || echo "No changes to commit"
             git push origin main
           else
