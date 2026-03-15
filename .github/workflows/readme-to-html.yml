@@ -9,12 +9,13 @@ on:
 jobs:
   convert_readme:
     runs-on: ubuntu-latest
-    # 关键点：赋予 Action 写入仓库的权限
     permissions:
       contents: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # 获取完整历史，防止推送失败
 
       - name: Convert Markdown to HTML
         uses: alex-page/github-project-pages-action@v2
@@ -27,10 +28,16 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          # 只有在文件确实生成或改变时才提交，防止报错
-          if [ -f README.html ]; then
-            git add README.html
-            git commit -m "Auto-update README.html" || exit 0
-            git push
+          
+          # 检查文件是否存在
+          if [ ! -f README.html ]; then
+            echo "错误：README.html 未能生成！"
+            exit 1
           fi
           
+          git add README.html
+          # 强制创建一个提交，即使文件内容没变（加一个时间戳注释）
+          git commit -m "Auto-update README.html (Timestamp: $(date))" || echo "没有检测到内容变化"
+          
+          # 尝试推送，如果失败会显示具体原因
+          git push origin main
