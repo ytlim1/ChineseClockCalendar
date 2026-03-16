@@ -1,4 +1,4 @@
-const CACHE_NAME = 'calendar-cache-v3.1';
+const CACHE_NAME = 'calendar-cache-v3.5';
 const ASSETS = [
   'index.html',
   'manifest.json',
