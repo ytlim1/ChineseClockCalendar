@@ -3,51 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>农历万年历 - 离线分享版</title>
-    
+    <title>农历万年历 - 终极发布版</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#b71c1c">
-    <link rel="apple-touch-icon" href="icon.png">
-
     <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.min.js"></script>
     <script data-goatcounter="https://ytlim-clock.goatcounter.com/count" async defer src="https://gc.zgo.at/count.js"></script>
-    
     <style>
         :root { --main-red: #b71c1c; --bg-gray: #f5f3ef; --fest-red: #cf1322; --btn-bg: #fff1f0; --btn-border: #ffa39e; }
         body { background-color: var(--bg-gray); font-family: "Microsoft YaHei", sans-serif; display: flex; flex-direction: column; align-items: center; padding: 15px 0; color: #333; overflow-x: hidden; }
-        
-        .card { 
-            background: #fff; padding: 25px 20px; border-radius: 20px; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08); width: 340px; 
-            text-align: center; border-top: 6px solid var(--main-red); 
-            position: relative; box-sizing: border-box;
-        }
-        
+        .card { background: #fff; padding: 25px 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); width: 340px; text-align: center; border-top: 6px solid var(--main-red); position: relative; box-sizing: border-box; }
         .top-row { display: flex; align-items: center; justify-content: center; position: relative; width: 100%; height: 32px; margin-bottom: 12px; }
         .solar-date { color: #888; font-size: 1.05em; margin: 0; padding: 0; line-height: 1; }
         .lang-mini-btn { position: absolute; right: 0; top: 50%; transform: translateY(-50%); font-size: 0.75em; font-weight: bold; padding: 3px 10px; background-color: var(--btn-bg); border: 1px solid var(--btn-border); border-radius: 6px; color: var(--fest-red); cursor: pointer; }
-
         .time { font-size: 2.8em; font-weight: bold; color: var(--main-red); margin: 5px 0; line-height: 1.1; }
         .jieqi-tag { display: inline-block; background: #fff1f0; color: var(--fest-red); padding: 2px 12px; border-radius: 50px; font-size: 0.9em; margin: 10px 0; border: 1px solid #ffa39e; }
         .lunar-main { font-size: 2.4em; font-weight: bold; margin: 5px 0; color: #111; }
         .gz-text { color: var(--main-red); font-weight: bold; font-size: 1.15em; margin-bottom: 8px; }
         .shichen-box { margin: 10px 0; background: #f9f9f9; padding: 8px; border-radius: 8px; color:#666; font-size: 0.95em; border: 1px solid #f0f0f0; }
-        
         .countdown { margin: 15px 0; padding-top: 15px; border-top: 1px dashed #eee; color: #777; font-size: 0.95em; }
         .days { color: var(--main-red); font-size: 1.8em; font-weight: bold; }
-        
         .cal-btn { background: #fff; color: var(--main-red); border: 1px solid #eee; padding: 10px; border-radius: 12px; cursor: pointer; font-size: 1em; width: 100%; margin-top: 10px; font-weight: bold; }
         .calendar-wrapper { display: none; background: #fff; width: 340px; border-radius: 20px; padding: 15px 0; box-shadow: 0 10px 25px rgba(0,0,0,0.05); margin-top: 10px; border: 1px solid #eee; }
         .calendar-wrapper.show { display: block; }
-        
-        .share-fab {
-            position: fixed; bottom: 25px; right: 20px; width: 56px; height: 56px;
-            background-color: var(--main-red); color: white; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 4px 12px rgba(183, 28, 28, 0.4); cursor: pointer;
-            font-size: 24px; z-index: 100; border: none;
-        }
-
+        .share-fab { position: fixed; bottom: 25px; right: 20px; width: 56px; height: 56px; background-color: var(--main-red); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(183,28,28,0.4); cursor: pointer; font-size: 24px; z-index: 100; border: none; }
         .cal-header { display: flex; justify-content: space-between; align-items: center; width: 90%; margin: 0 auto 10px; }
         .nav-btn { background: none; border: none; color: var(--main-red); font-size: 1.2em; font-weight: bold; padding: 5px 15px; }
         table { width: 95%; margin: 0 auto; border-collapse: collapse; }
@@ -87,14 +65,11 @@
     </table>
 </div>
 
-<button class="share-fab" onclick="shareToday()" title="分享今日农历">📤</button>
+<button class="share-fab" onclick="shareToday()">📤</button>
 
 <script>
-// --- Service Worker 注册 ---
 if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js').then(reg => console.log('SW Active')).catch(err => console.log('SW Error'));
-    });
+    window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js'); });
 }
 
 let viewDate = new Date(); 
@@ -111,29 +86,15 @@ function s2t(text) {
     return res;
 }
 
-function toggleLang() { 
-    isTrad = !isTrad; 
-    document.getElementById('langBtn').innerText = isTrad ? "转简" : "轉繁"; 
-    update(); 
-    renderCalendar(viewDate); 
-}
-
-function toggleCalendar() {
-    const wrapper = document.getElementById('calWrapper');
-    const isShowing = wrapper.classList.toggle('show');
-    document.getElementById('toggleBtn').innerText = isShowing ? s2t("隐藏月历") : s2t("查看月历");
-}
+function toggleLang() { isTrad = !isTrad; document.getElementById('langBtn').innerText = isTrad ? "转简" : "轉繁"; update(); renderCalendar(viewDate); }
+function toggleCalendar() { const wrapper = document.getElementById('calWrapper'); const isShowing = wrapper.classList.toggle('show'); document.getElementById('toggleBtn').innerText = isShowing ? s2t("隐藏月历") : s2t("查看月历"); }
 
 function shareToday() {
     const solar = Solar.fromDate(new Date());
     const lunar = solar.getLunar();
-    const festInfo = document.getElementById('fest-name').innerText + " " + s2t("还有") + " " + document.getElementById('fest-days').innerText + " " + s2t("天");
-    
-    const shareText = s2t(`今日农历：${lunar.getMonthInChinese()}月${lunar.getDayInChinese()} (${lunar.getYearShengXiao()}年)\n${solar.getYear()}年${solar.getMonth()}月${solar.getDay()}日\n今日节气：${lunar.getJieQi() || '无'}\n\n${festInfo}\n\n查看我的万年历：`);
-    
-    if (navigator.share) {
-        navigator.share({ title: s2t('农历万年历'), text: shareText, url: window.location.href });
-    } else { alert(s2t("您的浏览器暂不支持分享，请手动复制网址。")); }
+    const festStr = document.getElementById('fest-name').innerText + " " + s2t("还有") + " " + document.getElementById('fest-days').innerText + " " + s2t("天");
+    const shareText = s2t(`今日农历：${lunar.getMonthInChinese()}月${lunar.getDayInChinese()} (${lunar.getYearShengXiao()}年)\n${solar.getYear()}年${solar.getMonth()}月${solar.getDay()}日\n${festStr}\n\n查看我的万年历：`);
+    if (navigator.share) { navigator.share({ title: s2t('农历万年历'), text: shareText, url: window.location.href }); }
 }
 
 function changeMonth(delta) { viewDate.setMonth(viewDate.getMonth() + delta); renderCalendar(viewDate); }
@@ -147,7 +108,7 @@ function update() {
     document.getElementById('gz-year').innerText = s2t(`${lunar.getYearInGanZhi()}${lunar.getYearShengXiao()}年`);
     document.getElementById('jieqi-tag').innerText = s2t(`今日节气：${lunar.getJieQi() || lunar.getPrevJieQi().getName()}`);
     document.getElementById('shichen-info').innerText = s2t(`当前时辰：${lunar.getEightChar().getTimeZhi()}时`);
-
+    
     document.getElementById('lbl-dist').innerText = s2t("距离");
     document.getElementById('lbl-remain').innerText = s2t("还有");
     document.getElementById('lbl-day').innerText = s2t("天");
@@ -165,10 +126,7 @@ function update() {
         });
     });
     targets.sort((a,b)=>a.d-b.d);
-    if(targets[0]){
-        document.getElementById('fest-name').innerText = targets[0].n;
-        document.getElementById('fest-days').innerText = Math.ceil((targets[0].d-today)/86400000);
-    }
+    if(targets[0]){ document.getElementById('fest-name').innerText = targets[0].n; document.getElementById('fest-days').innerText = Math.ceil((targets[0].d-today)/86400000); }
 }
 
 function renderCalendar(date) {
@@ -188,7 +146,7 @@ function renderCalendar(date) {
     document.getElementById('calendar-body').innerHTML = html + '</tr>';
 }
 
-// --- 处理 PWA 快捷入口 (修复覆盖问题) ---
+// --- 处理 PWA 快捷入口 (修复覆盖逻辑) ---
 window.addEventListener('load', () => {
     const urlParams = new URLSearchParams(window.location.search);
     const action = urlParams.get('action');
@@ -198,39 +156,22 @@ window.addEventListener('load', () => {
         if (action === 'calendar') {
             toggleCalendar();
         } else if (action === 'fest_cny' || action === 'fest_mid') {
-            // 1. 获取当前年份
             const now = new Date();
             const year = now.getFullYear();
             let targetSolar;
-
-            // 2. 根据 Action 精确计算对应的节日日期
             if (action === 'fest_cny') {
-                // 计算春节 (农历正月初一)
                 targetSolar = Lunar.fromYmd(year, 1, 1).getSolar();
-                // 如果今年的春节已过，计算明年的
-                if (new Date(targetSolar.getYear(), targetSolar.getMonth()-1, targetSolar.getDay()) < now) {
-                    targetSolar = Lunar.fromYmd(year + 1, 1, 1).getSolar();
-                }
-            } else if (action === 'fest_mid') {
-                // 计算中秋节 (农历八月十五)
+                if (new Date(targetSolar.getYear(), targetSolar.getMonth()-1, targetSolar.getDay()) < now) targetSolar = Lunar.fromYmd(year + 1, 1, 1).getSolar();
+            } else {
                 targetSolar = Lunar.fromYmd(year, 8, 15).getSolar();
-                if (new Date(targetSolar.getYear(), targetSolar.getMonth()-1, targetSolar.getDay()) < now) {
-                    targetSolar = Lunar.fromYmd(year + 1, 8, 15).getSolar();
-                }
+                if (new Date(targetSolar.getYear(), targetSolar.getMonth()-1, targetSolar.getDay()) < now) targetSolar = Lunar.fromYmd(year + 1, 8, 15).getSolar();
             }
-
-            // 3. 计算天数差
             const targetDate = new Date(targetSolar.getYear(), targetSolar.getMonth()-1, targetSolar.getDay());
-            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-            const diffDays = Math.ceil((targetDate - today) / 86400000);
-            
+            const diffDays = Math.ceil((targetDate - new Date(now.getFullYear(), now.getMonth(), now.getDate())) / 86400000);
             const festTitle = action === 'fest_cny' ? "春节" : "中秋节";
-            const dateStr = `(${targetSolar.getDay()}/${targetSolar.getMonth()})`;
-            
-            // 4. 弹出精确的节日播报
-            alert(s2t(`🏮 ${s2t(festTitle)}播报：\n${s2t(festTitle)} ${dateStr} ${s2t("还有")} ${diffDays} ${s2t("天")}！\n${s2t("来自墨尔本的问候")}。`));
+            alert(s2t(`🏮 ${s2t(festTitle)}播报：\n${s2t(festTitle)} (${targetSolar.getDay()}/${targetSolar.getMonth()}) ${s2t("还有")} ${diffDays} ${s2t("天")}！\n${s2t("来自墨尔本的问候")}。`));
         }
-    }, 1000); // 稍微延长延迟，确保库文件完全就绪
+    }, 1000);
 });
 
 setInterval(update, 1000);
