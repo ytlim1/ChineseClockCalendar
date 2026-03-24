@@ -4,9 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>农历万年历 - 离线分享版</title>
+    
     <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#b71c1c">
+    <link rel="apple-touch-icon" href="icon.png">
+
     <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.min.js"></script>
     <script data-goatcounter="https://ytlim-clock.goatcounter.com/count" async defer src="https://gc.zgo.at/count.js"></script>
+    
     <style>
         :root { --main-red: #b71c1c; --bg-gray: #f5f3ef; --fest-red: #cf1322; --btn-bg: #fff1f0; --btn-border: #ffa39e; }
         body { background-color: var(--bg-gray); font-family: "Microsoft YaHei", sans-serif; display: flex; flex-direction: column; align-items: center; padding: 15px 0; color: #333; overflow-x: hidden; }
@@ -35,7 +40,6 @@
         .calendar-wrapper { display: none; background: #fff; width: 340px; border-radius: 20px; padding: 15px 0; box-shadow: 0 10px 25px rgba(0,0,0,0.05); margin-top: 10px; border: 1px solid #eee; }
         .calendar-wrapper.show { display: block; }
         
-        /* 分享按钮样式 */
         .share-fab {
             position: fixed; bottom: 25px; right: 20px; width: 56px; height: 56px;
             background-color: var(--main-red); color: white; border-radius: 50%;
@@ -83,18 +87,22 @@
     </table>
 </div>
 
-<button class="share-fab" onclick="shareToday()">📤</button>
+<button class="share-fab" onclick="shareToday()" title="分享今日农历">📤</button>
 
 <script>
+// --- Service Worker 注册 ---
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js').then(reg => console.log('SW Ready')).catch(err => console.log('SW Error'));
+        navigator.serviceWorker.register('./sw.js').then(reg => console.log('SW Active')).catch(err => console.log('SW Error'));
     });
 }
 
 let viewDate = new Date(); 
 let isTrad = false;
-const dict = { "S": "查看月历,隐藏月历,距离,还有,天,今日节气,当前时辰,礼拜,春节,端午节,中秋节,清明节,冬至,惊蛰", "T": "查看月曆,隱藏月曆,距離,還有,天,今日節氣,當前時辰,禮拜,春節,端午節,中秋節,清明節,冬至,驚蟄" };
+const dict = { 
+    "S": "查看月历,隐藏月历,距离,还有,天,今日节气,当前时辰,礼拜,春节,端午节,中秋节,清明节,冬至,惊蛰,节日播报,来自墨尔本的问候", 
+    "T": "查看月曆,隱藏月曆,距離,還有,天,今日節氣,當前時辰,禮拜,春節,端午節,中秋節,清明節,冬至,驚蟄,節日播報,來自墨爾本的問候" 
+};
 
 function s2t(text) {
     if (!isTrad || !text) return text;
@@ -103,7 +111,12 @@ function s2t(text) {
     return res;
 }
 
-function toggleLang() { isTrad = !isTrad; document.getElementById('langBtn').innerText = isTrad ? "转简" : "轉繁"; update(); renderCalendar(viewDate); }
+function toggleLang() { 
+    isTrad = !isTrad; 
+    document.getElementById('langBtn').innerText = isTrad ? "转简" : "轉繁"; 
+    update(); 
+    renderCalendar(viewDate); 
+}
 
 function toggleCalendar() {
     const wrapper = document.getElementById('calWrapper');
@@ -114,12 +127,13 @@ function toggleCalendar() {
 function shareToday() {
     const solar = Solar.fromDate(new Date());
     const lunar = solar.getLunar();
-    const shareText = s2t(`今日农历：${lunar.getMonthInChinese()}月${lunar.getDayInChinese()} (${lunar.getYearShengXiao()}年)\n${solar.getYear()}年${solar.getMonth()}月${solar.getDay()}日\n今日节气：${lunar.getJieQi() || '无'}\n\n查看我的万年历：`);
+    const festInfo = document.getElementById('fest-name').innerText + " " + s2t("还有") + " " + document.getElementById('fest-days').innerText + " " + s2t("天");
+    
+    const shareText = s2t(`今日农历：${lunar.getMonthInChinese()}月${lunar.getDayInChinese()} (${lunar.getYearShengXiao()}年)\n${solar.getYear()}年${solar.getMonth()}月${solar.getDay()}日\n今日节气：${lunar.getJieQi() || '无'}\n\n${festInfo}\n\n查看我的万年历：`);
     
     if (navigator.share) {
-        navigator.share({ title: '农历万年历', text: shareText, url: window.location.href })
-        .catch(err => console.log('Share failed', err));
-    } else { alert("抱歉，您的浏览器不支持原生分享功能。您可以直接复制网址发送给朋友。"); }
+        navigator.share({ title: s2t('农历万年历'), text: shareText, url: window.location.href });
+    } else { alert(s2t("您的浏览器暂不支持分享，请手动复制网址。")); }
 }
 
 function changeMonth(delta) { viewDate.setMonth(viewDate.getMonth() + delta); renderCalendar(viewDate); }
@@ -133,6 +147,10 @@ function update() {
     document.getElementById('gz-year').innerText = s2t(`${lunar.getYearInGanZhi()}${lunar.getYearShengXiao()}年`);
     document.getElementById('jieqi-tag').innerText = s2t(`今日节气：${lunar.getJieQi() || lunar.getPrevJieQi().getName()}`);
     document.getElementById('shichen-info').innerText = s2t(`当前时辰：${lunar.getEightChar().getTimeZhi()}时`);
+
+    document.getElementById('lbl-dist').innerText = s2t("距离");
+    document.getElementById('lbl-remain').innerText = s2t("还有");
+    document.getElementById('lbl-day').innerText = s2t("天");
 
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     let targets = [];
@@ -170,11 +188,22 @@ function renderCalendar(date) {
     document.getElementById('calendar-body').innerHTML = html + '</tr>';
 }
 
-// 处理快捷方式进入逻辑
-const urlParams = new URLSearchParams(window.location.search);
-if (urlParams.get('action') === 'calendar') {
-    setTimeout(toggleCalendar, 500);
-}
+// --- 处理 PWA 快捷入口 ---
+window.addEventListener('load', () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const action = urlParams.get('action');
+    if (!action) return;
+    
+    setTimeout(() => {
+        if (action === 'calendar') {
+            toggleCalendar();
+        } else if (action === 'fest_cny' || action === 'fest_mid') {
+            const festName = document.getElementById('fest-name').innerText;
+            const days = document.getElementById('fest-days').innerText;
+            alert(s2t(`🏮 节日播报：\n${festName} 还有 ${days} 天！\n来自墨尔本的问候。`));
+        }
+    }, 800);
+});
 
 setInterval(update, 1000);
 update();
