@@ -43,23 +43,23 @@
     }
   ],
   "shortcuts": [
-  {
-    "name": "春节倒计时",
-    "short_name": "春节",
-    "url": "./index.html?action=fest_cny",
-    "icons": [{ "src": "icon.png", "sizes": "192x192" }]
-  },
-  {
-    "name": "中秋倒计时",
-    "short_name": "中秋",
-    "url": "./index.html?action=fest_mid",
-    "icons": [{ "src": "icon.png", "sizes": "192x192" }]
-  },
-  {
-    "name": "查看月历",
-    "short_name": "月历",
-    "url": "./index.html?action=calendar",
-    "icons": [{ "src": "icon.png", "sizes": "192x192" }]
-  }
-]
+    {
+      "name": "春节倒计时",
+      "short_name": "春节",
+      "url": "./index.html?action=fest_cny",
+      "icons": [{ "src": "icon.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "中秋倒计时",
+      "short_name": "中秋",
+      "url": "./index.html?action=fest_mid",
+      "icons": [{ "src": "icon.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "查看月历",
+      "short_name": "月历",
+      "url": "./index.html?action=calendar",
+      "icons": [{ "src": "icon.png", "sizes": "192x192" }]
+    }
+  ]
 }
