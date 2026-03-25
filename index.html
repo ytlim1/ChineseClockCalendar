@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>农历万年历 - 终极发布版</title>
+    <title>农历万年历 - 墨尔本版</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#b71c1c">
     <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.min.js"></script>
@@ -74,9 +74,10 @@ if ('serviceWorker' in navigator) {
 
 let viewDate = new Date(); 
 let isTrad = false;
+// 核心字典：修复“马/馬”、“时/時”、“历/曆”以及地支转换
 const dict = { 
-    "S": "查看月历,隐藏月历,距离,还有,天,今日节气,当前时辰,礼拜,春节,端午节,中秋节,清明节,冬至,惊蛰,节日播报,来自墨尔本的问候,马,时,历,页,转,简,繁,鼠,牛,虎,兔,龙,蛇,马,羊,猴,鸡,狗,猪,子,丑,寅,卯,辰,巳,午,未,申,酉,戌,亥", 
-    "T": "查看月曆,隱藏月曆,距離,還有,天,今日節氣,當前時辰,禮拜,春節,端午節,中秋節,清明節,冬至,驚蟄,節日播報,來自墨爾本範問候,馬,時,曆,頁,轉,簡,繁,鼠,牛,虎,兔,龍,蛇,馬,羊,猴,雞,狗,豬,子,丑,寅,卯,辰,巳,午,未,申,酉,戌,亥" 
+    "S": "查看月历,隐藏月历,距离,还有,天,今日节气,当前时辰,礼拜,春节,端午节,中秋节,清明节,冬至,惊蛰,节日播报,来自墨尔本的问候,马,时,历,日历,时辰,月历,龙,鸡,子,丑,寅,卯,辰,巳,午,未,申,酉,戌,亥", 
+    "T": "查看月曆,隱藏月曆,距離,還有,天,今日節氣,當前時辰,禮拜,春節,端午節,中秋節,清明節,冬至,驚蟄,節日播報,來自墨爾本的問候,馬,時,曆,日曆,時辰,月曆,龍,雞,子,丑,寅,卯,辰,巳,午,未,申,酉,戌,亥" 
 };
 
 function s2t(text) {
@@ -86,8 +87,18 @@ function s2t(text) {
     return res;
 }
 
-function toggleLang() { isTrad = !isTrad; document.getElementById('langBtn').innerText = isTrad ? "转简" : "轉繁"; update(); renderCalendar(viewDate); }
-function toggleCalendar() { const wrapper = document.getElementById('calWrapper'); const isShowing = wrapper.classList.toggle('show'); document.getElementById('toggleBtn').innerText = isShowing ? s2t("隐藏月历") : s2t("查看月历"); }
+function toggleLang() { 
+    isTrad = !isTrad; 
+    document.getElementById('langBtn').innerText = isTrad ? "转简" : "轉繁"; 
+    update(); 
+    renderCalendar(viewDate); 
+}
+
+function toggleCalendar() { 
+    const wrapper = document.getElementById('calWrapper'); 
+    wrapper.classList.toggle('show'); 
+    update(); // 刷新按钮文字转换
+}
 
 function shareToday() {
     const solar = Solar.fromDate(new Date());
@@ -103,32 +114,43 @@ function update() {
     const now = new Date();
     const solar = Solar.fromDate(now), lunar = solar.getLunar();
     
-    // 1. 时间与西历日期
     document.getElementById('clock').innerText = now.toTimeString().split(' ')[0];
     document.getElementById('solar-date').innerText = s2t(`${solar.getYear()}年${solar.getMonth()}月${solar.getDay()}日 礼拜${solar.getWeekInChinese()}`);
-    
-    // 2. 农历月日 (使用 s2t 确保“初七”等字样正确)
     document.getElementById('lunar-main').innerText = s2t(`${lunar.getMonthInChinese()}月${lunar.getDayInChinese()}`);
     
-    // 3. 修复“马年”与“干支” (重点修复：直接对生肖和地支进行转换)
+    // 强制生肖与地支转换
     const gzYear = lunar.getYearInGanZhi();
     const shengXiao = lunar.getYearShengXiao();
     document.getElementById('gz-year').innerText = s2t(`${gzYear}${shengXiao}年`);
     
-    // 4. 修复“节气”与“时辰” (重点修复：确保“时”字和时辰名转换)
     const jieQi = lunar.getJieQi() || lunar.getPrevJieQi().getName();
     document.getElementById('jieqi-tag').innerText = s2t(`今日节气：${jieQi}`);
     
     const zhi = lunar.getEightChar().getTimeZhi();
     document.getElementById('shichen-info').innerText = s2t(`当前时辰：${zhi}时`);
 
-    // 5. 按钮与标签文字
-    document.getElementById('toggleBtn').innerText = document.getElementById('calWrapper').classList.contains('show') ? s2t("隐藏月历") : s2t("查看月历");
+    // 修复按钮文字转换
+    const isShowing = document.getElementById('calWrapper').classList.contains('show');
+    document.getElementById('toggleBtn').innerText = isShowing ? s2t("隐藏月历") : s2t("查看月历");
+
     document.getElementById('lbl-dist').innerText = s2t("距离");
     document.getElementById('lbl-remain').innerText = s2t("还有");
     document.getElementById('lbl-day').innerText = s2t("天");
 
-    // ... (后续节日倒计时逻辑保持不变，但确保 fest-name 也经过 s2t 处理)
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    let targets = [];
+    const fests = [{n:"春节",t:"l",m:1,d:1},{n:"端午节",t:"l",m:5,d:5},{n:"中秋节",t:"l",m:8,d:15},{n:"清明节",t:"j",q:"清明"},{n:"冬至",t:"j",q:"冬至"}];
+    [now.getFullYear(), now.getFullYear() + 1].forEach(y => {
+        fests.forEach(f => {
+            let sd = (f.t==="l") ? (function(){try{return Lunar.fromYmd(y,f.m,f.d).getSolar()}catch(e){}})() : Solar.fromDate(new Date(y,0,1)).getLunar().getJieQiTable()[f.q];
+            if(sd){
+                const d = new Date(sd.getYear(), sd.getMonth()-1, sd.getDay());
+                if(d >= today) targets.push({n: s2t(f.n) + ` (${sd.getDay()}/${sd.getMonth()})`, d: d});
+            }
+        });
+    });
+    targets.sort((a,b)=>a.d-b.d);
+    if(targets[0]){ document.getElementById('fest-name').innerText = targets[0].n; document.getElementById('fest-days').innerText = Math.ceil((targets[0].d-today)/86400000); }
 }
 
 function renderCalendar(date) {
@@ -148,16 +170,14 @@ function renderCalendar(date) {
     document.getElementById('calendar-body').innerHTML = html + '</tr>';
 }
 
-// --- 处理 PWA 快捷入口 (修复覆盖逻辑) ---
+// PWA 快捷入口独立计算逻辑
 window.addEventListener('load', () => {
     const urlParams = new URLSearchParams(window.location.search);
     const action = urlParams.get('action');
     if (!action) return;
-    
     setTimeout(() => {
-        if (action === 'calendar') {
-            toggleCalendar();
-        } else if (action === 'fest_cny' || action === 'fest_mid') {
+        if (action === 'calendar') { toggleCalendar(); } 
+        else if (action === 'fest_cny' || action === 'fest_mid') {
             const now = new Date();
             const year = now.getFullYear();
             let targetSolar;
