@@ -4,7 +4,7 @@
  * 修复：解决 "Return response is null" 报错及离线路径匹配问题
  */
 
-const CACHE_NAME = 'calendar-cache-v5';
+const CACHE_NAME = 'calendar-cache-v5.5';
 
 // 资源清单：包含所有可能访问到的根路径变体
 const ASSETS = [
