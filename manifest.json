@@ -32,14 +32,14 @@
       "sizes": "1080x1920",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "主界面 - 农历时钟"
+      "label": "主界面"
     },
     {
       "src": "screenshot_wide.png",
       "sizes": "1920x1080",
       "type": "image/png",
       "form_factor": "wide",
-      "label": "万年历视图"
+      "label": "日历视图"
     }
   ],
   "shortcuts": [
