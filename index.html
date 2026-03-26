@@ -74,7 +74,7 @@ if ('serviceWorker' in navigator) {
 
 let viewDate = new Date(); 
 let isTrad = false;
-// 核心字典：修复“马/馬”、“时/時”、“历/曆”以及地支转换
+// 字典中补齐了“马/馬”、“时/時”、“历/曆”以及所有地支
 const dict = { 
     "S": "查看月历,隐藏月历,距离,还有,天,今日节气,当前时辰,礼拜,春节,端午节,中秋节,清明节,冬至,惊蛰,节日播报,来自墨尔本的问候,马,时,历,日历,时辰,月历,龙,鸡,子,丑,寅,卯,辰,巳,午,未,申,酉,戌,亥", 
     "T": "查看月曆,隱藏月曆,距離,還有,天,今日節氣,當前時辰,禮拜,春節,端午節,中秋節,清明節,冬至,驚蟄,節日播報,來自墨爾本的問候,馬,時,曆,日曆,時辰,月曆,龍,雞,子,丑,寅,卯,辰,巳,午,未,申,酉,戌,亥" 
@@ -97,7 +97,7 @@ function toggleLang() {
 function toggleCalendar() { 
     const wrapper = document.getElementById('calWrapper'); 
     wrapper.classList.toggle('show'); 
-    update(); // 刷新按钮文字转换
+    update();
 }
 
 function shareToday() {
@@ -113,12 +113,10 @@ function changeMonth(delta) { viewDate.setMonth(viewDate.getMonth() + delta); re
 function update() {
     const now = new Date();
     const solar = Solar.fromDate(now), lunar = solar.getLunar();
-    
     document.getElementById('clock').innerText = now.toTimeString().split(' ')[0];
     document.getElementById('solar-date').innerText = s2t(`${solar.getYear()}年${solar.getMonth()}月${solar.getDay()}日 礼拜${solar.getWeekInChinese()}`);
     document.getElementById('lunar-main').innerText = s2t(`${lunar.getMonthInChinese()}月${lunar.getDayInChinese()}`);
     
-    // 强制生肖与地支转换
     const gzYear = lunar.getYearInGanZhi();
     const shengXiao = lunar.getYearShengXiao();
     document.getElementById('gz-year').innerText = s2t(`${gzYear}${shengXiao}年`);
@@ -129,7 +127,6 @@ function update() {
     const zhi = lunar.getEightChar().getTimeZhi();
     document.getElementById('shichen-info').innerText = s2t(`当前时辰：${zhi}时`);
 
-    // 修复按钮文字转换
     const isShowing = document.getElementById('calWrapper').classList.contains('show');
     document.getElementById('toggleBtn').innerText = isShowing ? s2t("隐藏月历") : s2t("查看月历");
 
@@ -170,7 +167,6 @@ function renderCalendar(date) {
     document.getElementById('calendar-body').innerHTML = html + '</tr>';
 }
 
-// PWA 快捷入口独立计算逻辑
 window.addEventListener('load', () => {
     const urlParams = new URLSearchParams(window.location.search);
     const action = urlParams.get('action');
