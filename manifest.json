@@ -1,8 +1,8 @@
 {
   "id": "/ChineseClockCalendar/",
-  "name": "Chinese Lunar Calendar 农历万年历",
-  "short_name": "万年历 Lunar",
-  "description": "专业农历万年历，支持实时时钟、传统节日提醒及离线使用。A professional Chinese Lunar Calendar with offline support.",
+  "name": "Chinese Lunar Calendar",
+  "short_name": "万年历",
+  "description": "Professional Chinese Lunar Calendar with offline support.",
   "lang": "zh-CN",
   "dir": "ltr",
   "categories": [
