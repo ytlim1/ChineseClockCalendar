@@ -6,145 +6,87 @@
     <title>万年历 Lunar Clock</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#b71c1c">
-    
     <style>
-        :root {
-            --bg-color: #f5f3ef;
-            --text-color: #333;
-            --accent-color: #b71c1c;
-        }
-        body {
-            font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            touch-action: manipulation;
-        }
-        #clock-container {
-            text-align: center;
-            padding: 20px;
-        }
-        .time { font-size: 4rem; font-weight: bold; color: var(--accent-color); }
-        .date { font-size: 1.5rem; margin: 10px 0; }
-        .lunar { font-size: 1.2rem; color: #666; }
-        
-        /* 弹窗样式 */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            padding: 20px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.2);
-            border-radius: 12px;
-            z-index: 1000;
-            width: 80%; max-width: 400px;
-        }
-        .overlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 999;
-        }
-        
-        .btn-group { margin-top: 20px; }
-        button {
-            padding: 10px 20px;
-            border: none;
-            background: var(--accent-color);
-            color: white;
-            border-radius: 5px;
-            cursor: pointer;
-            margin: 5px;
-        }
+        :root { --bg: #f5f3ef; --accent: #b71c1c; }
+        body { font-family: sans-serif; background: var(--bg); display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+        .time { font-size: 4rem; color: var(--accent); font-weight: bold; }
+        .lunar-info { font-size: 1.5rem; margin-top: 10px; color: #555; }
+        .btn-group { margin-top: 30px; }
+        button { padding: 12px 24px; background: var(--accent); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem; margin: 5px; }
+        /* 弹窗 */
+        #modal { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 25px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); z-index: 1001; width: 85%; max-width: 350px; text-align: center; }
+        #overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:1000; }
     </style>
 </head>
 <body>
 
-    <div id="clock-container">
-        <div class="time" id="time-display">00:00:00</div>
-        <div class="date" id="date-display">2026年3月27日</div>
-        <div class="lunar" id="lunar-display">加载中...</div>
-        
-        <div class="btn-group">
-            <button onclick="showTodayDetail()">今日详情</button>
-            <button onclick="shareApp()">一键分享</button>
-        </div>
+    <div class="time" id="clock">00:00:00</div>
+    <div class="lunar-info" id="lunar">加载中...</div>
+
+    <div class="btn-group">
+        <button onclick="showCountdown()">节日倒计时</button>
+        <button onclick="shareApp()">分享给好友</button>
     </div>
 
-    <div id="overlay" class="overlay" onclick="closeModals()"></div>
-    <div id="countdown-modal" class="modal">
-        <h3>🏮 节日倒计时</h3>
-        <p id="countdown-list">正在计算...</p>
-        <button onclick="closeModals()">关闭</button>
+    <div id="overlay" onclick="closeModal()"></div>
+    <div id="modal">
+        <h2 id="modal-title">节日倒计时</h2>
+        <div id="modal-content"></div>
+        <br>
+        <button onclick="closeModal()">返回</button>
     </div>
 
     <script>
-        // 1. 基础时钟与农历逻辑 (此处省略您已完善的农历转换算法，保持原有逻辑)
+        // --- 1. 简繁体字典与农历逻辑 ---
+        const dictionary = { "时": "時", "马": "馬", "龙": "龍" }; // 示例，请保留您完整的字典
+
+        function getLunarData(date) {
+            // 这里放入您原本庞大的农历计算逻辑和数据
+            return "丙午年 二月初九"; 
+        }
+
+        // --- 2. 时钟更新 ---
         function updateClock() {
             const now = new Date();
-            document.getElementById('time-display').innerText = now.toLocaleTimeString('zh-CN', { hour12: false });
-            // 假设您已有的农历转换函数 getLunar(now)
-            // document.getElementById('lunar-display').innerText = getLunar(now);
+            document.getElementById('clock').innerText = now.toLocaleTimeString('zh-CN', {hour12:false});
+            document.getElementById('lunar').innerText = getLunarData(now);
         }
         setInterval(updateClock, 1000);
 
-        // 2. 快捷方式跳转处理 (新添加)
+        // --- 3. 快捷方式逻辑 ---
         function handlePwaActions() {
             const params = new URLSearchParams(window.location.search);
             const action = params.get('action');
-
-            if (action === 'today') {
-                showTodayDetail();
-            } else if (action === 'countdown') {
-                showCountdown();
-            }
+            if (action === 'countdown') showCountdown();
+            if (action === 'today') alert("今日农历详情已在主页显示");
         }
 
-        // 3. 功能函数
-        function showTodayDetail() {
-            alert("今日农历详情：\n丙午年 二月初九\n宜：祭祀、出行\n忌：动土、开仓");
-            // 这里可以替换为您更复杂的弹窗逻辑
-        }
-
+        // --- 4. 功能函数 ---
         function showCountdown() {
+            document.getElementById('modal-title').innerText = "🏮 节日倒计时";
+            document.getElementById('modal-content').innerHTML = "离清明节还有 9 天<br>离端午节还有 65 天";
             document.getElementById('overlay').style.display = 'block';
-            document.getElementById('countdown-modal').style.display = 'block';
-            document.getElementById('countdown-list').innerHTML = "离清明节还有：9天<br>离端午节还有：65天";
+            document.getElementById('modal').style.display = 'block';
         }
 
-        function closeModals() {
+        function closeModal() {
             document.getElementById('overlay').style.display = 'none';
-            document.getElementById('countdown-modal').style.display = 'none';
+            document.getElementById('modal').style.display = 'none';
         }
 
         function shareApp() {
             if (navigator.share) {
-                navigator.share({
-                    title: '万年历 Lunar Clock',
-                    text: '分享这个实用的农历时钟给您！',
-                    url: window.location.href
-                }).catch(console.error);
-            } else {
-                alert("您的浏览器不支持直接分享，请复制链接。");
+                navigator.share({ title: '万年历', url: window.location.href });
             }
         }
 
-        // 初始化
         window.onload = () => {
             updateClock();
-            handlePwaActions(); // 关键：检测快捷方式进入
-            
-            // 注册 Service Worker
+            handlePwaActions();
             if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('sw.js');
+                navigator.serviceWorker.register('./sw.js')
+                    .then(() => console.log("SW Registered"))
+                    .catch(err => console.log("SW Failed:", err));
             }
         };
     </script>
