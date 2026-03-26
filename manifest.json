@@ -17,6 +17,10 @@
   "scope": "./",
   "prefer_related_applications": false,
   "related_applications": [],
+  "file_handlers": [],
+  "launch_handler": {
+    "client_mode": "focus-existing"
+  },
   "icons": [
     {
       "src": "icon-192.png",
