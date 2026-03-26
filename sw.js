@@ -1,92 +1,70 @@
-/**
- * Chinese Clock Calendar - Service Worker
- * 版本：v4.2 (2026-03-17)
- * 修复：解决 "Return response is null" 报错及离线路径匹配问题
- */
+// 更新版本号以强制浏览器刷新缓存 (当前版本：v11.0)
+const CACHE_NAME = 'lunar-calendar-v11.0';
 
-const CACHE_NAME = 'calendar-cache-v5.5';
-
-// 资源清单：包含所有可能访问到的根路径变体
-const ASSETS = [
+// 需要缓存的静态资源列表
+const urlsToCache = [
   './',
-  'index.html',
   './index.html',
-  'manifest.json',
   './manifest.json',
-  'icon.png',
-  './icon.png',
-  'https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.min.js'
+  // 核心图标：确保包含您刚在 Manifest 中定义的两个新文件名
+  './icon-192.png',
+  './icon-512.png',
+  // 截图：虽然很大，但缓存后可以让安装界面加载更快
+  './screenshot_mobile.png',
+  './screenshot_wide.png',
+  // 外部依赖库 (CDN 链接也会被 Service Worker 拦截并缓存)
+  'https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.min.js',
+  'https://gc.zgo.at/count.js'
 ];
 
-// 1. 安装阶段：容错预缓存
+// 安装阶段：预缓存所有资源
 self.addEventListener('install', (event) => {
-  self.skipWaiting();
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      console.log('[SW] 正在执行容错预缓存...');
-      return Promise.all(
-        ASSETS.map((url) => {
-          return cache.add(url).catch((err) => {
-            console.warn(`[SW] 资源缓存失败 (跳过): ${url}`, err);
-          });
-        })
-      );
-    })
+    caches.open(CACHE_NAME)
+      .then((cache) => {
+        console.log('Opened cache: ' + CACHE_NAME);
+        return cache.addAll(urlsToCache);
+      })
+      .then(() => self.skipWaiting()) // 强制新 Service Worker 立即接管
   );
 });
 
-// 2. 激活阶段：清理旧版本
+// 激活阶段：清理旧版本的缓存
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((keys) => {
+    caches.keys().then((cacheNames) => {
       return Promise.all(
-        keys.map((key) => {
-          if (key !== CACHE_NAME) return caches.delete(key);
+        cacheNames.map((cacheName) => {
+          if (cacheName !== CACHE_NAME) {
+            console.log('Deleting old cache:', cacheName);
+            return caches.delete(cacheName);
+          }
         })
       );
-    })
+    }).then(() => self.clients.claim()) // 立即开始控制所有页面
   );
-  return self.clients.claim();
 });
 
-// 3. 拦截请求：核心修复逻辑
+// 策略：网络优先 (Network First)
+// 这样在有网络时能看到最新的节日信息，无网络时使用缓存
 self.addEventListener('fetch', (event) => {
-  // 只拦截 GET 请求
-  if (event.request.method !== 'GET') return;
-
   event.respondWith(
-    caches.match(event.request, { ignoreSearch: true }).then((cachedResponse) => {
-      // A. 如果缓存命中，直接返回
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-
-      // B. 如果缓存未命中，尝试请求网络
-      return fetch(event.request).then((networkResponse) => {
-        // 检查返回是否有效
-        if (!networkResponse || networkResponse.status !== 200) {
-          return networkResponse;
+    fetch(event.request)
+      .then((response) => {
+        // 如果网络请求成功，克隆一份存入缓存
+        if (!response || response.status !== 200 || response.type !== 'basic') {
+          return response;
         }
-        return networkResponse;
-      }).catch(() => {
-        /**
-         * C. 兜底逻辑：网络断开且缓存无数据
-         * 解决 "Return response is null" 报错
-         */
-        
-        // 如果是页面跳转请求（如刷新主页），强制返回缓存中的 index.html
-        if (event.request.mode === 'navigate') {
-          return caches.match('./index.html');
-        }
-
-        // 对于其他资源（如 GoatCounter 统计脚本），返回一个空的成功响应或自定义错误
-        // 这样浏览器就不会报错 "response is null"
-        return new Response('Offline', {
-          status: 503,
-          statusText: 'Service Unavailable (Offline)',
-          headers: new Headers({ 'Content-Type': 'text/plain' })
-        });
-      });
-    })
+        const responseToCache = response.clone();
+        caches.open(CACHE_NAME)
+          .then((cache) => {
+            cache.put(event.request, responseToCache);
+          });
+        return response;
+      })
+      .catch(() => {
+        // 网络请求失败（离线），尝试从缓存中获取
+        return caches.match(event.request);
+      })
   );
 });
