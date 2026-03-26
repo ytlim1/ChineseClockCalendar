@@ -4,7 +4,7 @@
   "short_name": "Lunar",
   "description": "Professional Chinese Lunar Calendar",
   "lang": "zh-CN",
-  "start_url": "./index.html",
+  "start_url": "./index.html?v=final",
   "display": "standalone",
   "background_color": "#f5f3ef",
   "theme_color": "#b71c1c",
