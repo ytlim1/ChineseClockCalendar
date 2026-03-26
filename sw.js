@@ -1,5 +1,5 @@
 // 版本：v13.0 - 包含完整图标缓存和性能优化
-const CACHE_NAME = 'lunar-calendar-v14.0';
+const CACHE_NAME = 'lunar-calendar-v15.0';
 
 const urlsToCache = [
   './',
