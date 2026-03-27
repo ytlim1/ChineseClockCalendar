@@ -63,56 +63,6 @@ This project is open-source and available under the **MIT License**.
 
 ---
 
-### ✨ 核心功能
-
-* **实时时辰显示**: 除了公历时间，还同步显示当前的传统 **12 时辰**（如：子时、丑时等）。
-* **双历对照**: 同时显示公历（阳历）日期与农历（阴历）日期。
-* **节气追踪**: 自动计算并显示当前所属的 **24 节气**。
-* **节日倒计时**: 智能计算并展示距离春节、元宵节、端午节、中秋节的剩余天数。
-* **简繁切换**: 支持一键在简体中文与繁体中文之间切换。
-* **交互式月历**: 内置动态月历，支持查看过去与未来的月份。
-
-
-
----
-
-### 📲 手机安装指南 (PWA)
-
-本项目作为 Progressive Web App 开发，无需通过应用商店，即可直接“安装”到手机桌面：
-
-#### **iOS (iPhone/iPad)**
-1. 使用 **Safari** 浏览器打开 [Live Demo](https://ytlim1.github.io/ChineseClockCalendar/)。
-2. 点击底部的 **分享** 按钮（方框加向上箭头的图标）。
-3. 向上滑动菜单，选择 **“添加到主屏幕”**。
-
-#### **Android**
-1. 使用 **Chrome** 浏览器打开 [Live Demo](https://ytlim1.github.io/ChineseClockCalendar/)。
-2. 点击右上角的 **三个点** 菜单按钮。
-3. 选择 **“安装应用”** 或 **“添加到主屏幕”**。
-
----
-
-### 🛠️ 技术栈
-
-* **核心算法**: 基于 [lunar-javascript](https://6tail.cn/calendar/api.html) 高精度历法库。
-* **开发模式**: HTML5 + CSS3 + Vanilla JavaScript (ES6+)。
-* **离线能力**: 使用 Service Workers 实现 PWA 离线缓存。
-
----
-
-### 📄 开源协议
-本项目基于 **MIT 协议** 开源。欢迎交流与改进。
-
----
-
-### 💡 运行截图
-*(你可以将你的截图文件上传到仓库，然后在此处添加图片链接，例如: ![App Demo](# 🏮 Chinese Lunar Clock & Calendar (PWA)
-
-一个极简、优雅的 Web 应用，旨在连接公历与传统农历时辰。它不仅是一个万年历，更是一个可以安装在手机上的 **Progressive Web App (PWA)**。
-
-**🔗 访问链接:** [https://ytlim1.github.io/ChineseClockCalendar/](https://ytlim1.github.io/ChineseClockCalendar/)
-
----
 
 ### ✨ 核心功能
 
