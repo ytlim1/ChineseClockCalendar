@@ -20,7 +20,6 @@
         .solar-date { color: #888; font-size: 1.05em; margin: 0; padding: 0; line-height: 1; }
         .lang-mini-btn { position: absolute; right: 0; top: 50%; transform: translateY(-50%); font-size: 0.9em; font-weight: bold; width: 32px; height: 32px; background-color: var(--btn-bg); border: 1px solid var(--btn-border); border-radius: 50%; color: var(--fest-red); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
         .time { font-size: 2.8em; font-weight: bold; color: var(--main-red); margin: 5px 0; line-height: 1.1; font-variant-numeric: tabular-nums; }
-        /* 保持节气/农历标签的样式一致 */
         .jieqi-tag { display: inline-block; color: var(--fest-red); padding: 2px 14px; border-radius: 50px; font-size: 0.9em; margin: 10px 0; min-height: 24px; background: #fff1f0; border: 1px solid #ffa39e; font-weight: bold; }
         .lunar-main { font-size: 2.4em; font-weight: bold; margin: 5px 0; color: #111; }
         .gz-text { color: var(--main-red); font-weight: bold; font-size: 1.15em; margin-bottom: 4px; }
@@ -83,8 +82,9 @@ let viewDate = new Date();
 let isTrad = false;
 
 const dict = {
-    "S": "查看月历,隐藏月历,距离,还有,天,今日节气,当前时辰,礼拜,春节,端午节,中秋节,清明节,冬至,立春,雨水,惊蛰,春分,清明,谷雨,立夏,小满,芒种,夏至,小暑,大暑,立秋,处暑,白露,秋分,寒露,霜降,立冬,小雪,大雪,冬至,小寒,大寒,正月,二月,三月,四月,五月,六月,七月,八月,九月,十月,冬月,腊月,鼠,牛,虎,兔,龙,蛇,马,羊,猴,鸡,狗,猪,甲,乙,丙,丁,戊,己,庚,辛,壬,癸,子,丑,寅,卯,辰,巳,午,未,申,酉,戌,亥,年,月,日,历,时,钟,农历,农",
-    "T": "查看月曆,隱藏月曆,距離,還有,天,今日節氣,當前時辰,禮拜,春節,端午節,中秋節,清明節,冬至,立春,雨水,驚蟄,春分,清明,穀雨,立夏,小滿,芒種,夏至,小暑,大暑,立秋,處暑,白露,秋分,寒露,涼降,立冬,小雪,大雪,冬至,小寒,大寒,正月,二月,三月,四月,五月,六月,七月,八月,九月,十月,冬月,臘月,鼠,牛,虎,兔,龍,蛇,馬,羊,猴,雞,狗,豬,甲,乙,丙,丁,戊,己,庚,辛,壬,癸,子,丑,寅,卯,辰,巳,午,未,申,酉,戌,亥,年,月,日,曆,時,鐘,農曆,農"
+    // 修正了农历/农的转换顺序，并确保狗的正确显示
+    "S": "农历,农,查看月历,隐藏月历,距离,还有,天,今日节气,当前时辰,礼拜,春节,端午节,中秋节,清明节,冬至,立春,雨水,惊蛰,春分,清明,谷雨,立夏,小满,芒种,夏至,小暑,大暑,立秋,处暑,白露,秋分,寒露,霜降,立冬,小雪,大雪,冬至,小寒,大寒,正月,二月,三月,四月,五月,六月,七月,八月,九月,十月,冬月,腊月,鼠,牛,虎,兔,龙,蛇,马,羊,猴,鸡,狗,猪,甲,乙,丙,丁,戊,己,庚,辛,壬,癸,子,丑,寅,卯,辰,巳,午,未,申,酉,戌,亥,年,月,日,历,时,钟",
+    "T": "農曆,農,查看月曆,隱藏月曆,距離,還有,天,今日節氣,當前時辰,禮拜,春節,端午節,中秋節,清明節,冬至,立春,雨水,驚蟄,春分,清明,穀雨,立夏,小滿,芒種,夏至,小暑,大暑,立秋,處暑,白露,秋分,寒露,霜降,立冬,小雪,大雪,冬至,小寒,大寒,正月,二月,三月,四月,五月,六月,七月,八月,九月,十月,冬月,臘月,鼠,牛,虎,兔,龍,蛇,馬,羊,猴,雞,狗,豬,甲,乙,丙,丁,戊,己,庚,辛,壬,癸,子,丑,寅,卯,辰,巳,午,未,申,酉,戌,亥,年,月,日,曆,時,鐘"
 };
 
 function s2t(text) {
@@ -120,7 +120,6 @@ function update() {
     document.getElementById('gz-year').innerText = s2t(`${lunar.getYearInGanZhi()}${lunar.getYearShengXiao()}年`);
     document.getElementById('gz-detail').innerText = s2t(`${lunar.getYearInGanZhi()}年 ${lunar.getMonthInGanZhi()}月 ${lunar.getDayInGanZhi()}日`);
 
-    // 更新逻辑：若有节气显示名称，否则显示“农历”
     const jq = lunar.getJieQi();
     document.getElementById('jieqi-tag').innerText = s2t(jq ? jq : "农历");
 
