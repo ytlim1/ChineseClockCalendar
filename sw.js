@@ -1,10 +1,12 @@
-const CACHE_NAME = 'lunar-clock-2026-03-27-v3';
+const CACHE_NAME = 'lunar-clock-2026-03-27-v4';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './manifest.json',
   './icon-192.png',
   './icon-512.png',
+  './screenshot-mobile.png',
+  './screenshot-desktop.png',
   'https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.min.js'
 ];
 
