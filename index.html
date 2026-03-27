@@ -11,94 +11,126 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { margin: 0; background-color: var(--bg); display: flex; flex-direction: column; align-items: center; min-height: 100vh; font-family: -apple-system, sans-serif; padding: 20px; }
 
-        .main-card { background: white; width: 100%; max-width: 360px; border-radius: 40px; border-top: 10px solid var(--red); box-shadow: 0 15px 35px rgba(0,0,0,0.05); padding: 35px 25px; text-align: center; }
-        .big-time { font-size: 4rem; font-weight: 700; color: var(--red); margin: 15px 0; font-variant-numeric: tabular-nums; }
+        .main-card { background: white; width: 100%; max-width: 360px; border-radius: 40px; border-top: 10px solid var(--red); box-shadow: 0 15px 35px rgba(0,0,0,0.05); padding: 30px 20px; text-align: center; }
+        .top-row { display: flex; justify-content: center; align-items: center; gap: 10px; color: #999; font-size: 1rem; }
+        .btn-t { padding: 2px 8px; border: 1px solid #ffcdd2; color: var(--red); border-radius: 6px; font-size: 0.8rem; cursor: pointer; }
+        
+        .big-time { font-size: 4rem; font-weight: 700; color: var(--red); margin: 10px 0; font-variant-numeric: tabular-nums; }
+        .tag-jie { display: inline-block; padding: 4px 15px; border: 1px solid #ffcdd2; color: var(--red); border-radius: 20px; font-size: 0.9rem; margin-bottom: 10px; }
+        
         .lunar-m { font-size: 3.2rem; font-weight: 800; color: #111; margin: 0; }
-        .btn-call { width: 100%; padding: 16px; border: 1px solid #eee; background: white; border-radius: 20px; font-size: 1.2rem; color: var(--red); cursor: pointer; margin-top: 20px; }
+        .lunar-y { color: var(--red); font-size: 1.4rem; margin-top: 2px; }
+        
+        .slot-ui { background: #f9f9f9; padding: 12px; border-radius: 15px; color: #777; font-size: 1.1rem; border: 1px solid #f0f0f0; margin-top: 10px; }
+        .cd-ui { border-top: 1px dashed #eee; padding-top: 15px; color: #555; font-size: 1rem; margin-top: 15px; }
+        .cd-n { color: var(--red); font-size: 2rem; font-weight: bold; }
 
-        /* 月历矩阵布局：还原 image_76264e */
-        #calendar-area { display: none; width: 100%; max-width: 360px; background: white; margin-top: 15px; border-radius: 30px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.04); }
-        .cal-header { display: flex; justify-content: space-between; align-items: center; font-weight: bold; margin-bottom: 15px; color: #333; }
+        .btn-call { width: 100%; padding: 16px; border: 1px solid #eee; background: white; border-radius: 20px; font-size: 1.2rem; color: var(--red); cursor: pointer; margin-top: 15px; }
+
+        /* 月历与详情区 */
+        #calendar-area { display: none; width: 100%; max-width: 360px; margin-top: 15px; }
+        .sub-card { background: white; border-radius: 30px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.04); margin-bottom: 15px; }
+        
         .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align: center; }
-        .weekday { font-size: 0.8rem; color: #999; padding-bottom: 5px; }
-        .day-cell { padding: 8px 0; border-radius: 10px; font-size: 0.9rem; position: relative; display: flex; flex-direction: column; align-items: center; }
-        .day-cell b { font-size: 1rem; }
+        .day-cell { padding: 8px 0; border-radius: 10px; font-size: 0.9rem; display: flex; flex-direction: column; align-items: center; }
         .day-cell i { font-style: normal; font-size: 0.65rem; color: #999; }
         .day-cell.today { background: var(--red); color: white; }
         .day-cell.today i { color: #ffcdd2; }
+
+        .yi-ji-box { text-align: left; line-height: 2; font-size: 1.05rem; }
+        .yi-ji-box b { color: var(--red); margin-right: 5px; }
     </style>
 </head>
 <body>
 
     <div class="main-card">
-        <div style="color:#999;">2026年3月27日 礼拜五</div>
-        <div class="big-time" id="clock">00:00:00</div>
-        <div class="lunar-m">二月初九</div>
-        <div style="color:var(--red); font-size:1.4rem;">丙午马年</div>
-        <button class="btn-call" id="toggle-btn" onclick="toggleCalendar()">查看月历</button>
+        <div class="top-row">
+            <span id="d-str">2026年3月27日 礼拜五</span>
+            <span class="btn-t" onclick="toggleTrad()">轉繁</span>
+        </div>
+        <div class="big-time" id="t-str">00:00:00</div>
+        <div class="tag-jie" id="jie-str">今日节气：春分</div>
+        <div>
+            <div class="lunar-m" id="l-m">二月初九</div>
+            <div class="lunar-y" id="l-y">丙午马年</div>
+        </div>
+        <div class="slot-ui" id="s-str">当前时辰：午时</div>
+        <div class="cd-ui">距离 <b>清明节 (5/4)</b> 还有 <span class="cd-n" id="c-num">9</span> 天</div>
+        <button class="btn-call" id="btn-tgl" onclick="toggleAll()">查看月历</button>
     </div>
 
     <div id="calendar-area">
-        <div class="cal-header">
-            <span style="color:var(--red); cursor:pointer;">&lt;</span>
-            <span>2026 年 3 月</span>
-            <span style="color:var(--red); cursor:pointer;">&gt;</span>
+        <div class="sub-card">
+            <div id="yi-ji-content" class="yi-ji-box"></div>
         </div>
-        <div class="cal-grid" id="grid">
-            <div class="weekday">日</div><div class="weekday">一</div><div class="weekday">二</div>
-            <div class="weekday">三</div><div class="weekday">四</div><div class="weekday">五</div><div class="weekday">六</div>
+        <div class="sub-card">
+            <div style="display:flex; justify-content:space-between; margin-bottom:15px; font-weight:bold;">
+                <span>2026 年 3 月</span>
             </div>
+            <div class="cal-grid" id="grid">
+                <div style="color:#999">日</div><div style="color:#999">一</div><div style="color:#999">二</div>
+                <div style="color:#999">三</div><div style="color:#999">四</div><div style="color:#999">五</div><div style="color:#999">六</div>
+            </div>
+        </div>
     </div>
 
     <script>
-        function toggleCalendar() {
+        let isTrad = false;
+        function toggleTrad() { isTrad = !isTrad; update(); renderGrid(); }
+
+        function toggleAll() {
             const area = document.getElementById('calendar-area');
-            const btn = document.getElementById('toggle-btn');
-            if (area.style.display === 'block') {
-                area.style.display = 'none';
-                btn.innerText = '查看月历';
-            } else {
-                renderGrid();
-                area.style.display = 'block';
-                btn.innerText = '隐藏月历';
-            }
+            const btn = document.getElementById('btn-tgl');
+            const isVisible = area.style.display === 'block';
+            area.style.display = isVisible ? 'none' : 'block';
+            btn.innerText = isVisible ? '查看月历' : '隐藏月历';
+            if (!isVisible) { renderGrid(); updateDetails(); }
+        }
+
+        function update() {
+            const now = new Date();
+            const l = Lunar.fromDate(now);
+            const timeStr = now.toLocaleTimeString('zh-CN', { hour12: false });
+            document.getElementById('t-str').innerText = timeStr;
+            
+            // 节气与时辰
+            document.getElementById('jie-str').innerText = `今日节气：${l.getJieQi() || '无'}`;
+            document.getElementById('s-str').innerText = `当前时辰：${l.getTimeZhi()}时`;
+            
+            // 繁简处理逻辑（示意）
+            document.getElementById('l-m').innerText = isTrad ? "二月初九" : "二月初九"; // 可扩展繁体库
+        }
+
+        function updateDetails() {
+            const l = Lunar.fromDate(new Date());
+            document.getElementById('yi-ji-content').innerHTML = `
+                <div style="text-align:center; font-weight:bold; color:var(--red); margin-bottom:10px;">今日万年历</div>
+                <b>干支：</b>${l.getYearInGanZhi()}年 ${l.getMonthInGanZhi()}月 ${l.getDayInGanZhi()}日<br>
+                <b>宜：</b>${l.getDayYi().slice(0,4).join(' ')}<br>
+                <b>忌：</b>${l.getDayJi().slice(0,4).join(' ')}
+            `;
         }
 
         function renderGrid() {
             const grid = document.getElementById('grid');
-            // 保留周标题，清除旧日期
-            const weekdays = grid.querySelectorAll('.weekday');
-            grid.innerHTML = '';
-            weekdays.forEach(w => grid.appendChild(w));
+            const headerHtml = `<div style="color:#999">日</div><div style="color:#999">一</div><div style="color:#999">二</div><div style="color:#999">三</div><div style="color:#999">四</div><div style="color:#999">五</div><div style="color:#999">六</div>`;
+            grid.innerHTML = headerHtml;
 
-            const year = 2026, month = 3; 
+            const year = 2026, month = 3;
             const firstDay = new Date(year, month - 1, 1).getDay();
-            const daysInMonth = new Date(year, month, 0).getDate();
+            for (let i = 0; i < firstDay; i++) grid.appendChild(document.createElement('div'));
 
-            // 填充月初空白
-            for (let i = 0; i < firstDay; i++) {
-                grid.appendChild(document.createElement('div'));
-            }
-
-            // 填充日期
-            for (let d = 1; d <= daysInMonth; d++) {
-                const l = Solar.fromYmd(year, month, d).getLunar();
+            for (let d = 1; d <= 31; d++) {
                 const cell = document.createElement('div');
+                const sl = Solar.fromYmd(year, month, d).getLunar();
                 cell.className = 'day-cell' + (d === 27 ? ' today' : '');
-                
-                // 农历逻辑：如果有节日显示节日，否则显示初几
-                let lunarShow = l.getDayInChinese();
-                if (l.getFestivals().length > 0) lunarShow = l.getFestivals()[0].substring(0,2);
-                if (l.getJieQi()) lunarShow = l.getJieQi();
-
-                cell.innerHTML = `<b>${d}</b><i>${lunarShow}</i>`;
+                cell.innerHTML = `<b>${d}</b><i>${sl.getJieQi() || sl.getDayInChinese()}</i>`;
                 grid.appendChild(cell);
             }
         }
 
-        setInterval(() => {
-            document.getElementById('clock').innerText = new Date().toLocaleTimeString('zh-CN', { hour12: false });
-        }, 1000);
+        setInterval(update, 1000);
+        update();
     </script>
 </body>
 </html>
