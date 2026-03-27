@@ -11,10 +11,16 @@
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { margin: 0; background-color: var(--bg); display: flex; flex-direction: column; align-items: center; min-height: 100vh; font-family: -apple-system, sans-serif; padding: 20px; }
         .main-card { background: white; width: 100%; max-width: 360px; border-radius: 40px; border-top: 10px solid var(--red); box-shadow: 0 15px 35px rgba(0,0,0,0.05); padding: 30px 20px; text-align: center; position: relative; }
-        .btn-t { position: absolute; top: 25px; right: 25px; padding: 2px 10px; border: 1px solid #ffcdd2; color: var(--red); border-radius: 8px; font-size: 0.9rem; cursor: pointer; background: white; z-index: 10; font-weight: bold; }
+        
+        /* 1. 按钮样式优化 */
+        .btn-t { position: absolute; top: 25px; right: 25px; width: 35px; height: 35px; line-height: 33px; border: 1px solid #ffcdd2; color: var(--red); border-radius: 50%; font-size: 1rem; cursor: pointer; background: white; z-index: 10; font-weight: bold; }
+        
         .date-row { color: #999; font-size: 1rem; margin-bottom: 5px; }
         .big-time { font-size: 4.2rem; font-weight: 700; color: var(--red); margin: 5px 0; font-variant-numeric: tabular-nums; }
-        .tag-jie { display: inline-block; padding: 5px 18px; border: 1px solid #ffcdd2; color: var(--red); border-radius: 25px; font-size: 1rem; margin: 10px 0; min-width: 80px; }
+        
+        /* 2. 节气标签 */
+        .tag-jie { display: inline-block; padding: 5px 18px; border: 1px solid #ffcdd2; color: var(--red); border-radius: 25px; font-size: 1rem; margin: 10px 0; min-height: 32px; min-width: 80px; }
+        
         .lunar-m { font-size: 3.5rem; font-weight: 800; color: #111; margin: 0; letter-spacing: 2px; }
         .lunar-y { color: var(--red); font-size: 1.5rem; margin-top: 5px; font-weight: bold; }
         .gz-small { font-size: 0.85rem; color: #666; margin-top: 8px; }
@@ -22,6 +28,7 @@
         .cd-ui { border-top: 1px dashed #eee; padding-top: 20px; color: #555; font-size: 1.1rem; margin-top: 25px; }
         .cd-n { color: var(--red); font-size: 2.2rem; font-weight: bold; margin: 0 5px; }
         .btn-call { width: 100%; padding: 18px; border: 1px solid #eee; background: white; border-radius: 20px; font-size: 1.3rem; color: var(--red); cursor: pointer; margin-top: 20px; font-weight: bold; }
+        
         #calendar-area { display: none; width: 100%; max-width: 360px; margin-top: 15px; background: white; border-radius: 30px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.04); }
         .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align: center; margin-top: 15px; }
         .day-cell { padding: 10px 0; border-radius: 12px; font-size: 1rem; display: flex; flex-direction: column; align-items: center; }
@@ -31,18 +38,24 @@
     </style>
 </head>
 <body>
+
     <div class="main-card">
-        <div class="btn-t" id="t-btn" onclick="toggleTrad()">轉繁</div>
+        <div class="btn-t" id="t-btn" onclick="toggleTrad()">繁</div>
         <div class="date-row" id="d-str"></div>
         <div class="big-time" id="t-str">00:00:00</div>
+        
         <div class="tag-jie" id="jie-tag"></div>
+        
         <div class="lunar-m" id="l-m"></div>
         <div class="lunar-y" id="l-y"></div>
         <div class="gz-small" id="gz-str"></div>
+        
         <div class="slot-ui" id="s-str"></div>
         <div class="cd-ui" id="cd-box"></div>
+        
         <button class="btn-call" id="btn-tgl" onclick="toggleCalendar()">查看月历</button>
     </div>
+
     <div id="calendar-area">
         <div style="text-align:center; font-weight:bold; font-size: 1.1rem;" id="cal-title"></div>
         <div class="cal-grid" id="grid"></div>
@@ -50,11 +63,9 @@
 
     <script>
         let isTrad = false;
-        
-        // 扩展字典，涵盖了主面板和月历内所有文字
         const tMap = {
-            '查看月历':'查看月曆','隐藏月历':'隱藏月曆','当前时辰':'當前時辰','礼拜':'禮拜','距离':'距離','还有':'還有','天':'天','马':'馬','龙':'龍','年':'年','月':'月','日':'日','时':'時','辰':'辰','初':'初','十':'十','廿':'廿','卅':'卅','周':'週','节':'節',
-            '惊蛰':'驚蟄','春分':'春分','清明':'清明','立夏':'立夏','龙头':'龍頭','一':'一','二':'二','三':'三','四':'四','五':'五','六':'六','七':'七','八':'八','九':'九'
+            '查看月历':'查看月曆','隐藏月历':'隱藏月曆','当前时辰':'當前時辰','礼拜':'禮拜','距离':'距離','还有':'還有','天':'天','马':'馬','龙':'龍','年':'年','月':'月','日':'日','时':'時','辰':'辰','初':'初','十':'十','廿':'廿','卅':'卅','周':'週','节':'節','农历':'農曆',
+            '惊蛰':'驚蟄','春分':'春分','清明':'清明','龙头':'龍頭','一':'一','二':'二','三':'三','四':'四','五':'五','六':'六','七':'七','八':'八','九':'九'
         };
 
         function conv(str) {
@@ -65,12 +76,9 @@
 
         function toggleTrad() { 
             isTrad = !isTrad; 
-            document.getElementById('t-btn').innerText = isTrad ? "简" : "轉繁";
+            document.getElementById('t-btn').innerText = isTrad ? "简" : "繁";
             update(); 
-            // 修复点：如果月历正在显示，点击切换时必须立即重新生成网格
-            if (document.getElementById('calendar-area').style.display === 'block') {
-                renderGrid();
-            }
+            if (document.getElementById('calendar-area').style.display === 'block') renderGrid();
         }
 
         function toggleCalendar() {
@@ -87,8 +95,8 @@
             const s = Solar.fromDate(now);
             const jq = l.getJieQi();
             
-            // 节气显示逻辑
-            document.getElementById('jie-tag').innerText = conv(jq ? jq : l.getDayInChinese());
+            // 修复 (2): 气节位置逻辑。若是节气显名称，否则显“农历”二字
+            document.getElementById('jie-tag').innerText = conv(jq ? jq : "农历");
             
             document.getElementById('d-str').innerText = conv(`${s.getYear()}年${s.getMonth()}月${s.getDay()}日 ${l.getWeekInChinese()}`);
             document.getElementById('t-str').innerText = now.toLocaleTimeString('zh-CN', { hour12: false });
@@ -118,7 +126,6 @@
                 let lunarShow = sl.getJieQi() || sl.getDayInChinese();
                 if (sl.getFestivals().includes("龙头节")) lunarShow = "龙头";
                 
-                // 每一个动态生成的单元格内容都强制通过 conv()
                 html += `<div class="day-cell ${isToday?'today':''}">
                             <b>${d}</b>
                             <i>${conv(lunarShow)}</i>
