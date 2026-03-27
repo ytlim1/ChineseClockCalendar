@@ -1,16 +1,14 @@
 {
-  "id": "/ChineseClockCalendar/",
-  "name": "Chinese Lunar Calendar",
-  "short_name": "万年历 Lunar",
-  "description": "Professional Chinese Lunar Calendar with offline support.",
   "lang": "zh-CN",
+  "name": "天干地支农历万年历",
+  "short_name": "万年历",
+  "description": "具有天干地支纪年、二十四节气及精密时钟功能的专业农历 PWA。",
   "start_url": "./index.html",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#f5f3ef",
   "theme_color": "#b71c1c",
-  "dir": "ltr",
-  "orientation": "any",
-  "categories": ["productivity", "utilities"],
+  "categories": ["utilities", "lifestyle"],
   "icons": [
     {
       "src": "icon-192.png",
@@ -22,34 +20,13 @@
       "src": "icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "maskable"
+      "purpose": "any"
     },
     {
       "src": "icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any"
-    }
-  ],
-  "screenshots": [
-    {
-      "src": "screenshot_mobile.png",
-      "sizes": "1080x1920",
-      "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Lunar Calendar Mobile View"
-    }
-  ],
-  "shortcuts": [
-    {
-      "name": "今日农历",
-      "url": "./index.html?action=today",
-      "description": "查看今天的农历详细信息"
-    },
-    {
-      "name": "节日倒计时",
-      "url": "./index.html?action=countdown",
-      "description": "查看接下来的重大节日"
+      "purpose": "maskable"
     }
   ]
 }
