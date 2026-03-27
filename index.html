@@ -6,34 +6,90 @@
     <title>天干地支农历万年历</title>
     
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#b71c1c">
+    <meta name="theme-color" id="theme-color-meta" content="#b71c1c">
     <link rel="apple-touch-icon" href="icon-192.png">
 
     <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.min.js"></script>
     <script data-goatcounter="https://ytlim-clock.goatcounter.com/count" async defer src="https://gc.zgo.at/count.js"></script>
 
     <style>
-        :root { --main-red: #b71c1c; --bg-gray: #f5f3ef; --fest-red: #cf1322; --btn-bg: #fff1f0; --btn-border: #ffa39e; }
-        body { background-color: var(--bg-gray); font-family: "Microsoft YaHei", sans-serif; display: flex; flex-direction: column; align-items: center; padding: 15px 0; color: #333; }
-        .card { background: #fff; padding: 25px 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); width: 340px; text-align: center; border-top: 6px solid var(--main-red); position: relative; box-sizing: border-box; }
+        :root {
+            /* 浅色模式变量 */
+            --bg-gray: #f5f3ef;
+            --card-bg: #ffffff;
+            --main-red: #b71c1c;
+            --fest-red: #cf1322;
+            --text-main: #111111;
+            --text-sec: #888888;
+            --btn-bg: #fff1f0;
+            --btn-border: #ffa39e;
+            --shichen-bg: #f9f9f9;
+            --line-color: #eeeeee;
+            --shadow: rgba(0,0,0,0.08);
+        }
+
+        /* 强制深色模式类（由 JS 触发） */
+        [data-theme='dark'] {
+            --bg-gray: #121212;
+            --card-bg: #1e1e1e;
+            --main-red: #ff5252;
+            --fest-red: #ff7875;
+            --text-main: #e0e0e0;
+            --text-sec: #aaaaaa;
+            --btn-bg: #2a1215;
+            --btn-border: #5c2223;
+            --shichen-bg: #262626;
+            --line-color: #333333;
+            --shadow: rgba(0,0,0,0.4);
+        }
+
+        /* 自动媒体查询：如果用户没手动选过，则跟随系统 */
+        @media (prefers-color-scheme: dark) {
+            :root:not([data-theme='light']) {
+                --bg-gray: #121212;
+                --card-bg: #1e1e1e;
+                --main-red: #ff5252;
+                --fest-red: #ff7875;
+                --text-main: #e0e0e0;
+                --text-sec: #aaaaaa;
+                --btn-bg: #2a1215;
+                --btn-border: #5c2223;
+                --shichen-bg: #262626;
+                --line-color: #333333;
+                --shadow: rgba(0,0,0,0.4);
+            }
+        }
+
+        body { background-color: var(--bg-gray); font-family: sans-serif; display: flex; flex-direction: column; align-items: center; padding: 15px 0; color: var(--text-main); transition: background 0.3s; }
+        .card { background: var(--card-bg); padding: 25px 20px; border-radius: 20px; box-shadow: 0 10px 30px var(--shadow); width: 340px; text-align: center; border-top: 6px solid var(--main-red); position: relative; box-sizing: border-box; transition: background 0.3s; }
+        
         .top-row { display: flex; align-items: center; justify-content: center; position: relative; width: 100%; height: 32px; margin-bottom: 12px; }
-        .solar-date { color: #888; font-size: 1.05em; margin: 0; padding: 0; line-height: 1; }
-        .lang-mini-btn { position: absolute; right: 0; top: 50%; transform: translateY(-50%); font-size: 0.9em; font-weight: bold; width: 32px; height: 32px; background-color: var(--btn-bg); border: 1px solid var(--btn-border); border-radius: 50%; color: var(--fest-red); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
-        .time { font-size: 2.8em; font-weight: bold; color: var(--main-red); margin: 5px 0; line-height: 1.1; font-variant-numeric: tabular-nums; }
-        .jieqi-tag { display: inline-block; color: var(--fest-red); padding: 2px 14px; border-radius: 50px; font-size: 0.9em; margin: 10px 0; min-height: 24px; background: #fff1f0; border: 1px solid #ffa39e; font-weight: bold; }
-        .lunar-main { font-size: 2.4em; font-weight: bold; margin: 5px 0; color: #111; }
+        .solar-date { color: var(--text-sec); font-size: 1.05em; margin: 0; }
+        
+        /* 顶部按钮通用样式 */
+        .top-btn { position: absolute; top: 50%; transform: translateY(-50%); font-size: 0.9em; font-weight: bold; width: 32px; height: 32px; background-color: var(--btn-bg); border: 1px solid var(--btn-border); border-radius: 50%; color: var(--fest-red); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+        .lang-btn { right: 0; }
+        .theme-btn { left: 0; }
+
+        .time { font-size: 2.8em; font-weight: bold; color: var(--main-red); margin: 5px 0; font-variant-numeric: tabular-nums; }
+        .jieqi-tag { display: inline-block; color: var(--fest-red); padding: 2px 14px; border-radius: 50px; font-size: 0.9em; margin: 10px 0; min-height: 24px; background: var(--btn-bg); border: 1px solid var(--btn-border); font-weight: bold; }
+        
+        .lunar-main { font-size: 2.4em; font-weight: bold; margin: 5px 0; color: var(--text-main); }
         .gz-text { color: var(--main-red); font-weight: bold; font-size: 1.15em; margin-bottom: 4px; }
-        .gz-detail { color: #888; font-size: 0.85em; margin-bottom: 12px; letter-spacing: 1px; }
-        .shichen-box { margin: 10px 0; background: #f9f9f9; padding: 8px; border-radius: 8px; color:#666; font-size: 0.95em; border: 1px solid #f0f0f0; }
-        .countdown { margin: 15px 0; padding-top: 15px; border-top: 1px dashed #eee; color: #777; font-size: 0.95em; }
+        .gz-detail { color: var(--text-sec); font-size: 0.85em; margin-bottom: 12px; }
+        .shichen-box { margin: 10px 0; background: var(--shichen-bg); padding: 8px; border-radius: 8px; color: var(--text-sec); font-size: 0.95em; border: 1px solid var(--line-color); }
+        
+        .countdown { margin: 15px 0; padding-top: 15px; border-top: 1px dashed var(--line-color); color: var(--text-sec); font-size: 0.95em; }
         .days { color: var(--main-red); font-size: 1.8em; font-weight: bold; }
-        .cal-btn { background: #fff; color: var(--main-red); border: 1px solid #eee; padding: 10px; border-radius: 12px; cursor: pointer; font-size: 1em; width: 100%; margin-top: 10px; font-weight: bold; }
-        .calendar-wrapper { display: none; background: #fff; width: 340px; border-radius: 20px; padding: 15px 0; box-shadow: 0 10px 25px rgba(0,0,0,0.05); margin-top: 10px; border: 1px solid #eee; }
+        
+        .cal-btn { background: var(--card-bg); color: var(--main-red); border: 1px solid var(--line-color); padding: 10px; border-radius: 12px; cursor: pointer; font-size: 1em; width: 100%; margin-top: 10px; font-weight: bold; }
+        
+        .calendar-wrapper { display: none; background: var(--card-bg); width: 340px; border-radius: 20px; padding: 15px 0; box-shadow: 0 10px 25px var(--shadow); margin-top: 10px; border: 1px solid var(--line-color); }
         .calendar-wrapper.show { display: block; }
-        .cal-header { display: flex; justify-content: space-between; align-items: center; width: 90%; margin: 0 auto 10px; }
         .nav-btn { background: none; border: none; color: var(--main-red); font-size: 1.2em; cursor: pointer; font-weight: bold; padding: 5px 15px; }
+        
         table { width: 95%; margin: 0 auto; border-collapse: collapse; }
-        th { color: #999; padding-bottom: 8px; font-size: 0.8em; font-weight: normal; }
+        th { color: var(--text-sec); padding-bottom: 8px; font-size: 0.8em; }
         td { height: 50px; text-align: center; border-radius: 8px; vertical-align: middle; }
         .cur-day { background: var(--main-red) !important; color: #fff !important; }
         .is-fest { color: var(--fest-red) !important; font-weight: bold; }
@@ -43,24 +99,25 @@
 
 <div class="card">
     <div class="top-row">
+        <div class="top-btn theme-btn" id="themeBtn" onclick="toggleTheme()">🌙</div>
         <div id="solar-date" class="solar-date">---</div>
-        <div class="lang-mini-btn" id="langBtn" onclick="toggleLang()">繁</div>
+        <div class="top-btn lang-btn" id="langBtn" onclick="toggleLang()">繁</div>
     </div>
     <div id="clock" class="time">00:00:00</div>
-    <div id="jieqi-tag" class="jieqi-tag">农历</div>
+    <div id="jieqi-tag" class="jieqi-tag">農曆</div>
     <div id="lunar-main" class="lunar-main">---</div>
     <div id="gz-year" class="gz-text">---</div>
     <div id="gz-detail" class="gz-detail">---</div>
     <div id="shichen-info" class="shichen-box">---</div>
     <div class="countdown">
-        <span id="lbl-dist">距离</span> <span id="fest-name" style="color:#333; font-weight:bold;">---</span> <span id="lbl-remain">还有</span>
+        <span id="lbl-dist">距離</span> <span id="fest-name" style="color:var(--text-main); font-weight:bold;">---</span> <span id="lbl-remain">還有</span>
         <span id="fest-days" class="days">0</span> <span id="lbl-day">天</span>
     </div>
-    <button class="cal-btn" id="toggleBtn" onclick="toggleCalendar()">查看月历</button>
+    <button class="cal-btn" id="toggleBtn" onclick="toggleCalendar()">查看月曆</button>
 </div>
 
 <div class="calendar-wrapper" id="calWrapper">
-    <div class="cal-header">
+    <div style="display:flex; justify-content:space-between; align-items:center; width:90%; margin:0 auto 10px;">
         <button class="nav-btn" onclick="changeMonth(-1)">&lt;</button>
         <h4 id="cal-title" style="margin: 0;">---</h4>
         <button class="nav-btn" onclick="changeMonth(1)">&gt;</button>
@@ -72,6 +129,21 @@
 </div>
 
 <script>
+// 初始化深色模式
+const savedTheme = localStorage.getItem('theme');
+if (savedTheme) {
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    document.getElementById('themeBtn').innerText = savedTheme === 'dark' ? "☀️" : "🌙";
+}
+
+function toggleTheme() {
+    let currentTheme = document.documentElement.getAttribute('data-theme');
+    let targetTheme = (currentTheme === 'dark') ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', targetTheme);
+    localStorage.setItem('theme', targetTheme);
+    document.getElementById('themeBtn').innerText = targetTheme === 'dark' ? "☀️" : "🌙";
+}
+
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW Error:', err));
@@ -82,7 +154,6 @@ let viewDate = new Date();
 let isTrad = false;
 
 const dict = {
-    // 修正了农历/农的转换顺序，并确保狗的正确显示
     "S": "农历,农,查看月历,隐藏月历,距离,还有,天,今日节气,当前时辰,礼拜,春节,端午节,中秋节,清明节,冬至,立春,雨水,惊蛰,春分,清明,谷雨,立夏,小满,芒种,夏至,小暑,大暑,立秋,处暑,白露,秋分,寒露,霜降,立冬,小雪,大雪,冬至,小寒,大寒,正月,二月,三月,四月,五月,六月,七月,八月,九月,十月,冬月,腊月,鼠,牛,虎,兔,龙,蛇,马,羊,猴,鸡,狗,猪,甲,乙,丙,丁,戊,己,庚,辛,壬,癸,子,丑,寅,卯,辰,巳,午,未,申,酉,戌,亥,年,月,日,历,时,钟",
     "T": "農曆,農,查看月曆,隱藏月曆,距離,還有,天,今日節氣,當前時辰,禮拜,春節,端午節,中秋節,清明節,冬至,立春,雨水,驚蟄,春分,清明,穀雨,立夏,小滿,芒種,夏至,小暑,大暑,立秋,處暑,白露,秋分,寒露,霜降,立冬,小雪,大雪,冬至,小寒,大寒,正月,二月,三月,四月,五月,六月,七月,八月,九月,十月,冬月,臘月,鼠,牛,虎,兔,龍,蛇,馬,羊,猴,雞,狗,豬,甲,乙,丙,丁,戊,己,庚,辛,壬,癸,子,丑,寅,卯,辰,巳,午,未,申,酉,戌,亥,年,月,日,曆,時,鐘"
 };
