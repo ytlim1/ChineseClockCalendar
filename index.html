@@ -3,38 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>农历万年历</title>
+    <title>农历万年历 PWA</title>
     <link rel="manifest" href="manifest.json">
     <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.min.js"></script>
     <style>
         :root { --red: #b71c1c; --bg: #f6f6f6; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body { margin: 0; background-color: var(--bg); display: flex; flex-direction: column; align-items: center; min-height: 100vh; font-family: -apple-system, sans-serif; padding: 20px; }
-        
         .main-card { background: white; width: 100%; max-width: 360px; border-radius: 40px; border-top: 10px solid var(--red); box-shadow: 0 15px 35px rgba(0,0,0,0.05); padding: 30px 20px; text-align: center; position: relative; }
-        
-        /* 繁简切换按钮 */
-        .btn-t { position: absolute; top: 25px; right: 25px; padding: 2px 10px; border: 1px solid #ffcdd2; color: var(--red); border-radius: 8px; font-size: 0.9rem; cursor: pointer; background: white; z-index: 10; font-weight: bold; }
-        
+        .btn-t { position: absolute; top: 25px; right: 25px; padding: 2px 10px; border: 1px solid #ffcdd2; color: var(--red); border-radius: 8px; font-size: 0.9rem; cursor: pointer; background: white; font-weight: bold; }
         .date-row { color: #999; font-size: 1rem; margin-bottom: 5px; }
         .big-time { font-size: 4.2rem; font-weight: 700; color: var(--red); margin: 5px 0; font-variant-numeric: tabular-nums; }
-        
-        /* 节气/农历日标签 */
         .tag-jie { display: inline-block; padding: 5px 18px; border: 1px solid #ffcdd2; color: var(--red); border-radius: 25px; font-size: 1rem; margin: 10px 0; min-width: 80px; }
-        
         .lunar-m { font-size: 3.5rem; font-weight: 800; color: #111; margin: 0; letter-spacing: 2px; }
         .lunar-y { color: var(--red); font-size: 1.5rem; margin-top: 5px; font-weight: bold; }
-        
-        /* 干支：字体缩小 */
-        .gz-small { font-size: 0.85rem; color: #666; margin-top: 8px; letter-spacing: 0.5px; }
-        
+        .gz-small { font-size: 0.85rem; color: #666; margin-top: 8px; }
         .slot-ui { background: #f9f9f9; padding: 14px; border-radius: 18px; color: #777; font-size: 1.2rem; border: 1px solid #f0f0f0; margin-top: 18px; }
         .cd-ui { border-top: 1px dashed #eee; padding-top: 20px; color: #555; font-size: 1.1rem; margin-top: 25px; }
         .cd-n { color: var(--red); font-size: 2.2rem; font-weight: bold; margin: 0 5px; }
-
         .btn-call { width: 100%; padding: 18px; border: 1px solid #eee; background: white; border-radius: 20px; font-size: 1.3rem; color: var(--red); cursor: pointer; margin-top: 20px; font-weight: bold; }
-
-        /* 月历视图区 */
         #calendar-area { display: none; width: 100%; max-width: 360px; margin-top: 15px; background: white; border-radius: 30px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.04); }
         .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align: center; margin-top: 15px; }
         .day-cell { padding: 10px 0; border-radius: 12px; font-size: 1rem; display: flex; flex-direction: column; align-items: center; }
@@ -47,38 +34,34 @@
 
     <div class="main-card">
         <div class="btn-t" id="t-btn" onclick="toggleTrad()">轉繁</div>
-        <div class="date-row" id="d-str">2026年3月27日 礼拜五</div>
+        <div class="date-row" id="d-str"></div>
         <div class="big-time" id="t-str">00:00:00</div>
-        
-        <div class="tag-jie" id="jie-tag">初九</div>
-        
-        <div class="lunar-m" id="l-m">二月初九</div>
-        <div class="lunar-y" id="l-y">丙午马年</div>
-        <div class="gz-small" id="gz-str">丙午年 辛卯月 庚子日</div>
-        
-        <div class="slot-ui" id="s-str">当前时辰：午时</div>
-        
-        <div class="cd-ui" id="cd-box">距离 <b id="fest-target">清明节 (5/4)</b> 还有 <span class="cd-n">9</span> 天</div>
-        
+        <div class="tag-jie" id="jie-tag"></div>
+        <div class="lunar-m" id="l-m"></div>
+        <div class="lunar-y" id="l-y"></div>
+        <div class="gz-small" id="gz-str"></div>
+        <div class="slot-ui" id="s-str"></div>
+        <div class="cd-ui" id="cd-box"></div>
         <button class="btn-call" id="btn-tgl" onclick="toggleCalendar()">查看月历</button>
     </div>
 
     <div id="calendar-area">
-        <div style="text-align:center; font-weight:bold; font-size: 1.1rem;" id="cal-title">2026 年 3 月</div>
+        <div style="text-align:center; font-weight:bold; font-size: 1.1rem;" id="cal-title"></div>
         <div class="cal-grid" id="grid"></div>
     </div>
 
     <script>
         let isTrad = false;
 
-        // 繁简映射字典：确保涵盖月历和主界面所有常用汉字
+        // 补全字典，确保月历中所有文字都能转换
         const tMap = {
-            '年':'年','月':'月','日':'日','马':'馬','时':'時','辰':'辰','当前':'當前','礼拜':'禮拜','查看':'查看','隐藏':'隱藏','月历':'月曆','距离':'距離','还有':'還有','天':'天','初':'初','正':'正','二':'二','三':'三','四':'四','五':'五','六':'六','七':'七','八':'八','九':'九','十':'十','廿':'廿','卅':'卅','周':'週','节':'節','春分':'春分','清明':'清明','龙头':'龍頭'
+            '年':'年','月':'月','日':'日','马':'馬','时':'時','辰':'辰','当前':'當前','礼拜':'禮拜','查看':'查看','隐藏':'隱藏','月历':'月曆','距离':'距離','还有':'還有','天':'天','初':'初','正':'正','二':'二','三':'三','四':'四','五':'五','六':'六','七':'七','八':'八','九':'九','十':'十','廿':'廿','卅':'卅','周':'週','节':'節','春分':'春分','清明':'清明','龙头':'龍頭','一':'一'
         };
 
+        // 核心转换函数
         function conv(str) {
             if (!str || !isTrad) return str;
-            // 优先匹配短句，否则逐字翻译
+            // 针对整体词组或单字进行匹配
             if (tMap[str]) return tMap[str];
             return str.split('').map(c => tMap[c] || c).join('');
         }
@@ -86,7 +69,8 @@
         function toggleTrad() { 
             isTrad = !isTrad; 
             document.getElementById('t-btn').innerText = isTrad ? "简" : "轉繁";
-            update();
+            update(); // 刷新主界面文字
+            // 关键：如果月历开着，强制重新渲染月历内的所有格子
             if (document.getElementById('calendar-area').style.display === 'block') renderGrid();
         }
 
@@ -94,8 +78,8 @@
             const area = document.getElementById('calendar-area');
             const isVisible = area.style.display === 'block';
             area.style.display = isVisible ? 'none' : 'block';
-            if (!isVisible) renderGrid();
-            update();
+            if (!isVisible) renderGrid(); // 展开时渲染一次
+            update(); // 更新按钮文字繁简
         }
 
         function update() {
@@ -103,11 +87,11 @@
             const l = Lunar.fromDate(now);
             const s = Solar.fromDate(now);
             
-            // 1. 节气修复：有节气显节气，无节气显农历日
+            // 1. 节气逻辑：有节气显节气，无则显农历日（如：初九）
             const jq = l.getJieQi();
             document.getElementById('jie-tag').innerText = conv(jq ? jq : l.getDayInChinese());
             
-            // 2. 主界面文本更新
+            // 2. 更新文字内容
             document.getElementById('d-str').innerText = conv(`${s.getYear()}年${s.getMonth()}月${s.getDay()}日 ${l.getWeekInChinese()}`);
             document.getElementById('t-str').innerText = now.toLocaleTimeString('zh-CN', { hour12: false });
             document.getElementById('l-m').innerText = conv(l.getMonthInChinese() + "月" + l.getDayInChinese());
@@ -115,17 +99,16 @@
             document.getElementById('gz-str').innerText = conv(`${l.getYearInGanZhi()}年 ${l.getMonthInGanZhi()}月 ${l.getDayInGanZhi()}日`);
             document.getElementById('s-str').innerText = conv(`当前时辰：${l.getTimeZhi()}时`);
             
-            // 3. 按钮文字转换
+            // 按钮及倒计时文字
             const isCalVisible = document.getElementById('calendar-area').style.display === 'block';
             document.getElementById('btn-tgl').innerText = conv(isCalVisible ? '隐藏月历' : '查看月历');
-            
-            // 4. 倒计时区域转换
-            document.getElementById('fest-target').innerText = conv("清明节 (5/4)");
+            document.getElementById('cd-box').innerHTML = conv(`距离 `) + `<b>${conv("清明节 (5/4)")}</b>` + conv(` 还有`) + `<span class="cd-n">9</span>` + conv(`天`);
         }
 
         function renderGrid() {
             const grid = document.getElementById('grid');
             const weekDays = ['日','一','二','三','四','五','六'];
+            // 渲染星期的繁简
             let html = weekDays.map(d => `<div style="color:#999">${conv(d)}</div>`).join('');
             
             const year = 2026, month = 3;
@@ -134,13 +117,13 @@
 
             for (let d = 1; d <= 31; d++) {
                 const sl = Solar.fromYmd(year, month, d).getLunar();
-                const isToday = d === 27;
+                const isToday = (d === 27);
                 
-                // 月历里的农历文字转换逻辑：节日 > 节气 > 日期
-                let lunarShow = sl.getFestivals()[0] || sl.getJieQi() || sl.getDayInChinese();
-                // 简化节日名称以便显示
-                if (lunarShow === "龙头节") lunarShow = "龙头";
-                
+                // 月历内文字逻辑：节气/节日 > 农历日期
+                let lunarShow = sl.getJieQi() || sl.getDayInChinese();
+                if (sl.getFestivals().includes("龙头节")) lunarShow = "龙头";
+
+                // 每个格子都调用 conv() 确保繁简同步
                 html += `<div class="day-cell ${isToday?'today':''}">
                             <b>${d}</b>
                             <i>${conv(lunarShow)}</i>
