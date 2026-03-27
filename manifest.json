@@ -3,6 +3,7 @@
   "name": "天干地支农历万年历",
   "short_name": "万年历",
   "description": "具有天干地支纪年、二十四节气及精密时钟功能的专业农历 PWA。",
+  "id": "/lunar-clock-pwa",
   "start_url": "./index.html",
   "display": "standalone",
   "orientation": "portrait",
@@ -27,6 +28,22 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "screenshot-mobile.png",
+      "sizes": "1080x1920",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "万年历移动端界面"
+    },
+    {
+      "src": "screenshot-wide.png",
+      "sizes": "1920x1080",
+      "type": "image/png",
+      "form_factor": "wide",
+      "label": "万年历桌面端界面"
     }
   ]
 }
