@@ -32,14 +32,14 @@
   ],
   "screenshots": [
     {
-      "src": "screenshot-mobile.png",
+      "src": "screenshot_mobile.png",
       "sizes": "1080x1920",
       "type": "image/png",
       "form_factor": "narrow",
       "label": "万年历移动端界面"
     },
     {
-      "src": "screenshot-wide.png",
+      "src": "screenshot_wide.png",
       "sizes": "1920x1080",
       "type": "image/png",
       "form_factor": "wide",
