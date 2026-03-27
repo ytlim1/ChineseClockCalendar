@@ -5,100 +5,117 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>农历万年历</title>
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#b71c1c">
     <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.min.js"></script>
     <style>
-        :root { --primary: #b71c1c; }
+        :root { --red: #b71c1c; --bg: #f6f6f6; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
         body {
-            margin: 0; background-color: #f6f6f6;
+            margin: 0; background-color: var(--bg);
             display: flex; justify-content: center; align-items: center;
             height: 100vh; font-family: -apple-system, sans-serif;
-            overflow: hidden; /* 防止页面上下滚动 */
+            overflow: hidden;
         }
 
-        /* 修复 UI 过大：加入 max-height 和 padding 控制 */
-        .card {
-            background: white; width: 90%; max-width: 360px;
-            max-height: 85vh; /* 限制高度，防止贴边 */
-            border-radius: 40px; border-top: 10px solid var(--primary);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
-            padding: 35px 25px; text-align: center;
-            display: flex; flex-direction: column; justify-content: space-around;
+        /* 严格锁定 25 日比例：控制高度防止过大 */
+        .main-card {
+            background: white; width: 88%; max-width: 360px;
+            height: 75vh; max-height: 650px; /* 物理锁定高度，找回呼吸感 */
+            border-radius: 45px; border-top: 10px solid var(--red);
+            box-shadow: 0 20px 45px rgba(0,0,0,0.06);
+            padding: 40px 25px; text-align: center;
+            display: flex; flex-direction: column; justify-content: space-between;
+            position: relative; z-index: 1;
         }
 
-        .top-info { color: #999; font-size: 1.1rem; margin-bottom: 5px; }
-        .clock-num { font-size: 4.2rem; font-weight: 700; color: var(--primary); margin: 5px 0; font-variant-numeric: tabular-nums; }
-        .term-tag { display: inline-block; padding: 4px 18px; border: 1px solid #ffcdd2; color: var(--primary); border-radius: 20px; font-size: 1rem; align-self: center; }
-        .lunar-main { font-size: 3.5rem; font-weight: 800; margin: 5px 0; color: #1a1a1a; }
-        .lunar-year { color: var(--primary); font-size: 1.5rem; margin-bottom: 15px; }
-        .slot-box { background: #f9f9f9; padding: 12px; border-radius: 15px; color: #777; font-size: 1.2rem; border: 1px solid #f0f0f0; }
-        .cd-row { border-top: 1px dashed #eee; padding-top: 15px; color: #555; font-size: 1.1rem; margin-top: 10px; }
-        .cd-bold { color: var(--primary); font-size: 2rem; font-weight: bold; }
+        .top-txt { color: #999; font-size: 1.1rem; display: flex; justify-content: center; gap: 10px; }
+        .btn-t { padding: 2px 8px; border: 1px solid #ffcdd2; color: var(--red); border-radius: 8px; font-size: 0.85rem; }
+        
+        .big-time { font-size: 4.2rem; font-weight: 700; color: var(--red); margin: 0; font-variant-numeric: tabular-nums; }
+        .tag-term { display: inline-block; padding: 4px 18px; border: 1px solid #ffcdd2; color: var(--red); border-radius: 20px; font-size: 1rem; align-self: center; }
+        
+        .lunar-m { font-size: 3.5rem; font-weight: 800; color: #111; margin: 0; }
+        .lunar-y { color: var(--red); font-size: 1.5rem; margin-top: 5px; }
+        
+        .slot-ui { background: #f9f9f9; padding: 12px; border-radius: 18px; color: #777; font-size: 1.2rem; border: 1px solid #f0f0f0; }
+        .cd-ui { border-top: 1px dashed #eee; padding-top: 20px; color: #555; font-size: 1.1rem; }
+        .cd-n { color: var(--red); font-size: 2.2rem; font-weight: bold; }
 
-        .btn-open {
-            width: 100%; padding: 16px; margin-top: 15px;
-            border: 1px solid #eee; background: white;
-            border-radius: 20px; font-size: 1.25rem;
-            color: var(--primary); cursor: pointer;
-            z-index: 10; /* 确保在最上层 */
+        .btn-call {
+            width: 100%; padding: 18px; border: 1px solid #eee; 
+            background: white; border-radius: 22px; font-size: 1.25rem;
+            color: var(--red); cursor: pointer;
+            position: relative; z-index: 5; /* 确保点击层级最高 */
         }
 
-        /* 弹窗样式 */
-        #mask { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.4); z-index:100; backdrop-filter:blur(4px); }
-        #pop-win { display: none; position: fixed; top:50%; left:50%; transform:translate(-50%,-50%); z-index:101; background:white; width:85%; max-width:320px; border-radius:30px; padding:25px; box-shadow:0 20px 40px rgba(0,0,0,0.2); }
+        /* 弹窗重塑：解决 image_768f28 的紧凑感 */
+        #pop-mask { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:100; backdrop-filter:blur(5px); }
+        #pop-box { 
+            display: none; position: fixed; top:50%; left:50%; transform:translate(-50%,-50%); 
+            z-index:101; background:white; width:85%; max-width:330px; 
+            border-radius: 35px; padding: 35px; box-shadow:0 30px 60px rgba(0,0,0,0.25); 
+        }
+        .pop-title { color: var(--red); font-size: 1.5rem; font-weight: bold; margin-bottom: 20px; text-align: center; }
+        .pop-info { text-align: left; line-height: 2.2; color: #333; font-size: 1.15rem; margin-bottom: 25px; }
     </style>
+    <script>
+        // 放在头部确保函数立即生效
+        function togglePop(show) {
+            const m = document.getElementById('pop-mask');
+            const b = document.getElementById('pop-box');
+            if(show) {
+                const l = Lunar.fromDate(new Date());
+                document.getElementById('pop-res').innerHTML = `
+                    <b>农历：</b>${l.getMonthInChinese()}月${l.getDayInChinese()}<br>
+                    <b>干支：</b>${l.getYearInGanZhi()}年 ${l.getMonthInGanZhi()}月 ${l.getDayInGanZhi()}日<br>
+                    <b>宜：</b>${l.getYi().slice(0,3).join(' ')}<br>
+                    <b>忌：</b>${l.getJi().slice(0,3).join(' ')}
+                `;
+                m.style.display = 'block';
+                b.style.display = 'block';
+            } else {
+                m.style.display = 'none';
+                b.style.display = 'none';
+            }
+        }
+
+        function runClock() {
+            const n = new Date();
+            const l = Lunar.fromDate(n);
+            document.getElementById('t-v').innerText = n.toLocaleTimeString('zh-CN', { hour12: false });
+            
+            const target = new Date(2026, 3, 5); 
+            const diff = Math.ceil((target - n) / (1000 * 60 * 60 * 24));
+            document.getElementById('c-v').innerText = diff > 0 ? diff : 0;
+        }
+        setInterval(runClock, 1000);
+        window.onload = runClock;
+    </script>
 </head>
 <body>
 
-    <div class="card">
-        <div class="top-info" id="d-val">2026年3月27日 礼拜五</div>
-        <div class="clock-num" id="t-val">11:36:37</div>
-        <div class="term-tag">今日节气：春分</div>
-        <div class="lunar-main" id="l-val">二月初九</div>
-        <div class="lunar-year" id="g-val">丙午马年</div>
-        <div class="slot-box" id="s-val">当前时辰：午时</div>
-        <div class="cd-row">距离 <b>清明节 (5/4)</b> 还有 <span class="cd-bold" id="c-val">9</span> 天</div>
-        <button class="btn-open" onclick="openPopup()">查看月历</button>
+    <div class="main-card">
+        <div class="top-txt">
+            <span>2026年3月27日 礼拜五</span>
+            <span class="btn-t">轉繁</span>
+        </div>
+        <div class="big-time" id="t-v">00:00:00</div>
+        <div class="tag-term">今日节气：春分</div>
+        <div>
+            <div class="lunar-m">二月初九</div>
+            <div class="lunar-y">丙午马年</div>
+        </div>
+        <div class="slot-ui">当前时辰：午时</div>
+        <div class="cd-ui">距离 <b>清明节 (5/4)</b> 还有 <span class="cd-n" id="c-v">9</span> 天</div>
+        <button class="btn-call" onclick="togglePop(true)">查看月历</button>
     </div>
 
-    <div id="mask" onclick="closePopup()"></div>
-    <div id="pop-win">
-        <h3 style="color:var(--primary); margin-top:0;">今日详情</h3>
-        <div id="pop-body" style="text-align:left; line-height:1.8; margin-bottom:20px;"></div>
-        <button class="btn-open" onclick="closePopup()">返回</button>
+    <div id="pop-mask" onclick="togglePop(false)"></div>
+    <div id="pop-box">
+        <div class="pop-title">月历详情</div>
+        <div id="pop-res" class="pop-info"></div>
+        <button class="btn-call" onclick="togglePop(false)">返回主界面</button>
     </div>
 
-    <script>
-        function update() {
-            const now = new Date();
-            const lunar = Lunar.fromDate(now);
-            document.getElementById('t-val').innerText = now.toLocaleTimeString('zh-CN', { hour12: false });
-            
-            const target = new Date(2026, 3, 5); 
-            const diff = Math.ceil((target - now) / (1000 * 60 * 60 * 24));
-            document.getElementById('c-val').innerText = diff > 0 ? diff : 0;
-        }
-
-        function openPopup() {
-            const l = Lunar.fromDate(new Date());
-            document.getElementById('pop-body').innerHTML = `<b>干支：</b>${l.getYearInGanZhi()}年<br><b>宜：</b>${l.getYi().slice(0,3).join(' ')}<br><b>忌：</b>${l.getJi().slice(0,3).join(' ')}`;
-            document.getElementById('mask').style.display = 'block';
-            document.getElementById('pop-win').style.display = 'block';
-        }
-
-        function closePopup() {
-            document.getElementById('mask').style.display = 'none';
-            document.getElementById('pop-win').style.display = 'none';
-        }
-
-        setInterval(update, 1000);
-        update();
-
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js?v=7');
-        }
-    </script>
 </body>
 </html>
