@@ -12,113 +12,110 @@
         
         body {
             margin: 0; background-color: var(--bg);
-            display: flex; justify-content: center; align-items: center;
-            height: 100vh; font-family: -apple-system, sans-serif;
-            overflow: hidden;
+            display: flex; flex-direction: column; align-items: center;
+            min-height: 100vh; font-family: -apple-system, sans-serif;
+            padding: 20px;
         }
 
-        /* 核心 UI：锁定 25 日截图的高级感比例 */
+        /* 还原 25 日截图的高级感卡片比例 */
         .main-card {
-            background: white; width: 88%; max-width: 360px;
-            height: 72vh; max-height: 620px; /* 物理锁定高度，找回呼吸感 */
-            border-radius: 42px; border-top: 10px solid var(--red);
-            box-shadow: 0 20px 45px rgba(0,0,0,0.06);
+            background: white; width: 100%; max-width: 360px;
+            border-radius: 40px; border-top: 10px solid var(--red);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.05);
             padding: 35px 25px; text-align: center;
-            display: flex; flex-direction: column; justify-content: space-between;
+            display: flex; flex-direction: column; gap: 15px;
+            transition: all 0.3s ease;
         }
 
-        .date-top { color: #999; font-size: 1.1rem; display: flex; justify-content: center; gap: 8px; }
-        .btn-trad { padding: 2px 8px; border: 1px solid #ffcdd2; color: var(--red); border-radius: 8px; font-size: 0.85rem; }
+        .top-txt { color: #999; font-size: 1rem; display: flex; justify-content: center; gap: 8px; }
+        .btn-t { padding: 2px 8px; border: 1px solid #ffcdd2; color: var(--red); border-radius: 6px; font-size: 0.8rem; }
         
-        .clock-val { font-size: 4.2rem; font-weight: 700; color: var(--red); margin: 0; font-variant-numeric: tabular-nums; }
-        .tag-term { display: inline-block; padding: 4px 18px; border: 1px solid #ffcdd2; color: var(--red); border-radius: 20px; font-size: 1rem; align-self: center; }
+        .big-time { font-size: 4rem; font-weight: 700; color: var(--red); margin: 5px 0; font-variant-numeric: tabular-nums; }
+        .tag-term { display: inline-block; padding: 4px 15px; border: 1px solid #ffcdd2; color: var(--red); border-radius: 20px; font-size: 0.9rem; align-self: center; }
         
-        .lunar-m { font-size: 3.5rem; font-weight: 800; color: #111; margin: 0; }
-        .lunar-y { color: var(--red); font-size: 1.5rem; margin-top: 5px; }
+        .lunar-m { font-size: 3.2rem; font-weight: 800; color: #111; margin: 0; }
+        .lunar-y { color: var(--red); font-size: 1.4rem; margin-top: 2px; }
         
-        .slot-ui { background: #f9f9f9; padding: 12px; border-radius: 18px; color: #777; font-size: 1.2rem; border: 1px solid #f0f0f0; }
-        .cd-line { border-top: 1px dashed #eee; padding-top: 15px; color: #555; font-size: 1.1rem; }
-        .cd-n { color: var(--red); font-size: 2.2rem; font-weight: bold; }
+        .slot-ui { background: #f9f9f9; padding: 12px; border-radius: 15px; color: #777; font-size: 1.1rem; border: 1px solid #f0f0f0; }
+        .cd-ui { border-top: 1px dashed #eee; padding-top: 15px; color: #555; font-size: 1rem; }
+        .cd-n { color: var(--red); font-size: 2rem; font-weight: bold; }
 
-        .btn-ui {
-            width: 100%; padding: 18px; border: 1px solid #eee; 
-            background: white; border-radius: 22px; font-size: 1.25rem;
-            color: var(--red); cursor: pointer;
+        .btn-call {
+            width: 100%; padding: 16px; border: 1px solid #eee; 
+            background: white; border-radius: 20px; font-size: 1.2rem;
+            color: var(--red); cursor: pointer; margin-top: 10px;
         }
 
-        /* 弹窗优化：增加留白，解决挤压感 */
-        #pop-mask { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.45); z-index:100; backdrop-filter:blur(5px); }
-        #pop-box { 
-            display: none; position: fixed; top:50%; left:50%; transform:translate(-50%,-50%); 
-            z-index:101; background:white; width:85%; max-width:330px; 
-            border-radius: 35px; padding: 40px 30px; box-shadow:0 30px 60px rgba(0,0,0,0.2); 
+        /* 下方嵌入式详情区：还原 image_76264e 的风格 */
+        #calendar-area {
+            display: none; width: 100%; max-width: 360px;
+            background: white; margin-top: 15px; border-radius: 30px;
+            padding: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.04);
+            animation: slideDown 0.3s ease-out;
         }
-        .pop-t { color: var(--red); font-size: 1.6rem; font-weight: bold; margin-bottom: 25px; text-align: center; }
-        .pop-c { text-align: left; line-height: 2.4; color: #333; font-size: 1.15rem; margin-bottom: 30px; }
+        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .detail-item { line-height: 2.2; color: #333; font-size: 1.05rem; text-align: left; }
+        .detail-item b { color: var(--red); margin-right: 5px; }
     </style>
 </head>
 <body>
 
     <div class="main-card">
-        <div class="date-top">
-            <span id="d-v">2026年3月27日 礼拜五</span>
-            <span class="btn-trad">轉繁</span>
+        <div class="top-txt">
+            <span id="cur-date">2026年3月27日 礼拜五</span>
+            <span class="btn-t">轉繁</span>
         </div>
-        <div class="clock-val" id="t-v">00:00:00</div>
+        <div class="big-time" id="cur-time">00:00:00</div>
         <div class="tag-term">今日节气：春分</div>
         <div>
-            <div class="lunar-m">二月初九</div>
-            <div class="lunar-y">丙午马年</div>
+            <div class="lunar-m" id="l-m">二月初九</div>
+            <div class="lunar-y" id="l-y">丙午马年</div>
         </div>
-        <div class="slot-ui">当前时辰：午时</div>
-        <div class="cd-line">距离 <b>清明节 (5/4)</b> 还有 <span class="cd-n" id="c-v">9</span> 天</div>
-        <button class="btn-ui" onclick="doOpen()">查看月历</button>
+        <div class="slot-ui" id="s-v">当前时辰：午时</div>
+        <div class="cd-ui">距离 <b>清明节 (5/4)</b> 还有 <span class="cd-n" id="c-v">9</span> 天</div>
+        <button class="btn-call" id="toggle-btn" onclick="toggleCalendar()">查看月历</button>
     </div>
 
-    <div id="pop-mask" onclick="doClose()"></div>
-    <div id="pop-box">
-        <div class="pop-t">月历详情</div>
-        <div id="pop-res" class="pop-c"></div>
-        <button class="btn-ui" onclick="doClose()">返回主界面</button>
+    <div id="calendar-area">
+        <div id="calendar-content" class="detail-item"></div>
     </div>
 
     <script>
-        function doOpen() {
-            try {
+        function toggleCalendar() {
+            const area = document.getElementById('calendar-area');
+            const btn = document.getElementById('toggle-btn');
+            
+            if (area.style.display === 'block') {
+                area.style.display = 'none';
+                btn.innerText = '查看月历';
+            } else {
                 const l = Lunar.fromDate(new Date());
-                // 核心修复：改用 getDayYi() 和 getDayJi()
-                const yiList = l.getDayYi(); 
-                const jiList = l.getDayJi();
-
-                document.getElementById('pop-res').innerHTML = `
-                    <b>农历：</b>${l.getMonthInChinese()}月${l.getDayInChinese()}<br>
+                // 维持已修复的正确 API：getDayYi / getDayJi
+                document.getElementById('calendar-content').innerHTML = `
+                    <div style="text-align:center; font-weight:bold; color:var(--red); margin-bottom:15px; font-size:1.2rem;">今日万年历</div>
                     <b>干支：</b>${l.getYearInGanZhi()}年 ${l.getMonthInGanZhi()}月 ${l.getDayInGanZhi()}日<br>
-                    <b>宜：</b>${yiList.slice(0, 3).join(' ')}<br>
-                    <b>忌：</b>${jiList.slice(0, 3).join(' ')}
+                    <b>五行：</b>${l.getYearNaYin()}<br>
+                    <b>宜：</b>${l.getDayYi().slice(0, 5).join(' ')}<br>
+                    <b>忌：</b>${l.getDayJi().slice(0, 5).join(' ')}
                 `;
-                document.getElementById('pop-mask').style.display = 'block';
-                document.getElementById('pop-box').style.display = 'block';
-            } catch (err) {
-                console.error("弹窗报错:", err);
+                area.style.display = 'block';
+                btn.innerText = '隐藏月历';
+                // 自动滚动到底部以便查看
+                window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
             }
         }
 
-        function doClose() {
-            document.getElementById('pop-mask').style.display = 'none';
-            document.getElementById('pop-box').style.display = 'none';
-        }
-
-        function tick() {
+        function run() {
             const now = new Date();
-            document.getElementById('t-v').innerText = now.toLocaleTimeString('zh-CN', { hour12: false });
+            document.getElementById('cur-time').innerText = now.toLocaleTimeString('zh-CN', { hour12: false });
             
             const target = new Date(2026, 3, 5); 
             const diff = Math.ceil((target - now) / (1000 * 60 * 60 * 24));
             document.getElementById('c-v').innerText = diff > 0 ? diff : 0;
         }
-
-        setInterval(tick, 1000);
-        tick();
+        setInterval(run, 1000);
+        run();
     </script>
 </body>
 </html>
