@@ -28,7 +28,7 @@
             --shadow: rgba(0,0,0,0.08);
         }
 
-        /* 强制深色模式类（由 JS 触发） */
+        /* 深色模式类 */
         [data-theme='dark'] {
             --bg-gray: #121212;
             --card-bg: #1e1e1e;
@@ -43,7 +43,7 @@
             --shadow: rgba(0,0,0,0.4);
         }
 
-        /* 自动媒体查询：如果用户没手动选过，则跟随系统 */
+        /* 自动适配系统深色模式 */
         @media (prefers-color-scheme: dark) {
             :root:not([data-theme='light']) {
                 --bg-gray: #121212;
@@ -60,37 +60,40 @@
             }
         }
 
-        body { background-color: var(--bg-gray); font-family: sans-serif; display: flex; flex-direction: column; align-items: center; padding: 15px 0; color: var(--text-main); transition: background 0.3s; }
-        .card { background: var(--card-bg); padding: 25px 20px; border-radius: 20px; box-shadow: 0 10px 30px var(--shadow); width: 340px; text-align: center; border-top: 6px solid var(--main-red); position: relative; box-sizing: border-box; transition: background 0.3s; }
+        body { background-color: var(--bg-gray); font-family: "Microsoft YaHei", sans-serif; display: flex; flex-direction: column; align-items: center; padding: 15px 0; color: var(--text-main); transition: all 0.3s; margin: 0; }
+        .card { background: var(--card-bg); padding: 25px 20px; border-radius: 20px; box-shadow: 0 10px 30px var(--shadow); width: 340px; text-align: center; border-top: 6px solid var(--main-red); position: relative; box-sizing: border-box; }
         
         .top-row { display: flex; align-items: center; justify-content: center; position: relative; width: 100%; height: 32px; margin-bottom: 12px; }
-        .solar-date { color: var(--text-sec); font-size: 1.05em; margin: 0; }
+        .solar-date { color: var(--text-sec); font-size: 1.05em; margin: 0; font-weight: 500; }
         
-        /* 顶部按钮通用样式 */
+        /* 顶部功能按钮 */
         .top-btn { position: absolute; top: 50%; transform: translateY(-50%); font-size: 0.9em; font-weight: bold; width: 32px; height: 32px; background-color: var(--btn-bg); border: 1px solid var(--btn-border); border-radius: 50%; color: var(--fest-red); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
         .lang-btn { right: 0; }
         .theme-btn { left: 0; }
 
-        .time { font-size: 2.8em; font-weight: bold; color: var(--main-red); margin: 5px 0; font-variant-numeric: tabular-nums; }
+        .time { font-size: 2.8em; font-weight: bold; color: var(--main-red); margin: 5px 0; font-variant-numeric: tabular-nums; line-height: 1.1; }
         .jieqi-tag { display: inline-block; color: var(--fest-red); padding: 2px 14px; border-radius: 50px; font-size: 0.9em; margin: 10px 0; min-height: 24px; background: var(--btn-bg); border: 1px solid var(--btn-border); font-weight: bold; }
         
         .lunar-main { font-size: 2.4em; font-weight: bold; margin: 5px 0; color: var(--text-main); }
         .gz-text { color: var(--main-red); font-weight: bold; font-size: 1.15em; margin-bottom: 4px; }
-        .gz-detail { color: var(--text-sec); font-size: 0.85em; margin-bottom: 12px; }
+        .gz-detail { color: var(--text-sec); font-size: 0.85em; margin-bottom: 12px; letter-spacing: 0.5px; }
         .shichen-box { margin: 10px 0; background: var(--shichen-bg); padding: 8px; border-radius: 8px; color: var(--text-sec); font-size: 0.95em; border: 1px solid var(--line-color); }
         
         .countdown { margin: 15px 0; padding-top: 15px; border-top: 1px dashed var(--line-color); color: var(--text-sec); font-size: 0.95em; }
         .days { color: var(--main-red); font-size: 1.8em; font-weight: bold; }
         
-        .cal-btn { background: var(--card-bg); color: var(--main-red); border: 1px solid var(--line-color); padding: 10px; border-radius: 12px; cursor: pointer; font-size: 1em; width: 100%; margin-top: 10px; font-weight: bold; }
+        /* 底部操作区：解决全屏模式无法分享的问题 */
+        .action-row { display: flex; gap: 10px; margin-top: 15px; width: 100%; }
+        .action-btn { flex: 1; background: var(--card-bg); color: var(--main-red); border: 1px solid var(--line-color); padding: 12px; border-radius: 12px; cursor: pointer; font-size: 0.95em; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 5px; }
+        .action-btn:active { background: var(--btn-bg); }
         
         .calendar-wrapper { display: none; background: var(--card-bg); width: 340px; border-radius: 20px; padding: 15px 0; box-shadow: 0 10px 25px var(--shadow); margin-top: 10px; border: 1px solid var(--line-color); }
         .calendar-wrapper.show { display: block; }
         .nav-btn { background: none; border: none; color: var(--main-red); font-size: 1.2em; cursor: pointer; font-weight: bold; padding: 5px 15px; }
         
         table { width: 95%; margin: 0 auto; border-collapse: collapse; }
-        th { color: var(--text-sec); padding-bottom: 8px; font-size: 0.8em; }
-        td { height: 50px; text-align: center; border-radius: 8px; vertical-align: middle; }
+        th { color: var(--text-sec); padding-bottom: 8px; font-size: 0.85em; font-weight: normal; }
+        td { height: 50px; text-align: center; border-radius: 8px; vertical-align: middle; position: relative; }
         .cur-day { background: var(--main-red) !important; color: #fff !important; }
         .is-fest { color: var(--fest-red) !important; font-weight: bold; }
     </style>
@@ -99,9 +102,9 @@
 
 <div class="card">
     <div class="top-row">
-        <div class="top-btn theme-btn" id="themeBtn" onclick="toggleTheme()">🌙</div>
+        <div class="top-btn theme-btn" id="themeBtn" title="切换深色模式" onclick="toggleTheme()">🌙</div>
         <div id="solar-date" class="solar-date">---</div>
-        <div class="top-btn lang-btn" id="langBtn" onclick="toggleLang()">繁</div>
+        <div class="top-btn lang-btn" id="langBtn" title="繁简转换" onclick="toggleLang()">繁</div>
     </div>
     <div id="clock" class="time">00:00:00</div>
     <div id="jieqi-tag" class="jieqi-tag">農曆</div>
@@ -113,13 +116,17 @@
         <span id="lbl-dist">距離</span> <span id="fest-name" style="color:var(--text-main); font-weight:bold;">---</span> <span id="lbl-remain">還有</span>
         <span id="fest-days" class="days">0</span> <span id="lbl-day">天</span>
     </div>
-    <button class="cal-btn" id="toggleBtn" onclick="toggleCalendar()">查看月曆</button>
+
+    <div class="action-row">
+        <button class="action-btn" id="toggleBtn" onclick="toggleCalendar()">🗓️ <span id="btn-text">月曆</span></button>
+        <button class="action-btn" onclick="shareApp()">📤 分享</button>
+    </div>
 </div>
 
 <div class="calendar-wrapper" id="calWrapper">
     <div style="display:flex; justify-content:space-between; align-items:center; width:90%; margin:0 auto 10px;">
         <button class="nav-btn" onclick="changeMonth(-1)">&lt;</button>
-        <h4 id="cal-title" style="margin: 0;">---</h4>
+        <h4 id="cal-title" style="margin: 0; color:var(--text-main);">---</h4>
         <button class="nav-btn" onclick="changeMonth(1)">&gt;</button>
     </div>
     <table>
@@ -129,7 +136,7 @@
 </div>
 
 <script>
-// 初始化深色模式
+// 1. 深色模式初始化与切换
 const savedTheme = localStorage.getItem('theme');
 if (savedTheme) {
     document.documentElement.setAttribute('data-theme', savedTheme);
@@ -144,6 +151,20 @@ function toggleTheme() {
     document.getElementById('themeBtn').innerText = targetTheme === 'dark' ? "☀️" : "🌙";
 }
 
+// 2. 原生分享功能 (解决 Android PWA 全屏无菜单问题)
+function shareApp() {
+    if (navigator.share) {
+        navigator.share({
+            title: '天干地支农历万年历',
+            text: '发现一个超棒的农历 PWA，支持干支、节气和深色模式！',
+            url: 'https://ytlim1.github.io/ChineseClockCalendar/'
+        }).catch(err => console.log('分享失败:', err));
+    } else {
+        alert("请手动复制地址分享：https://ytlim1.github.io/ChineseClockCalendar/");
+    }
+}
+
+// 3. Service Worker 注册
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW Error:', err));
@@ -153,9 +174,10 @@ if ('serviceWorker' in navigator) {
 let viewDate = new Date(); 
 let isTrad = false;
 
+// 4. 繁简字典 (已修正 農曆、農、狗)
 const dict = {
-    "S": "农历,农,查看月历,隐藏月历,距离,还有,天,今日节气,当前时辰,礼拜,春节,端午节,中秋节,清明节,冬至,立春,雨水,惊蛰,春分,清明,谷雨,立夏,小满,芒种,夏至,小暑,大暑,立秋,处暑,白露,秋分,寒露,霜降,立冬,小雪,大雪,冬至,小寒,大寒,正月,二月,三月,四月,五月,六月,七月,八月,九月,十月,冬月,腊月,鼠,牛,虎,兔,龙,蛇,马,羊,猴,鸡,狗,猪,甲,乙,丙,丁,戊,己,庚,辛,壬,癸,子,丑,寅,卯,辰,巳,午,未,申,酉,戌,亥,年,月,日,历,时,钟",
-    "T": "農曆,農,查看月曆,隱藏月曆,距離,還有,天,今日節氣,當前時辰,禮拜,春節,端午節,中秋節,清明節,冬至,立春,雨水,驚蟄,春分,清明,穀雨,立夏,小滿,芒種,夏至,小暑,大暑,立秋,處暑,白露,秋分,寒露,霜降,立冬,小雪,大雪,冬至,小寒,大寒,正月,二月,三月,四月,五月,六月,七月,八月,九月,十月,冬月,臘月,鼠,牛,虎,兔,龍,蛇,馬,羊,猴,雞,狗,豬,甲,乙,丙,丁,戊,己,庚,辛,壬,癸,子,丑,寅,卯,辰,巳,午,未,申,酉,戌,亥,年,月,日,曆,時,鐘"
+    "S": "农历,农,查看月历,隐藏月历,距离,还有,天,今日节气,当前时辰,礼拜,春节,端午节,中秋节,清明节,冬至,立春,雨水,惊蛰,春分,清明,谷雨,立夏,小满,芒种,夏至,小暑,大暑,立秋,处暑,白露,秋分,寒露,霜降,立冬,小雪,大雪,冬至,小寒,大寒,正月,二月,三月,四月,五月,六月,七月,八月,九月,十月,冬月,腊月,鼠,牛,虎,兔,龙,蛇,马,羊,猴,鸡,狗,猪,甲,乙,丙,丁,戊,己,庚,辛,壬,癸,子,丑,寅,卯,辰,巳,午,未,申,酉,戌,亥,年,月,日,历,时,钟,月历",
+    "T": "農曆,農,查看月曆,隱藏月曆,距離,還有,天,今日節氣,當前時辰,禮拜,春節,端午節,中秋節,清明節,冬至,立春,雨水,驚蟄,春分,清明,穀雨,立夏,小滿,芒種,夏至,小暑,大暑,立秋,處暑,白露,秋分,寒露,霜降,立冬,小雪,大雪,冬至,小寒,大寒,正月,二月,三月,四月,五月,六月,七月,八月,九月,十月,冬月,臘月,鼠,牛,虎,兔,龍,蛇,馬,羊,猴,雞,狗,豬,甲,乙,丙,丁,戊,己,庚,辛,壬,癸,子,丑,寅,卯,辰,巳,午,未,申,酉,戌,亥,年,月,日,曆,時,鐘,月曆"
 };
 
 function s2t(text) {
@@ -198,7 +220,7 @@ function update() {
     document.getElementById('lbl-dist').innerText = s2t("距离");
     document.getElementById('lbl-remain').innerText = s2t("还有");
     document.getElementById('lbl-day').innerText = s2t("天");
-    document.getElementById('toggleBtn').innerText = document.getElementById('calWrapper').classList.contains('show') ? s2t("隐藏月历") : s2t("查看月历");
+    document.getElementById('btn-text').innerText = s2t("月历");
 
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     let targets = [];
@@ -228,7 +250,7 @@ function renderCalendar(date) {
         const jq = ld.getJieQi();
         const isToday = (d===now.getDate() && month===now.getMonth() && year===now.getFullYear()) ? "cur-day" : "";
         const isF = (jq==="冬至" || jq==="清明" || ld.getDayInChinese()==="初一") ? "is-fest" : "";
-        html += `<td class="${isToday}"><span>${d}</span><br><small class="${isF}" style="font-size:0.7em">${s2t(jq || ld.getDayInChinese())}</small></td>`;
+        html += `<td class="${isToday}"><span style="font-weight:bold">${d}</span><br><small class="${isF}" style="font-size:0.75em">${s2t(jq || ld.getDayInChinese())}</small></td>`;
     }
     document.getElementById('calendar-body').innerHTML = html + '</tr>';
 }
