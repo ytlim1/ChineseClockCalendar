@@ -9,6 +9,7 @@
     <style>
         :root { --primary: #b71c1c; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        
         body {
             margin: 0; background-color: #f6f6f6;
             display: flex; justify-content: center; align-items: center;
@@ -39,16 +40,33 @@
         .lunar-main { font-size: 3.5rem; font-weight: 800; margin: 0; }
         .lunar-year { color: var(--primary); font-size: 1.5rem; margin-bottom: 25px; }
         .time-box { background: #f9f9f9; padding: 15px; border-radius: 15px; color: #666; font-size: 1.2rem; margin-bottom: 25px; }
-        .action-btn { width: 100%; padding: 18px; border: 1px solid #eee; background: white; border-radius: 15px; font-size: 1.2rem; color: var(--primary); }
+        
+        /* 距离清明节样式 */
+        .countdown { font-size: 1.1rem; color: #555; margin-bottom: 20px; }
+        .cd-num { color: var(--primary); font-size: 1.8rem; font-weight: bold; }
 
-        /* 分享按钮 */
+        .action-btn { 
+            width: 100%; padding: 18px; border: 1px solid #eee; 
+            background: white; border-radius: 15px; 
+            font-size: 1.2rem; color: var(--primary); cursor: pointer;
+        }
+
+        /* 右下角分享按钮 */
         .fab { position: fixed; bottom: 35px; right: 35px; width: 65px; height: 65px; background: var(--primary); border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 10px 25px rgba(183, 28, 28, 0.3); }
 
-        /* 核心修复：确保遮罩层默认隐藏，且只有显示时才会有暗色效果 */
-        #overlay {
-            display: none; /* 必须默认隐藏 */
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5); z-index: 100;
+        /* 核心修复：弹窗容器 */
+        #calendar-modal {
+            display: none; position: fixed; top: 0; left: 0; 
+            width: 100%; height: 100%; z-index: 1000;
+        }
+        .modal-overlay {
+            position: absolute; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(3px);
+        }
+        .modal-content {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: white; width: 85%; max-width: 340px; border-radius: 30px;
+            padding: 30px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.2);
         }
     </style>
 </head>
@@ -62,15 +80,22 @@
         <div class="lunar-main">二月初九</div>
         <div class="lunar-year">丙午马年</div>
         <div class="time-box">当前时辰：午时</div>
-        <div style="font-size: 1.1rem; color: #555; margin-bottom: 20px;">
-            距离 <b>清明节 (5/4)</b> 还有 <span style="color:var(--primary); font-size:1.8rem; font-weight:bold;">9</span> 天
+        <div class="countdown">
+            距离 <b>清明节 (5/4)</b> 还有 <span class="cd-num">9</span> 天
         </div>
-        <button class="action-btn" onclick="openDetails()">查看月历</button>
+        <button class="action-btn" onclick="openCalendar()">查看月历</button>
     </div>
 
     <div class="fab" onclick="shareApp()"><svg width="28" height="28" viewBox="0 0 24 24" fill="white"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92c0-1.61-1.31-2.92-2.92-2.92z"/></svg></div>
 
-    <div id="overlay" onclick="closeDetails()"></div>
+    <div id="calendar-modal">
+        <div class="modal-overlay" onclick="closeCalendar()"></div>
+        <div class="modal-content">
+            <h3 style="color:var(--primary)">月历详情</h3>
+            <div id="calendar-data" style="margin: 20px 0; line-height: 1.6;">正在加载...</div>
+            <button class="action-btn" onclick="closeCalendar()">返回主界面</button>
+        </div>
+    </div>
 
     <script>
         function updateClock() {
@@ -78,24 +103,24 @@
         }
         setInterval(updateClock, 1000);
 
-        function openDetails() {
-            // 这里可以添加您真正的月历弹窗逻辑
-            document.getElementById('overlay').style.display = 'block';
+        function openCalendar() {
+            document.getElementById('calendar-modal').style.display = 'block';
+            document.getElementById('calendar-data').innerHTML = "<b>农历：</b>二月初九<br><b>干支：</b>丙午年 辛卯月 戊子日";
         }
 
-        function closeDetails() {
-            document.getElementById('overlay').style.display = 'none';
+        function closeCalendar() {
+            document.getElementById('calendar-modal').style.display = 'none';
+            // 关键：点击返回时清理 URL 参数，确保回到干净的主界面
+            if (window.history.replaceState) {
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
         }
 
-        // 核心修复逻辑：处理快捷方式动作
+        // 处理 PWA 快捷方式入口
         function handlePwaActions() {
             const params = new URLSearchParams(window.location.search);
             if (params.get('action') === 'today') {
-                openDetails();
-                // 立即清理 URL 参数，防止刷新时再次被锁住
-                if (window.history.replaceState) {
-                    window.history.replaceState({}, document.title, window.location.pathname);
-                }
+                openCalendar();
             }
         }
 
@@ -105,7 +130,7 @@
 
         window.onload = () => {
             updateClock();
-            handlePwaActions(); // 仅在需要时触发 openDetails
+            handlePwaActions(); 
             if ('serviceWorker' in navigator) { navigator.serviceWorker.register('./sw.js'); }
         };
     </script>
