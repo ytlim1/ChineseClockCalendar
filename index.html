@@ -9,113 +9,96 @@
     <style>
         :root { --red: #b71c1c; --bg: #f6f6f6; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        
-        body {
-            margin: 0; background-color: var(--bg);
-            display: flex; flex-direction: column; align-items: center;
-            min-height: 100vh; font-family: -apple-system, sans-serif;
-            padding: 20px;
-        }
+        body { margin: 0; background-color: var(--bg); display: flex; flex-direction: column; align-items: center; min-height: 100vh; font-family: -apple-system, sans-serif; padding: 20px; }
 
-        /* 还原 25 日截图的高级感卡片比例 */
-        .main-card {
-            background: white; width: 100%; max-width: 360px;
-            border-radius: 40px; border-top: 10px solid var(--red);
-            box-shadow: 0 15px 35px rgba(0,0,0,0.05);
-            padding: 35px 25px; text-align: center;
-            display: flex; flex-direction: column; gap: 15px;
-            transition: all 0.3s ease;
-        }
-
-        .top-txt { color: #999; font-size: 1rem; display: flex; justify-content: center; gap: 8px; }
-        .btn-t { padding: 2px 8px; border: 1px solid #ffcdd2; color: var(--red); border-radius: 6px; font-size: 0.8rem; }
-        
-        .big-time { font-size: 4rem; font-weight: 700; color: var(--red); margin: 5px 0; font-variant-numeric: tabular-nums; }
-        .tag-term { display: inline-block; padding: 4px 15px; border: 1px solid #ffcdd2; color: var(--red); border-radius: 20px; font-size: 0.9rem; align-self: center; }
-        
+        .main-card { background: white; width: 100%; max-width: 360px; border-radius: 40px; border-top: 10px solid var(--red); box-shadow: 0 15px 35px rgba(0,0,0,0.05); padding: 35px 25px; text-align: center; }
+        .big-time { font-size: 4rem; font-weight: 700; color: var(--red); margin: 15px 0; font-variant-numeric: tabular-nums; }
         .lunar-m { font-size: 3.2rem; font-weight: 800; color: #111; margin: 0; }
-        .lunar-y { color: var(--red); font-size: 1.4rem; margin-top: 2px; }
-        
-        .slot-ui { background: #f9f9f9; padding: 12px; border-radius: 15px; color: #777; font-size: 1.1rem; border: 1px solid #f0f0f0; }
-        .cd-ui { border-top: 1px dashed #eee; padding-top: 15px; color: #555; font-size: 1rem; }
-        .cd-n { color: var(--red); font-size: 2rem; font-weight: bold; }
+        .btn-call { width: 100%; padding: 16px; border: 1px solid #eee; background: white; border-radius: 20px; font-size: 1.2rem; color: var(--red); cursor: pointer; margin-top: 20px; }
 
-        .btn-call {
-            width: 100%; padding: 16px; border: 1px solid #eee; 
-            background: white; border-radius: 20px; font-size: 1.2rem;
-            color: var(--red); cursor: pointer; margin-top: 10px;
-        }
-
-        /* 下方嵌入式详情区：还原 image_76264e 的风格 */
-        #calendar-area {
-            display: none; width: 100%; max-width: 360px;
-            background: white; margin-top: 15px; border-radius: 30px;
-            padding: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.04);
-            animation: slideDown 0.3s ease-out;
-        }
-        @keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .detail-item { line-height: 2.2; color: #333; font-size: 1.05rem; text-align: left; }
-        .detail-item b { color: var(--red); margin-right: 5px; }
+        /* 月历矩阵布局：还原 image_76264e */
+        #calendar-area { display: none; width: 100%; max-width: 360px; background: white; margin-top: 15px; border-radius: 30px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.04); }
+        .cal-header { display: flex; justify-content: space-between; align-items: center; font-weight: bold; margin-bottom: 15px; color: #333; }
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align: center; }
+        .weekday { font-size: 0.8rem; color: #999; padding-bottom: 5px; }
+        .day-cell { padding: 8px 0; border-radius: 10px; font-size: 0.9rem; position: relative; display: flex; flex-direction: column; align-items: center; }
+        .day-cell b { font-size: 1rem; }
+        .day-cell i { font-style: normal; font-size: 0.65rem; color: #999; }
+        .day-cell.today { background: var(--red); color: white; }
+        .day-cell.today i { color: #ffcdd2; }
     </style>
 </head>
 <body>
 
     <div class="main-card">
-        <div class="top-txt">
-            <span id="cur-date">2026年3月27日 礼拜五</span>
-            <span class="btn-t">轉繁</span>
-        </div>
-        <div class="big-time" id="cur-time">00:00:00</div>
-        <div class="tag-term">今日节气：春分</div>
-        <div>
-            <div class="lunar-m" id="l-m">二月初九</div>
-            <div class="lunar-y" id="l-y">丙午马年</div>
-        </div>
-        <div class="slot-ui" id="s-v">当前时辰：午时</div>
-        <div class="cd-ui">距离 <b>清明节 (5/4)</b> 还有 <span class="cd-n" id="c-v">9</span> 天</div>
+        <div style="color:#999;">2026年3月27日 礼拜五</div>
+        <div class="big-time" id="clock">00:00:00</div>
+        <div class="lunar-m">二月初九</div>
+        <div style="color:var(--red); font-size:1.4rem;">丙午马年</div>
         <button class="btn-call" id="toggle-btn" onclick="toggleCalendar()">查看月历</button>
     </div>
 
     <div id="calendar-area">
-        <div id="calendar-content" class="detail-item"></div>
+        <div class="cal-header">
+            <span style="color:var(--red); cursor:pointer;">&lt;</span>
+            <span>2026 年 3 月</span>
+            <span style="color:var(--red); cursor:pointer;">&gt;</span>
+        </div>
+        <div class="cal-grid" id="grid">
+            <div class="weekday">日</div><div class="weekday">一</div><div class="weekday">二</div>
+            <div class="weekday">三</div><div class="weekday">四</div><div class="weekday">五</div><div class="weekday">六</div>
+            </div>
     </div>
 
     <script>
         function toggleCalendar() {
             const area = document.getElementById('calendar-area');
             const btn = document.getElementById('toggle-btn');
-            
             if (area.style.display === 'block') {
                 area.style.display = 'none';
                 btn.innerText = '查看月历';
             } else {
-                const l = Lunar.fromDate(new Date());
-                // 维持已修复的正确 API：getDayYi / getDayJi
-                document.getElementById('calendar-content').innerHTML = `
-                    <div style="text-align:center; font-weight:bold; color:var(--red); margin-bottom:15px; font-size:1.2rem;">今日万年历</div>
-                    <b>干支：</b>${l.getYearInGanZhi()}年 ${l.getMonthInGanZhi()}月 ${l.getDayInGanZhi()}日<br>
-                    <b>五行：</b>${l.getYearNaYin()}<br>
-                    <b>宜：</b>${l.getDayYi().slice(0, 5).join(' ')}<br>
-                    <b>忌：</b>${l.getDayJi().slice(0, 5).join(' ')}
-                `;
+                renderGrid();
                 area.style.display = 'block';
                 btn.innerText = '隐藏月历';
-                // 自动滚动到底部以便查看
-                window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
             }
         }
 
-        function run() {
-            const now = new Date();
-            document.getElementById('cur-time').innerText = now.toLocaleTimeString('zh-CN', { hour12: false });
-            
-            const target = new Date(2026, 3, 5); 
-            const diff = Math.ceil((target - now) / (1000 * 60 * 60 * 24));
-            document.getElementById('c-v').innerText = diff > 0 ? diff : 0;
+        function renderGrid() {
+            const grid = document.getElementById('grid');
+            // 保留周标题，清除旧日期
+            const weekdays = grid.querySelectorAll('.weekday');
+            grid.innerHTML = '';
+            weekdays.forEach(w => grid.appendChild(w));
+
+            const year = 2026, month = 3; 
+            const firstDay = new Date(year, month - 1, 1).getDay();
+            const daysInMonth = new Date(year, month, 0).getDate();
+
+            // 填充月初空白
+            for (let i = 0; i < firstDay; i++) {
+                grid.appendChild(document.createElement('div'));
+            }
+
+            // 填充日期
+            for (let d = 1; d <= daysInMonth; d++) {
+                const l = Solar.fromYmd(year, month, d).getLunar();
+                const cell = document.createElement('div');
+                cell.className = 'day-cell' + (d === 27 ? ' today' : '');
+                
+                // 农历逻辑：如果有节日显示节日，否则显示初几
+                let lunarShow = l.getDayInChinese();
+                if (l.getFestivals().length > 0) lunarShow = l.getFestivals()[0].substring(0,2);
+                if (l.getJieQi()) lunarShow = l.getJieQi();
+
+                cell.innerHTML = `<b>${d}</b><i>${lunarShow}</i>`;
+                grid.appendChild(cell);
+            }
         }
-        setInterval(run, 1000);
-        run();
+
+        setInterval(() => {
+            document.getElementById('clock').innerText = new Date().toLocaleTimeString('zh-CN', { hour12: false });
+        }, 1000);
     </script>
 </body>
 </html>
