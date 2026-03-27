@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>万年历 Lunar Clock</title>
+    <title>农历万年历</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#b71c1c">
+    <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.min.js"></script>
     <style>
         :root { --primary: #b71c1c; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -13,126 +14,91 @@
         body {
             margin: 0; background-color: #f6f6f6;
             display: flex; justify-content: center; align-items: center;
-            min-height: 100vh; font-family: -apple-system, sans-serif;
+            height: 100vh; font-family: -apple-system, sans-serif;
+            overflow: hidden; /* 防止页面上下滚动 */
         }
 
-        /* 1:1 还原您的精致卡片 UI */
+        /* 修复 UI 过大：加入 max-height 和 padding 控制 */
         .card {
-            background: white; width: 92%; max-width: 380px;
+            background: white; width: 90%; max-width: 360px;
+            max-height: 85vh; /* 限制高度，防止贴边 */
             border-radius: 40px; border-top: 10px solid var(--primary);
-            box-shadow: 0 25px 50px rgba(0,0,0,0.06);
-            padding: 45px 25px 35px; text-align: center; position: relative;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+            padding: 35px 25px; text-align: center;
+            display: flex; flex-direction: column; justify-content: space-around;
         }
 
-        .trad-btn {
-            position: absolute; top: 40px; right: 30px;
-            padding: 4px 12px; border: 1px solid #ffcdd2;
-            color: var(--primary); border-radius: 10px; font-size: 0.9rem;
+        .top-info { color: #999; font-size: 1.1rem; margin-bottom: 5px; }
+        .clock-num { font-size: 4.2rem; font-weight: 700; color: var(--primary); margin: 5px 0; font-variant-numeric: tabular-nums; }
+        .term-tag { display: inline-block; padding: 4px 18px; border: 1px solid #ffcdd2; color: var(--primary); border-radius: 20px; font-size: 1rem; align-self: center; }
+        .lunar-main { font-size: 3.5rem; font-weight: 800; margin: 5px 0; color: #1a1a1a; }
+        .lunar-year { color: var(--primary); font-size: 1.5rem; margin-bottom: 15px; }
+        .slot-box { background: #f9f9f9; padding: 12px; border-radius: 15px; color: #777; font-size: 1.2rem; border: 1px solid #f0f0f0; }
+        .cd-row { border-top: 1px dashed #eee; padding-top: 15px; color: #555; font-size: 1.1rem; margin-top: 10px; }
+        .cd-bold { color: var(--primary); font-size: 2rem; font-weight: bold; }
+
+        .btn-open {
+            width: 100%; padding: 16px; margin-top: 15px;
+            border: 1px solid #eee; background: white;
+            border-radius: 20px; font-size: 1.25rem;
+            color: var(--primary); cursor: pointer;
+            z-index: 10; /* 确保在最上层 */
         }
 
-        .date-line { color: #999; font-size: 1.2rem; margin-bottom: 8px; }
-        .clock { font-size: 5rem; font-weight: 700; color: var(--primary); margin: 10px 0; }
-        .solar-tag {
-            display: inline-block; padding: 6px 20px;
-            border: 1px solid #ffcdd2; color: var(--primary);
-            border-radius: 20px; font-size: 1rem; margin-bottom: 20px;
-        }
-        .lunar-main { font-size: 3.5rem; font-weight: 800; margin: 0; }
-        .lunar-year { color: var(--primary); font-size: 1.5rem; margin-bottom: 25px; }
-        .time-box { background: #f9f9f9; padding: 15px; border-radius: 15px; color: #666; font-size: 1.2rem; margin-bottom: 25px; }
-        
-        /* 距离清明节样式 */
-        .countdown { font-size: 1.1rem; color: #555; margin-bottom: 20px; }
-        .cd-num { color: var(--primary); font-size: 1.8rem; font-weight: bold; }
-
-        .action-btn { 
-            width: 100%; padding: 18px; border: 1px solid #eee; 
-            background: white; border-radius: 15px; 
-            font-size: 1.2rem; color: var(--primary); cursor: pointer;
-        }
-
-        /* 右下角分享按钮 */
-        .fab { position: fixed; bottom: 35px; right: 35px; width: 65px; height: 65px; background: var(--primary); border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 10px 25px rgba(183, 28, 28, 0.3); }
-
-        /* 核心修复：弹窗容器 */
-        #calendar-modal {
-            display: none; position: fixed; top: 0; left: 0; 
-            width: 100%; height: 100%; z-index: 1000;
-        }
-        .modal-overlay {
-            position: absolute; width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.6); backdrop-filter: blur(3px);
-        }
-        .modal-content {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: white; width: 85%; max-width: 340px; border-radius: 30px;
-            padding: 30px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.2);
-        }
+        /* 弹窗样式 */
+        #mask { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.4); z-index:100; backdrop-filter:blur(4px); }
+        #pop-win { display: none; position: fixed; top:50%; left:50%; transform:translate(-50%,-50%); z-index:101; background:white; width:85%; max-width:320px; border-radius:30px; padding:25px; box-shadow:0 20px 40px rgba(0,0,0,0.2); }
     </style>
 </head>
 <body>
 
     <div class="card">
-        <div class="trad-btn">轉繁</div>
-        <div class="date-line">2026年3月27日 礼拜五</div>
-        <div class="clock" id="clock-display">11:05:00</div>
-        <div class="solar-tag">今日节气：春分</div>
-        <div class="lunar-main">二月初九</div>
-        <div class="lunar-year">丙午马年</div>
-        <div class="time-box">当前时辰：午时</div>
-        <div class="countdown">
-            距离 <b>清明节 (5/4)</b> 还有 <span class="cd-num">9</span> 天
-        </div>
-        <button class="action-btn" onclick="openCalendar()">查看月历</button>
+        <div class="top-info" id="d-val">2026年3月27日 礼拜五</div>
+        <div class="clock-num" id="t-val">11:36:37</div>
+        <div class="term-tag">今日节气：春分</div>
+        <div class="lunar-main" id="l-val">二月初九</div>
+        <div class="lunar-year" id="g-val">丙午马年</div>
+        <div class="slot-box" id="s-val">当前时辰：午时</div>
+        <div class="cd-row">距离 <b>清明节 (5/4)</b> 还有 <span class="cd-bold" id="c-val">9</span> 天</div>
+        <button class="btn-open" onclick="openPopup()">查看月历</button>
     </div>
 
-    <div class="fab" onclick="shareApp()"><svg width="28" height="28" viewBox="0 0 24 24" fill="white"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92c0-1.61-1.31-2.92-2.92-2.92z"/></svg></div>
-
-    <div id="calendar-modal">
-        <div class="modal-overlay" onclick="closeCalendar()"></div>
-        <div class="modal-content">
-            <h3 style="color:var(--primary)">月历详情</h3>
-            <div id="calendar-data" style="margin: 20px 0; line-height: 1.6;">正在加载...</div>
-            <button class="action-btn" onclick="closeCalendar()">返回主界面</button>
-        </div>
+    <div id="mask" onclick="closePopup()"></div>
+    <div id="pop-win">
+        <h3 style="color:var(--primary); margin-top:0;">今日详情</h3>
+        <div id="pop-body" style="text-align:left; line-height:1.8; margin-bottom:20px;"></div>
+        <button class="btn-open" onclick="closePopup()">返回</button>
     </div>
 
     <script>
-        function updateClock() {
-            document.getElementById('clock-display').textContent = new Date().toLocaleTimeString('zh-CN', { hour12: false });
-        }
-        setInterval(updateClock, 1000);
-
-        function openCalendar() {
-            document.getElementById('calendar-modal').style.display = 'block';
-            document.getElementById('calendar-data').innerHTML = "<b>农历：</b>二月初九<br><b>干支：</b>丙午年 辛卯月 戊子日";
-        }
-
-        function closeCalendar() {
-            document.getElementById('calendar-modal').style.display = 'none';
-            // 关键：点击返回时清理 URL 参数，确保回到干净的主界面
-            if (window.history.replaceState) {
-                window.history.replaceState({}, document.title, window.location.pathname);
-            }
+        function update() {
+            const now = new Date();
+            const lunar = Lunar.fromDate(now);
+            document.getElementById('t-val').innerText = now.toLocaleTimeString('zh-CN', { hour12: false });
+            
+            const target = new Date(2026, 3, 5); 
+            const diff = Math.ceil((target - now) / (1000 * 60 * 60 * 24));
+            document.getElementById('c-val').innerText = diff > 0 ? diff : 0;
         }
 
-        // 处理 PWA 快捷方式入口
-        function handlePwaActions() {
-            const params = new URLSearchParams(window.location.search);
-            if (params.get('action') === 'today') {
-                openCalendar();
-            }
+        function openPopup() {
+            const l = Lunar.fromDate(new Date());
+            document.getElementById('pop-body').innerHTML = `<b>干支：</b>${l.getYearInGanZhi()}年<br><b>宜：</b>${l.getYi().slice(0,3).join(' ')}<br><b>忌：</b>${l.getJi().slice(0,3).join(' ')}`;
+            document.getElementById('mask').style.display = 'block';
+            document.getElementById('pop-win').style.display = 'block';
         }
 
-        async function shareApp() {
-            if (navigator.share) { await navigator.share({ title: '万年历', url: window.location.href }); }
+        function closePopup() {
+            document.getElementById('mask').style.display = 'none';
+            document.getElementById('pop-win').style.display = 'none';
         }
 
-        window.onload = () => {
-            updateClock();
-            handlePwaActions(); 
-            if ('serviceWorker' in navigator) { navigator.serviceWorker.register('./sw.js'); }
-        };
+        setInterval(update, 1000);
+        update();
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js?v=7');
+        }
     </script>
 </body>
 </html>
