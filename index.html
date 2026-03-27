@@ -7,164 +7,106 @@
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#b71c1c">
     <style>
-        :root { --primary: #b71c1c; --bg: #f9f9f7; }
+        :root { --primary: #b71c1c; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        
         body {
-            margin: 0; background-color: var(--bg);
+            margin: 0; background-color: #f6f6f6;
             display: flex; justify-content: center; align-items: center;
             min-height: 100vh; font-family: -apple-system, sans-serif;
         }
 
-        /* 严格还原您的卡片 UI */
+        /* 1:1 还原您的精致卡片 UI */
         .card {
             background: white; width: 92%; max-width: 380px;
             border-radius: 40px; border-top: 10px solid var(--primary);
             box-shadow: 0 25px 50px rgba(0,0,0,0.06);
-            padding: 45px 25px 30px; text-align: center; position: relative;
+            padding: 45px 25px 35px; text-align: center; position: relative;
         }
 
         .trad-btn {
-            position: absolute; top: 35px; right: 30px;
+            position: absolute; top: 40px; right: 30px;
             padding: 4px 12px; border: 1px solid #ffcdd2;
             color: var(--primary); border-radius: 10px; font-size: 0.9rem;
         }
 
         .date-line { color: #999; font-size: 1.2rem; margin-bottom: 8px; }
-        
-        .clock {
-            font-size: 5rem; font-weight: 700; color: var(--primary);
-            margin: 10px 0; font-variant-numeric: tabular-nums;
-        }
-
+        .clock { font-size: 5rem; font-weight: 700; color: var(--primary); margin: 10px 0; }
         .solar-tag {
-            display: inline-block; padding: 6px 22px;
+            display: inline-block; padding: 6px 20px;
             border: 1px solid #ffcdd2; color: var(--primary);
-            border-radius: 25px; font-size: 1.1rem; margin-bottom: 25px;
+            border-radius: 20px; font-size: 1rem; margin-bottom: 20px;
         }
+        .lunar-main { font-size: 3.5rem; font-weight: 800; margin: 0; }
+        .lunar-year { color: var(--primary); font-size: 1.5rem; margin-bottom: 25px; }
+        .time-box { background: #f9f9f9; padding: 15px; border-radius: 15px; color: #666; font-size: 1.2rem; margin-bottom: 25px; }
+        .action-btn { width: 100%; padding: 18px; border: 1px solid #eee; background: white; border-radius: 15px; font-size: 1.2rem; color: var(--primary); }
 
-        .lunar-main { font-size: 3.8rem; font-weight: 800; margin: 0; color: #1a1a1a; }
-        .lunar-year { color: var(--primary); font-size: 1.6rem; margin: 10px 0 30px; }
+        /* 分享按钮 */
+        .fab { position: fixed; bottom: 35px; right: 35px; width: 65px; height: 65px; background: var(--primary); border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 10px 25px rgba(183, 28, 28, 0.3); }
 
-        .time-slot {
-            background: #fcfcfc; border: 1px solid #f0f0f0;
-            padding: 18px; border-radius: 18px; color: #777;
-            font-size: 1.25rem; margin-bottom: 30px;
-        }
-
-        .countdown-row {
-            border-top: 1px dashed #eee; padding-top: 25px;
-            color: #555; font-size: 1.2rem;
-        }
-        .cd-days { color: var(--primary); font-size: 2.2rem; font-weight: bold; }
-
-        .action-btn {
-            width: 100%; padding: 18px; margin-top: 30px;
-            border: 1px solid #eee; background: white;
-            border-radius: 18px; font-size: 1.3rem;
-            color: var(--primary); cursor: pointer;
-        }
-
-        /* 悬浮分享按钮 */
-        .fab {
-            position: fixed; bottom: 35px; right: 35px;
-            width: 65px; height: 65px; background: var(--primary);
-            border-radius: 50%; display: flex; justify-content: center; align-items: center;
-            box-shadow: 0 12px 30px rgba(183, 28, 28, 0.3);
-        }
-
-        /* 遮罩层 */
+        /* 核心修复：确保遮罩层默认隐藏，且只有显示时才会有暗色效果 */
         #overlay {
-            display: none; position: fixed; top: 0; left: 0;
-            width: 100%; height: 100%; background: rgba(0,0,0,0.4);
-            z-index: 100; backdrop-filter: blur(3px);
+            display: none; /* 必须默认隐藏 */
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); z-index: 100;
         }
     </style>
 </head>
 <body>
 
     <div class="card">
-        <div class="trad-btn" onclick="toggleTrad()">轉繁</div>
-        <div class="date-line" id="date-display">2026年3月27日 礼拜五</div>
+        <div class="trad-btn">轉繁</div>
+        <div class="date-line">2026年3月27日 礼拜五</div>
         <div class="clock" id="clock-display">11:05:00</div>
-        
         <div class="solar-tag">今日节气：春分</div>
-        
-        <div class="lunar-main" id="lunar-display">二月初九</div>
+        <div class="lunar-main">二月初九</div>
         <div class="lunar-year">丙午马年</div>
-
-        <div class="time-slot">当前时辰：午时</div>
-
-        <div class="countdown-row">
-            距离 <b>清明节 (5/4)</b> 还有 <span class="cd-days">9</span> 天
+        <div class="time-box">当前时辰：午时</div>
+        <div style="font-size: 1.1rem; color: #555; margin-bottom: 20px;">
+            距离 <b>清明节 (5/4)</b> 还有 <span style="color:var(--primary); font-size:1.8rem; font-weight:bold;">9</span> 天
         </div>
-
         <button class="action-btn" onclick="openDetails()">查看月历</button>
     </div>
 
-    <div class="fab" onclick="shareApp()">
-        <svg width="28" height="28" viewBox="0 0 24 24" fill="white">
-            <path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92c0-1.61-1.31-2.92-2.92-2.92z"/>
-        </svg>
-    </div>
+    <div class="fab" onclick="shareApp()"><svg width="28" height="28" viewBox="0 0 24 24" fill="white"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7s-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81 1.66 0 3-1.34 3-3s-1.34-3-3-3-3 1.34-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9c-1.66 0-3 1.34-3 3s1.34 3 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.16c-.05.21-.08.43-.08.65 0 1.61 1.31 2.92 2.92 2.92s2.92-1.31 2.92-2.92c0-1.61-1.31-2.92-2.92-2.92z"/></svg></div>
 
     <div id="overlay" onclick="closeDetails()"></div>
 
     <script>
-        // --- 1. 时钟逻辑 (请保留您原本最精准的农历算法) ---
-        function updateUI() {
-            const now = new Date();
-            document.getElementById('clock-display').textContent = now.toLocaleTimeString('zh-CN', { hour12: false });
+        function updateClock() {
+            document.getElementById('clock-display').textContent = new Date().toLocaleTimeString('zh-CN', { hour12: false });
         }
-        setInterval(updateUI, 1000);
+        setInterval(updateClock, 1000);
 
-        // --- 2. 核心修复：清理 URL 参数防止无法返回 ---
-        function handleShortcuts() {
-            const params = new URLSearchParams(window.location.search);
-            const action = params.get('action');
-
-            if (action === 'today') {
-                openDetails(); // 触发您的详情视图
-            }
-
-            // 【关键代码】一旦检测到参数并触发动作，立即抹掉 URL 尾巴
-            if (action && window.history.replaceState) {
-                const cleanUrl = window.location.pathname; 
-                window.history.replaceState({}, document.title, cleanUrl);
-            }
-        }
-
-        // --- 3. 交互函数 ---
         function openDetails() {
+            // 这里可以添加您真正的月历弹窗逻辑
             document.getElementById('overlay').style.display = 'block';
-            console.log("详情已开启，且 URL 已清理。现在返回就是回到 index.html。");
         }
 
         function closeDetails() {
             document.getElementById('overlay').style.display = 'none';
         }
 
-        function toggleTrad() {
-            // 您的简繁转换逻辑
-            alert("正在切换简繁显示...");
+        // 核心修复逻辑：处理快捷方式动作
+        function handlePwaActions() {
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('action') === 'today') {
+                openDetails();
+                // 立即清理 URL 参数，防止刷新时再次被锁住
+                if (window.history.replaceState) {
+                    window.history.replaceState({}, document.title, window.location.pathname);
+                }
+            }
         }
 
         async function shareApp() {
-            if (navigator.share) {
-                try {
-                    await navigator.share({ title: '我的万年历', url: window.location.href });
-                } catch (e) { console.log('分享取消'); }
-            }
+            if (navigator.share) { await navigator.share({ title: '万年历', url: window.location.href }); }
         }
 
-        // 初始化执行
         window.onload = () => {
-            updateUI();
-            handleShortcuts(); // 启动时立即检测并清理参数
-            
-            if ('serviceWorker' in navigator) {
-                navigator.serviceWorker.register('./sw.js');
-            }
+            updateClock();
+            handlePwaActions(); // 仅在需要时触发 openDetails
+            if ('serviceWorker' in navigator) { navigator.serviceWorker.register('./sw.js'); }
         };
     </script>
 </body>
