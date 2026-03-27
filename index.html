@@ -16,7 +16,7 @@
             min-height: 100vh; font-family: -apple-system, sans-serif;
         }
 
-        /* 核心卡片 UI - 严格对应您的截图 */
+        /* 严格还原您的卡片 UI */
         .card {
             background: white; width: 92%; max-width: 380px;
             border-radius: 40px; border-top: 10px solid var(--primary);
@@ -31,6 +31,7 @@
         }
 
         .date-line { color: #999; font-size: 1.2rem; margin-bottom: 8px; }
+        
         .clock {
             font-size: 5rem; font-weight: 700; color: var(--primary);
             margin: 10px 0; font-variant-numeric: tabular-nums;
@@ -85,7 +86,7 @@
     <div class="card">
         <div class="trad-btn" onclick="toggleTrad()">轉繁</div>
         <div class="date-line" id="date-display">2026年3月27日 礼拜五</div>
-        <div class="clock" id="clock-display">11:00:00</div>
+        <div class="clock" id="clock-display">11:05:00</div>
         
         <div class="solar-tag">今日节气：春分</div>
         
@@ -110,33 +111,33 @@
     <div id="overlay" onclick="closeDetails()"></div>
 
     <script>
-        // 1. 时钟更新 (此处请保留您原本最精准的农历算法)
+        // --- 1. 时钟逻辑 (请保留您原本最精准的农历算法) ---
         function updateUI() {
             const now = new Date();
             document.getElementById('clock-display').textContent = now.toLocaleTimeString('zh-CN', { hour12: false });
         }
         setInterval(updateUI, 1000);
 
-        // 2. 核心修复：处理快捷方式并清理 URL
+        // --- 2. 核心修复：清理 URL 参数防止无法返回 ---
         function handleShortcuts() {
             const params = new URLSearchParams(window.location.search);
             const action = params.get('action');
 
             if (action === 'today') {
-                openDetails(); // 触发您的详情/月历
+                openDetails(); // 触发您的详情视图
             }
 
-            // 【关键步骤】立即抹掉 URL 里的参数，防止“无法返回”
+            // 【关键代码】一旦检测到参数并触发动作，立即抹掉 URL 尾巴
             if (action && window.history.replaceState) {
                 const cleanUrl = window.location.pathname; 
                 window.history.replaceState({}, document.title, cleanUrl);
             }
         }
 
-        // 3. 交互逻辑
+        // --- 3. 交互函数 ---
         function openDetails() {
             document.getElementById('overlay').style.display = 'block';
-            console.log("详情已开启，URL 已清理，现在点击返回将回到主钟。");
+            console.log("详情已开启，且 URL 已清理。现在返回就是回到 index.html。");
         }
 
         function closeDetails() {
@@ -144,18 +145,23 @@
         }
 
         function toggleTrad() {
-            alert("正在切换简繁字典...");
+            // 您的简繁转换逻辑
+            alert("正在切换简繁显示...");
         }
 
         async function shareApp() {
             if (navigator.share) {
-                await navigator.share({ title: '我的万年历', url: window.location.href });
+                try {
+                    await navigator.share({ title: '我的万年历', url: window.location.href });
+                } catch (e) { console.log('分享取消'); }
             }
         }
 
+        // 初始化执行
         window.onload = () => {
             updateUI();
-            handleShortcuts(); // 启动检测
+            handleShortcuts(); // 启动时立即检测并清理参数
+            
             if ('serviceWorker' in navigator) {
                 navigator.serviceWorker.register('./sw.js');
             }
