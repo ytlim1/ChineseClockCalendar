@@ -7,118 +7,117 @@
     <link rel="manifest" href="manifest.json">
     <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.min.js"></script>
     <style>
-        :root { --primary: #b71c1c; --bg: #f6f6f6; }
+        :root { --primary: #b71c1c; --bg-gray: #f6f6f6; }
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         
         body {
-            margin: 0; background-color: var(--bg);
+            margin: 0; background-color: var(--bg-gray);
             display: flex; justify-content: center; align-items: center;
-            height: 100vh; font-family: -apple-system, sans-serif;
-            overflow: hidden;
+            min-height: 100vh; font-family: -apple-system, sans-serif;
+            padding: env(safe-area-inset-top) 20px env(safe-area-inset-bottom);
         }
 
-        /* 严格还原 25 日截图比例：锁定高度与呼吸感 */
-        .card-wrap {
-            background: white; width: 88%; max-width: 360px;
-            height: 72vh; max-height: 600px; /* 物理锁定，防止臃肿 */
+        /* 核心布局：找回 25 日截图的轻盈比例 */
+        .card {
+            background: white; width: 100%; max-width: 360px;
             border-radius: 40px; border-top: 10px solid var(--primary);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.06);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.05);
             padding: 35px 25px; text-align: center;
-            display: flex; flex-direction: column; justify-content: space-between;
+            display: flex; flex-direction: column; gap: 15px;
         }
 
-        .top-info { color: #999; font-size: 1.1rem; display: flex; justify-content: center; gap: 10px; }
-        .btn-trad { padding: 2px 10px; border: 1px solid #ffcdd2; color: var(--primary); border-radius: 8px; font-size: 0.85rem; }
+        .top-info { color: #999; font-size: 1rem; display: flex; justify-content: center; align-items: center; gap: 8px; }
+        .btn-t { padding: 2px 8px; border: 1px solid #ffcdd2; color: var(--primary); border-radius: 6px; font-size: 0.8rem; }
         
-        .time-big { font-size: 4.2rem; font-weight: 700; color: var(--primary); margin: 0; font-variant-numeric: tabular-nums; }
-        .tag-term { display: inline-block; padding: 4px 18px; border: 1px solid #ffcdd2; color: var(--primary); border-radius: 20px; font-size: 1rem; align-self: center; }
+        .clock { font-size: 4rem; font-weight: 700; color: var(--primary); margin: 0; font-variant-numeric: tabular-nums; }
+        .tag-row { display: flex; justify-content: center; }
+        .tag { padding: 4px 15px; border: 1px solid #ffcdd2; color: var(--primary); border-radius: 20px; font-size: 0.9rem; }
         
-        .lunar-m { font-size: 3.4rem; font-weight: 800; color: #111; margin: 0; }
-        .lunar-y { color: var(--primary); font-size: 1.5rem; margin-top: 5px; }
+        .lunar-main { font-size: 3.2rem; font-weight: 800; color: #1a1a1a; margin-top: 5px; }
+        .lunar-year { color: var(--primary); font-size: 1.4rem; font-weight: 500; }
         
-        .slot-box { background: #f9f9f9; padding: 12px; border-radius: 18px; color: #777; font-size: 1.2rem; border: 1px solid #f0f0f0; }
-        .cd-row { border-top: 1px dashed #eee; padding-top: 15px; color: #555; font-size: 1.1rem; }
-        .cd-val { color: var(--primary); font-size: 2.2rem; font-weight: bold; }
+        .shichen-box { background: #f9f9f9; padding: 12px; border-radius: 15px; color: #666; font-size: 1.1rem; border: 1px solid #f0f0f0; }
+        .countdown { border-top: 1px dashed #eee; padding-top: 15px; color: #555; font-size: 1.05rem; }
+        .cd-num { color: var(--primary); font-size: 2rem; font-weight: bold; margin: 0 3px; }
 
-        .btn-main {
+        .btn-action {
             width: 100%; padding: 16px; border: 1px solid #eee; 
-            background: white; border-radius: 22px; font-size: 1.25rem;
-            color: var(--primary); cursor: pointer;
+            background: white; border-radius: 20px; font-size: 1.2rem;
+            color: var(--primary); cursor: pointer; transition: background 0.2s;
         }
+        .btn-action:active { background: #fff8f8; }
 
-        /* 弹窗设计：找回精致感 */
-        #modal-bg { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:100; backdrop-filter:blur(5px); }
-        #modal-pop { 
+        /* 弹窗样式修正 */
+        #modal-mask { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.4); z-index:100; backdrop-filter:blur(4px); }
+        #pop-window { 
             display: none; position: fixed; top:50%; left:50%; transform:translate(-50%,-50%); 
-            z-index:101; background:white; width:85%; max-width:330px; 
-            border-radius: 35px; padding: 35px; box-shadow:0 30px 60px rgba(0,0,0,0.25); 
+            z-index:101; background:white; width:85%; max-width:320px; 
+            border-radius: 35px; padding: 30px; box-shadow: 0 25px 50px rgba(0,0,0,0.2); 
         }
-        .pop-head { color: var(--primary); font-size: 1.5rem; font-weight: bold; margin-bottom: 20px; text-align: center; }
-        .pop-data { text-align: left; line-height: 2.2; color: #333; font-size: 1.1rem; margin-bottom: 25px; }
     </style>
 </head>
 <body>
 
-    <div class="card-wrap">
+    <div class="card">
         <div class="top-info">
-            <span id="txt-date">2026年3月27日 礼拜五</span>
-            <span class="btn-trad">轉繁</span>
+            <span id="d-str">2026年3月27日 礼拜五</span>
+            <span class="btn-t">轉繁</span>
         </div>
-        <div class="time-big" id="txt-time">11:47:25</div>
-        <div class="tag-term">今日节气：春分</div>
+        <div class="clock" id="t-str">00:00:00</div>
+        <div class="tag-row"><span class="tag">今日节气：春分</span></div>
         <div>
-            <div class="lunar-m">二月初九</div>
-            <div class="lunar-y">丙午马年</div>
+            <div class="lunar-main" id="l-m">二月初九</div>
+            <div class="lunar-year" id="l-y">丙午马年</div>
         </div>
-        <div class="slot-box">当前时辰：午时</div>
-        <div class="cd-row">距离 <b>清明节 (5/4)</b> 还有 <span class="cd-val" id="txt-cd">9</span> 天</div>
-        <button class="btn-main" onclick="handleOpen()">查看月历</button>
+        <div class="shichen-box" id="s-str">当前时辰：午时</div>
+        <div class="countdown">距离 <b>清明节 (5/4)</b> 还有 <span class="cd-num" id="c-num">9</span> 天</div>
+        <button class="btn-action" onclick="showDetail()">查看月历</button>
     </div>
 
-    <div id="modal-bg" onclick="handleClose()"></div>
-    <div id="modal-pop">
-        <div class="pop-head">月历详情</div>
-        <div id="pop-content" class="pop-data"></div>
-        <button class="btn-main" onclick="handleClose()">返回主界面</button>
+    <div id="modal-mask" onclick="hideDetail()"></div>
+    <div id="pop-window">
+        <h3 style="color:var(--primary); margin:0 0 20px 0; text-align:center;">今日万年历</h3>
+        <div id="pop-content" style="line-height:2; color:#333; font-size:1.1rem; text-align:left; margin-bottom:20px;"></div>
+        <button class="btn-action" onclick="hideDetail()">返回主界面</button>
     </div>
 
     <script>
-        // 核心修复：确保变量名清晰，避开 1/l 混淆
-        function handleOpen() {
+        function update() {
+            const now = new Date();
+            const lunar = Lunar.fromDate(now);
+            document.getElementById('t-str').innerText = now.toLocaleTimeString('zh-CN', { hour12: false });
+            
+            // 倒计时逻辑
+            const target = new Date(2026, 3, 5); 
+            const diff = Math.ceil((target - now) / (1000 * 60 * 60 * 24));
+            document.getElementById('c-num').innerText = diff > 0 ? diff : 0;
+        }
+
+        function showDetail() {
             try {
-                const myLunar = Lunar.fromDate(new Date());
-                const yi = myLunar.getYi(); // 修复报错点：确保函数名正确
-                const ji = myLunar.getJi();
-                
+                const l = Lunar.fromDate(new Date());
+                // 核心修复：使用 getDayYi 和 getDayJi 代替 getYi/getJi
                 document.getElementById('pop-content').innerHTML = `
-                    <b>农历：</b>${myLunar.getMonthInChinese()}月${myLunar.getDayInChinese()}<br>
-                    <b>干支：</b>${myLunar.getYearInGanZhi()}年 ${myLunar.getMonthInGanZhi()}月 ${myLunar.getDayInGanZhi()}日<br>
-                    <b>宜：</b>${yi.slice(0,3).join(' ')}<br>
-                    <b>忌：</b>${ji.slice(0,3).join(' ')}
+                    <b>干支：</b>${l.getYearInGanZhi()}年 ${l.getMonthInGanZhi()}月 ${l.getDayInGanZhi()}日<br>
+                    <b>五行：</b>${l.getYearNaYin()}<br>
+                    <b>宜：</b>${l.getDayYi().slice(0,4).join(' ')}<br>
+                    <b>忌：</b>${l.getDayJi().slice(0,4).join(' ')}
                 `;
-                document.getElementById('modal-bg').style.display = 'block';
-                document.getElementById('modal-pop').style.display = 'block';
-            } catch (err) {
-                console.error("弹窗启动失败:", err);
+                document.getElementById('modal-mask').style.display = 'block';
+                document.getElementById('pop-window').style.display = 'block';
+            } catch (e) {
+                console.error("弹窗启动失败:", e);
+                alert("万年历详情加载失败，请刷新重试。");
             }
         }
 
-        function handleClose() {
-            document.getElementById('modal-bg').style.display = 'none';
-            document.getElementById('modal-pop').style.display = 'none';
+        function hideDetail() {
+            document.getElementById('modal-mask').style.display = 'none';
+            document.getElementById('pop-window').style.display = 'none';
         }
 
-        function tick() {
-            const now = new Date();
-            document.getElementById('txt-time').innerText = now.toLocaleTimeString('zh-CN', { hour12: false });
-            
-            const target = new Date(2026, 3, 5); 
-            const diff = Math.ceil((target - now) / (1000 * 60 * 60 * 24));
-            document.getElementById('txt-cd').innerText = diff > 0 ? diff : 0;
-        }
-
-        setInterval(tick, 1000);
-        window.onload = tick;
+        setInterval(update, 1000);
+        update();
     </script>
 </body>
 </html>
