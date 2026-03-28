@@ -6,8 +6,10 @@
     <title>天干地支农历万年历</title>
     
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" id="theme-color-meta" content="#b71c1c">
+    <link rel="icon" type="image/png" href="icon-192.png">
+    <link rel="shortcut icon" href="icon-192.png" type="image/png">
     <link rel="apple-touch-icon" href="icon-192.png">
+    <meta name="theme-color" id="theme-color-meta" content="#b71c1c">
 
     <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.min.js"></script>
     <script data-goatcounter="https://ytlim-clock.goatcounter.com/count" async defer src="https://gc.zgo.at/count.js"></script>
@@ -66,7 +68,6 @@
         .top-row { display: flex; align-items: center; justify-content: center; position: relative; width: 100%; height: 32px; margin-bottom: 12px; }
         .solar-date { color: var(--text-sec); font-size: 1.05em; margin: 0; font-weight: 500; }
         
-        /* 顶部功能按钮 */
         .top-btn { position: absolute; top: 50%; transform: translateY(-50%); font-size: 0.9em; font-weight: bold; width: 32px; height: 32px; background-color: var(--btn-bg); border: 1px solid var(--btn-border); border-radius: 50%; color: var(--fest-red); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
         .lang-btn { right: 0; }
         .theme-btn { left: 0; }
@@ -82,7 +83,6 @@
         .countdown { margin: 15px 0; padding-top: 15px; border-top: 1px dashed var(--line-color); color: var(--text-sec); font-size: 0.95em; }
         .days { color: var(--main-red); font-size: 1.8em; font-weight: bold; }
         
-        /* 底部操作区：解决全屏模式无法分享的问题 */
         .action-row { display: flex; gap: 10px; margin-top: 15px; width: 100%; }
         .action-btn { flex: 1; background: var(--card-bg); color: var(--main-red); border: 1px solid var(--line-color); padding: 12px; border-radius: 12px; cursor: pointer; font-size: 0.95em; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 5px; }
         .action-btn:active { background: var(--btn-bg); }
@@ -151,16 +151,16 @@ function toggleTheme() {
     document.getElementById('themeBtn').innerText = targetTheme === 'dark' ? "☀️" : "🌙";
 }
 
-// 2. 原生分享功能 (解决 Android PWA 全屏无菜单问题)
+// 2. 原生分享功能
 function shareApp() {
     if (navigator.share) {
         navigator.share({
             title: '天干地支农历万年历',
             text: '发现一个超棒的农历 PWA，支持干支、节气和深色模式！',
-            url: 'https://ytlim1.github.io/ChineseClockCalendar/'
+            url: window.location.href
         }).catch(err => console.log('分享失败:', err));
     } else {
-        alert("请手动复制地址分享：https://ytlim1.github.io/ChineseClockCalendar/");
+        alert("请手动复制地址分享：" + window.location.href);
     }
 }
 
