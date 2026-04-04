@@ -16,7 +16,6 @@
 
     <style>
         :root {
-            /* 浅色模式变量 */
             --bg-gray: #f5f3ef;
             --card-bg: #ffffff;
             --main-red: #b71c1c;
@@ -30,7 +29,6 @@
             --shadow: rgba(0,0,0,0.08);
         }
 
-        /* 深色模式类 */
         [data-theme='dark'] {
             --bg-gray: #121212;
             --card-bg: #1e1e1e;
@@ -45,7 +43,6 @@
             --shadow: rgba(0,0,0,0.4);
         }
 
-        /* 自动适配系统深色模式 */
         @media (prefers-color-scheme: dark) {
             :root:not([data-theme='light']) {
                 --bg-gray: #121212;
@@ -85,7 +82,6 @@
         
         .action-row { display: flex; gap: 10px; margin-top: 15px; width: 100%; }
         .action-btn { flex: 1; background: var(--card-bg); color: var(--main-red); border: 1px solid var(--line-color); padding: 12px; border-radius: 12px; cursor: pointer; font-size: 0.95em; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 5px; }
-        .action-btn:active { background: var(--btn-bg); }
         
         .calendar-wrapper { display: none; background: var(--card-bg); width: 340px; border-radius: 20px; padding: 15px 0; box-shadow: 0 10px 25px var(--shadow); margin-top: 10px; border: 1px solid var(--line-color); }
         .calendar-wrapper.show { display: block; }
@@ -102,7 +98,7 @@
 
 <div class="card">
     <div class="top-row">
-        <div class="top-btn theme-btn" id="themeBtn" title="切换深色模式" onclick="toggleTheme()">🌙</div>
+        <div class="top-btn theme-btn" id="themeBtn" title="切换模式" onclick="toggleTheme()">🌙</div>
         <div id="solar-date" class="solar-date">---</div>
         <div class="top-btn lang-btn" id="langBtn" title="繁简转换" onclick="toggleLang()">繁</div>
     </div>
@@ -112,13 +108,17 @@
     <div id="gz-year" class="gz-text">---</div>
     <div id="gz-detail" class="gz-detail">---</div>
     <div id="shichen-info" class="shichen-box">---</div>
-    <div class="countdown">
-        <span id="lbl-dist">距離</span> <span id="fest-name" style="color:var(--text-main); font-weight:bold;">---</span> <span id="lbl-remain">還有</span>
-        <span id="fest-days" class="days">0</span> <span id="lbl-day">天</span>
+    
+    <div class="countdown" id="countdown-area">
+        <span id="lbl-dist">距离</span> 
+        <span id="fest-name" style="color:var(--text-main); font-weight:bold;">---</span> 
+        <span id="lbl-remain">还有</span>
+        <span id="fest-days" class="days">0</span> 
+        <span id="lbl-day">天</span>
     </div>
 
     <div class="action-row">
-        <button class="action-btn" id="toggleBtn" onclick="toggleCalendar()">🗓️ <span id="btn-text">月曆</span></button>
+        <button class="action-btn" id="toggleBtn" onclick="toggleCalendar()">🗓️ <span id="btn-text">月历</span></button>
         <button class="action-btn" onclick="shareApp()">📤 分享</button>
     </div>
 </div>
@@ -136,7 +136,7 @@
 </div>
 
 <script>
-// 1. 深色模式初始化与切换
+// 1. 系统配置
 const savedTheme = localStorage.getItem('theme');
 if (savedTheme) {
     document.documentElement.setAttribute('data-theme', savedTheme);
@@ -151,33 +151,27 @@ function toggleTheme() {
     document.getElementById('themeBtn').innerText = targetTheme === 'dark' ? "☀️" : "🌙";
 }
 
-// 2. 原生分享功能
 function shareApp() {
     if (navigator.share) {
-        navigator.share({
-            title: '天干地支农历万年历',
-            text: '发现一个超棒的农历 PWA，支持干支、节气和深色模式！',
-            url: window.location.href
-        }).catch(err => console.log('分享失败:', err));
+        navigator.share({ title: '天干地支农历万年历', url: window.location.href }).catch(err => console.log(err));
     } else {
         alert("请手动复制地址分享：" + window.location.href);
     }
 }
 
-// 3. Service Worker 注册
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW Error:', err));
+        navigator.serviceWorker.register('./sw.js').catch(err => console.log(err));
     });
 }
 
 let viewDate = new Date(); 
 let isTrad = false;
 
-// 4. 繁简字典 (已修正 農曆、農、狗)
+// 2. 简繁字典 (已修正 農、狗)
 const dict = {
-    "S": "农历,农,查看月历,隐藏月历,距离,还有,天,今日节气,当前时辰,礼拜,春节,端午节,中秋节,清明节,冬至,立春,雨水,惊蛰,春分,清明,谷雨,立夏,小满,芒种,夏至,小暑,大暑,立秋,处暑,白露,秋分,寒露,霜降,立冬,小雪,大雪,冬至,小寒,大寒,正月,二月,三月,四月,五月,六月,七月,八月,九月,十月,冬月,腊月,鼠,牛,虎,兔,龙,蛇,马,羊,猴,鸡,狗,猪,甲,乙,丙,丁,戊,己,庚,辛,壬,癸,子,丑,寅,卯,辰,巳,午,未,申,酉,戌,亥,年,月,日,历,时,钟,月历",
-    "T": "農曆,農,查看月曆,隱藏月曆,距離,還有,天,今日節氣,當前時辰,禮拜,春節,端午節,中秋節,清明節,冬至,立春,雨水,驚蟄,春分,清明,穀雨,立夏,小滿,芒種,夏至,小暑,大暑,立秋,處暑,白露,秋分,寒露,霜降,立冬,小雪,大雪,冬至,小寒,大寒,正月,二月,三月,四月,五月,六月,七月,八月,九月,十月,冬月,臘月,鼠,牛,虎,兔,龍,蛇,馬,羊,猴,雞,狗,豬,甲,乙,丙,丁,戊,己,庚,辛,壬,癸,子,丑,寅,卯,辰,巳,午,未,申,酉,戌,亥,年,月,日,曆,時,鐘,月曆"
+    "S": "农历,农,查看月历,隐藏月历,距离,还有,天,今日节气,当前时辰,礼拜,春节,端午节,中秋节,清明节,冬至,立春,雨水,惊蛰,春分,清明,谷雨,立夏,小满,芒种,夏至,小暑,大暑,立秋,处暑,白露,秋分,寒露,霜降,立冬,小雪,大雪,冬至,小寒,大寒,正月,二月,三月,四月,五月,六月,七月,八月,九月,十月,冬月,腊月,鼠,牛,虎,兔,龙,蛇,马,羊,猴,鸡,狗,猪,甲,乙,丙,丁,戊,己,庚,辛,壬,癸,子,丑,寅,卯,辰,巳,午,未,申,酉,戌,亥,年,月,日,历,时,钟,月历,今天是",
+    "T": "農曆,農,查看月曆,隱藏月曆,距離,還有,天,今日節氣,當前時辰,禮拜,春節,端午節,中秋節,清明節,冬至,立春,雨水,驚蟄,春分,清明,穀雨,立夏,小滿,芒種,夏至,小暑,大暑,立秋,處暑,白露,秋分,寒露,霜降,立冬,小雪,大雪,冬至,小寒,大寒,正月,二月,三月,四月,五月,六月,七月,八月,九月,十月,冬月,臘月,鼠,牛,虎,兔,龍,蛇,馬,羊,猴,雞,狗,豬,甲,乙,丙,丁,戊,己,庚,辛,壬,癸,子,丑,寅,卯,辰,巳,午,未,申,酉,戌,亥,年,月,日,曆,時,鐘,月曆,今天是"
 };
 
 function s2t(text) {
@@ -204,9 +198,11 @@ function changeMonth(delta) {
     renderCalendar(viewDate);
 }
 
+// 3. 核心更新逻辑 (包含“今天是...”优化)
 function update() {
     const now = new Date();
     const solar = Solar.fromDate(now), lunar = solar.getLunar();
+    
     document.getElementById('clock').innerText = now.toTimeString().split(' ')[0];
     document.getElementById('solar-date').innerText = s2t(`${solar.getYear()}年${solar.getMonth()}月${solar.getDay()}日 礼拜${solar.getWeekInChinese()}`);
     document.getElementById('lunar-main').innerText = s2t(`${lunar.getMonthInChinese()}月${lunar.getDayInChinese()}`);
@@ -215,27 +211,44 @@ function update() {
 
     const jq = lunar.getJieQi();
     document.getElementById('jieqi-tag').innerText = s2t(jq ? jq : "农历");
-
     document.getElementById('shichen-info').innerText = s2t(`当前时辰：${lunar.getEightChar().getTimeZhi()}时`);
-    document.getElementById('lbl-dist').innerText = s2t("距离");
-    document.getElementById('lbl-remain').innerText = s2t("还有");
-    document.getElementById('lbl-day').innerText = s2t("天");
     document.getElementById('btn-text').innerText = s2t("月历");
 
+    // 节日倒计时逻辑
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     let targets = [];
     const fests = [{n:"春节",t:"l",m:1,d:1},{n:"端午节",t:"l",m:5,d:5},{n:"中秋节",t:"l",m:8,d:15},{n:"清明节",t:"j",q:"清明"},{n:"冬至",t:"j",q:"冬至"}];
+
     [now.getFullYear(), now.getFullYear() + 1].forEach(y => {
         fests.forEach(f => {
             let sd = (f.t==="l") ? (function(){try{return Lunar.fromYmd(y,f.m,f.d).getSolar()}catch(e){}})() : Solar.fromDate(new Date(y,0,1)).getLunar().getJieQiTable()[f.q];
             if(sd){
                 const d = new Date(sd.getYear(), sd.getMonth()-1, sd.getDay());
-                if(d >= today) targets.push({n: s2t(f.n) + ` (${sd.getDay()}/${sd.getMonth()})`, d: d});
+                if(d >= today) targets.push({n: s2t(f.n), d: d, m: sd.getMonth(), dy: sd.getDay()});
             }
         });
     });
     targets.sort((a,b)=>a.d-b.d);
-    if(targets[0]){ document.getElementById('fest-name').innerText = targets[0].n; document.getElementById('fest-days').innerText = Math.ceil((targets[0].d-today)/86400000); }
+
+    if(targets[0]){
+        const diff = Math.ceil((targets[0].d - today) / 86400000);
+        const festNameWithDate = `${targets[0].n} (${targets[0].dy}/${targets[0].m})`;
+        
+        if (diff === 0) {
+            // 当天显示优化
+            document.getElementById('lbl-dist').innerText = s2t("今天是");
+            document.getElementById('fest-name').innerText = festNameWithDate;
+            document.getElementById('lbl-remain').innerText = ""; 
+            document.getElementById('fest-days').innerText = "";
+            document.getElementById('lbl-day').innerText = "";
+        } else {
+            document.getElementById('lbl-dist').innerText = s2t("距离");
+            document.getElementById('fest-name').innerText = festNameWithDate;
+            document.getElementById('lbl-remain').innerText = s2t("还有");
+            document.getElementById('fest-days').innerText = diff;
+            document.getElementById('lbl-day').innerText = s2t("天");
+        }
+    }
 }
 
 function renderCalendar(date) {
