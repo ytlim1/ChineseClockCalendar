@@ -91,7 +91,6 @@
         th { color: var(--text-sec); padding-bottom: 8px; font-size: 0.85em; font-weight: normal; }
         td { height: 50px; text-align: center; border-radius: 8px; vertical-align: middle; position: relative; }
         
-        /* 修正选中日期颜色对比度 */
         .cur-day { background: var(--main-red) !important; color: #fff !important; }
         .cur-day small { color: #fff !important; }
         .is-fest { color: var(--fest-red) !important; font-weight: bold; }
@@ -139,7 +138,6 @@
 </div>
 
 <script>
-// 系统逻辑保持不变
 const savedTheme = localStorage.getItem('theme');
 if (savedTheme) {
     document.documentElement.setAttribute('data-theme', savedTheme);
@@ -200,7 +198,6 @@ function changeMonth(delta) {
     renderCalendar(viewDate);
 }
 
-// 核心更新逻辑：修正节日文案
 function update() {
     const now = new Date();
     const solar = Solar.fromDate(now), lunar = solar.getLunar();
@@ -236,7 +233,6 @@ function update() {
         const festNameWithDate = `${targets[0].n} (${targets[0].dy}/${targets[0].m})`;
         
         if (diff === 0) {
-            // 文案优化：今天是XX节
             document.getElementById('lbl-dist').innerText = s2t("今天是");
             document.getElementById('fest-name').innerText = festNameWithDate;
             document.getElementById('lbl-remain').innerText = ""; 
@@ -252,19 +248,58 @@ function update() {
     }
 }
 
+// 优化后的月历渲染逻辑
 function renderCalendar(date) {
     const year = date.getFullYear(), month = date.getMonth(), now = new Date();
     document.getElementById('cal-title').innerText = s2t(`${year}年 ${month + 1}月`);
-    const firstDay = new Date(year, month, 1).getDay(), lastDate = new Date(year, month + 1, 0).getDate();
+    
+    const firstDay = new Date(year, month, 1).getDay();
+    const lastDate = new Date(year, month + 1, 0).getDate();
+    
+    // 定义需要显示的传统节日
+    const festivalList = [
+        {n:"春节",m:1,d:1,t:"l"},
+        {n:"端午节",m:5,d:5,t:"l"},
+        {n:"中秋节",m:8,d:15,t:"l"},
+        {n:"清明节",q:"清明",t:"j"},
+        {n:"冬至",q:"冬至",t:"j"}
+    ];
+
     let html = '<tr>';
     for (let i = 0; i < firstDay; i++) html += '<td></td>';
+    
     for (let d = 1; d <= lastDate; d++) {
         if ((d + firstDay - 1) % 7 === 0 && d !== 1) html += '</tr><tr>';
-        const ld = Solar.fromYmd(year, month + 1, d).getLunar();
+        
+        const solarDate = Solar.fromYmd(year, month + 1, d);
+        const ld = solarDate.getLunar();
         const jq = ld.getJieQi();
+        
+        // 1. 初一显示为月份
+        let lunarText = ld.getDayInChinese();
+        if (lunarText === "初一") {
+            lunarText = ld.getMonthInChinese() + "月";
+        }
+
+        // 2. 检查并显示节日
+        let displayTag = jq || lunarText;
+        festivalList.forEach(f => {
+            if (f.t === "l" && ld.getMonth() === f.m && ld.getDay() === f.d) {
+                displayTag = f.n;
+            } else if (f.t === "j" && jq === f.q) {
+                displayTag = f.n;
+            }
+        });
+
         const isToday = (d===now.getDate() && month===now.getMonth() && year===now.getFullYear()) ? "cur-day" : "";
-        const isF = (jq==="冬至" || jq==="清明" || ld.getDayInChinese()==="初一") ? "is-fest" : "";
-        html += `<td class="${isToday}"><span style="font-weight:bold">${d}</span><br><small class="${isF}" style="font-size:0.75em">${s2t(jq || ld.getDayInChinese())}</small></td>`;
+        
+        // 判定是否加红显示（节日、节气或初一/月份开始）
+        const isF = (jq || lunarText.includes("月") || displayTag.includes("节") || displayTag === "冬至") ? "is-fest" : "";
+        
+        html += `<td class="${isToday}">
+                    <span style="font-weight:bold">${d}</span><br>
+                    <small class="${isF}" style="font-size:0.75em">${s2t(displayTag)}</small>
+                 </td>`;
     }
     document.getElementById('calendar-body').innerHTML = html + '</tr>';
 }
