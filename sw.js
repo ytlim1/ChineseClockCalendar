@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lunar-clock-2026-03-27-v7';
+const CACHE_NAME = 'lunar-clock-2026-04-06-v1';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
