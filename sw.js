@@ -1,41 +1,229 @@
-const CACHE_NAME = 'lunar-clock-2026-04-06-v1';
-const ASSETS_TO_CACHE = [
-  './',
-  './index.html',
-  './manifest.json',
-  './icon-192.png',
-  './icon-512.png',
-  './screenshot_mobile.png',
-  './screenshot_wide.png',
-  'https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.min.js'
-];
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>天干地支农历万年历</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="icon-192.png">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <meta name="theme-color" id="theme-color-meta" content="#b71c1c">
 
-self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS_TO_CACHE))
-  );
-  self.skipWaiting();
-});
+    <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.min.js"></script>
+    <script data-goatcounter="https://ytlim-clock.goatcounter.com/count" async defer src="https://gc.zgo.at/count.js"></script>
 
-self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys().then((keys) => {
-      return Promise.all(keys.map((key) => {
-        if (key !== CACHE_NAME) return caches.delete(key);
-      }));
-    })
-  );
-  self.clients.claim();
-});
-
-self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request).then((response) => {
-      return response || fetch(event.request).catch(() => {
-        if (event.request.mode === 'navigate') {
-          return caches.match('./index.html');
+    <style>
+        :root {
+            --bg-gray: #f5f3ef; --card-bg: #ffffff; --main-red: #b71c1c; --fest-red: #cf1322;
+            --text-main: #111111; --text-sec: #888888; --btn-bg: #fff1f0; --btn-border: #ffa39e;
+            --shichen-bg: #f9f9f9; --line-color: #eeeeee; --shadow: rgba(0,0,0,0.08);
         }
-      });
-    })
-  );
-});
+        [data-theme='dark'] {
+            --bg-gray: #121212; --card-bg: #1e1e1e; --main-red: #ff5252; --fest-red: #ff7875;
+            --text-main: #e0e0e0; --text-sec: #aaaaaa; --btn-bg: #2a1215; --btn-border: #5c2223;
+            --shichen-bg: #262626; --line-color: #333333; --shadow: rgba(0,0,0,0.4);
+        }
+        body { background-color: var(--bg-gray); font-family: sans-serif; display: flex; flex-direction: column; align-items: center; padding: 15px 0; color: var(--text-main); margin: 0; }
+        .card { background: var(--card-bg); padding: 25px 20px; border-radius: 20px; box-shadow: 0 10px 30px var(--shadow); width: 340px; text-align: center; border-top: 6px solid var(--main-red); box-sizing: border-box; }
+        .top-row { display: flex; align-items: center; justify-content: center; position: relative; width: 100%; height: 32px; margin-bottom: 12px; }
+        .top-btn { position: absolute; font-size: 0.9em; font-weight: bold; width: 32px; height: 32px; background: var(--btn-bg); border: 1px solid var(--btn-border); border-radius: 50%; color: var(--fest-red); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .time { font-size: 2.8em; font-weight: bold; color: var(--main-red); margin: 5px 0; font-variant-numeric: tabular-nums; }
+        .jieqi-tag { display: inline-block; color: var(--fest-red); padding: 2px 14px; border-radius: 50px; font-size: 0.9em; margin: 10px 0; background: var(--btn-bg); border: 1px solid var(--btn-border); font-weight: bold; }
+        .lunar-main { font-size: 2.4em; font-weight: bold; margin: 5px 0; }
+        .gz-text { color: var(--main-red); font-weight: bold; font-size: 1.15em; }
+        .gz-detail { color: var(--text-sec); font-size: 0.85em; margin-bottom: 12px; }
+        .shichen-box { background: var(--shichen-bg); padding: 8px; border-radius: 8px; color: var(--text-sec); border: 1px solid var(--line-color); }
+        
+        /* 修正后的导航区域布局 */
+        .countdown { 
+            margin: 15px 0; 
+            padding-top: 15px; 
+            border-top: 1px dashed var(--line-color); 
+            display: flex; 
+            align-items: center;        /* 垂直居中核心逻辑 */
+            justify-content: space-between; 
+        }
+        #fest-content { 
+            flex: 1; 
+            display: flex; 
+            align-items: center;        /* 文字内容垂直居中 */
+            justify-content: center; 
+            gap: 5px; 
+            line-height: 1; 
+        }
+        .nav-arrow { 
+            cursor: pointer; 
+            font-size: 1.2em; 
+            color: var(--main-red); 
+            padding: 0 10px; 
+            user-select: none; 
+            line-height: 1;             /* 确保箭头本身不带多余行高 */
+        }
+        .nav-arrow.disabled { color: var(--text-sec); opacity: 0.3; cursor: default; }
+        .days { color: var(--main-red); font-size: 1.8em; font-weight: bold; }
+
+        .action-row { display: flex; gap: 10px; margin-top: 15px; }
+        .action-btn { flex: 1; background: var(--card-bg); color: var(--main-red); border: 1px solid var(--line-color); padding: 12px; border-radius: 12px; cursor: pointer; font-weight: bold; }
+        .calendar-wrapper { display: none; background: var(--card-bg); width: 340px; border-radius: 20px; padding: 15px 0; box-shadow: 0 10px 25px var(--shadow); margin-top: 10px; border: 1px solid var(--line-color); }
+        .calendar-wrapper.show { display: block; }
+        table { width: 95%; margin: 0 auto; border-collapse: collapse; }
+        td { height: 50px; text-align: center; border-radius: 8px; }
+        
+        /* 选中状态文字变白修正 */
+        .cur-day { background: var(--main-red) !important; color: #fff !important; }
+        .cur-day small { color: #fff !important; }
+        .is-fest { color: var(--fest-red) !important; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <div class="top-row">
+        <div class="top-btn" style="left:0" onclick="toggleTheme()" id="themeBtn">🌙</div>
+        <div id="solar-date" style="color:var(--text-sec); font-size:1.05em">---</div>
+        <div class="top-btn" style="right:0" onclick="toggleLang()" id="langBtn">繁</div>
+    </div>
+    <div id="clock" class="time">00:00:00</div>
+    <div id="jieqi-tag" class="jieqi-tag">農曆</div>
+    <div id="lunar-main" class="lunar-main">---</div>
+    <div id="gz-year" class="gz-text">---</div>
+    <div id="gz-detail" class="gz-detail">---</div>
+    <div id="shichen-info" class="shichen-box">---</div>
+    
+    <div class="countdown">
+        <span id="prevFest" class="nav-arrow" onclick="navFest(-1)">❮</span>
+        <div id="fest-content">
+            </div>
+        <span id="nextFest" class="nav-arrow" onclick="navFest(1)">❯</span>
+    </div>
+
+    <div class="action-row">
+        <button class="action-btn" onclick="toggleCalendar()">🗓️ <span id="btn-text">月历</span></button>
+        <button class="action-btn" onclick="shareApp()">📤 分享</button>
+    </div>
+</div>
+
+<div class="calendar-wrapper" id="calWrapper">
+    <div style="display:flex; justify-content:space-between; padding:0 20px 10px;">
+        <button onclick="changeMonth(-1)" style="color:var(--main-red); background:none; border:none; font-weight:bold; cursor:pointer">❮</button>
+        <h4 id="cal-title" style="margin:0">---</h4>
+        <button onclick="changeMonth(1)" style="color:var(--main-red); background:none; border:none; font-weight:bold; cursor:pointer">❯</button>
+    </div>
+    <table>
+        <thead><tr><th>日</th><th>一</th><th>二</th><th>三</th><th>四</th><th>五</th><th>六</th></tr></thead>
+        <tbody id="calendar-body"></tbody>
+    </table>
+</div>
+
+<script>
+let viewDate = new Date(), isTrad = false, allFests = [], currentFestIdx = 0;
+
+function s2t(t) {
+    if(!isTrad || !t) return t;
+    const s="农历,农,查看月历,隐藏月历,距离,还有,天,今日节气,当前时辰,礼拜,春节,端午节,中秋节,清明节,冬至,立春,雨水,惊蛰,春分,清明,谷雨,立夏,小满,芒种,夏至,小暑,大暑,立秋,处暑,白露,秋分,寒露,霜降,立冬,小雪,大雪,冬至,小寒,大寒,正月,二月,三月,四月,五月,六月,七月,八月,九月,十月,冬月,腊月,鼠,牛,虎,兔,龙,蛇,马,羊,猴,鸡,狗,猪,甲,乙,丙,丁,戊,己,庚,辛,壬,癸,子,丑,寅,卯,辰,巳,午,未,申,酉,戌,亥,年,月,日,历,时,钟,月历,今天是",
+          t2="農曆,農,查看月曆,隱藏月曆,距離,還有,天,今日節氣,當前時辰,禮拜,春節,端午節,中秋節,清明節,冬至,立春,雨水,驚蟄,春分,清明,穀雨,立夏,小滿,芒種,夏至,小暑,大暑,立秋,處暑,白露,秋分,寒露,霜降,立冬,小雪,大雪,冬至,小寒,大寒,正月,二月,三月,四月,五月,六月,七月,八月,九月,十月,冬月,臘月,鼠,牛,虎,兔,龍,蛇,馬,羊,猴,雞,狗,豬,甲,乙,丙,丁,戊,己,庚,辛,壬,癸,子,丑,寅,卯,辰,巳,午,未,申,酉,戌,亥,年,月,日,曆,時,鐘,月曆,今天是";
+    let res = t, sa = s.split(','), ta = t2.split(',');
+    sa.forEach((x,i)=>res=res.split(x).join(ta[i]));
+    return res;
+}
+
+function update() {
+    const now = new Date(), solar = Solar.fromDate(now), lunar = solar.getLunar();
+    document.getElementById('clock').innerText = now.toTimeString().split(' ')[0];
+    document.getElementById('solar-date').innerText = s2t(`${solar.getYear()}年${solar.getMonth()}月${solar.getDay()}日 礼拜${solar.getWeekInChinese()}`);
+    document.getElementById('lunar-main').innerText = s2t(`${lunar.getMonthInChinese()}月${lunar.getDayInChinese()}`);
+    document.getElementById('gz-year').innerText = s2t(`${lunar.getYearInGanZhi()}${lunar.getYearShengXiao()}年`);
+    document.getElementById('gz-detail').innerText = s2t(`${lunar.getYearInGanZhi()}年 ${lunar.getMonthInGanZhi()}月 ${lunar.getDayInGanZhi()}日`);
+    document.getElementById('jieqi-tag').innerText = s2t(lunar.getJieQi() || "农历");
+    document.getElementById('shichen-info').innerText = s2t(`当前时辰：${lunar.getEightChar().getTimeZhi()}时`);
+
+    // 节日列表逻辑：仅限未来
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    allFests = [];
+    const fDefs = [{n:"春节",t:"l",m:1,d:1},{n:"端午节",t:"l",m:5,d:5},{n:"中秋节",t:"l",m:8,d:15},{n:"清明节",t:"j",q:"清明"},{n:"冬至",t:"j",q:"冬至"}];
+    [now.getFullYear(), now.getFullYear()+1].forEach(y => {
+        fDefs.forEach(f => {
+            let sd = (f.t==="l") ? (function(){try{return Lunar.fromYmd(y,f.m,f.d).getSolar()}catch(e){}})() : Solar.fromDate(new Date(y,0,1)).getLunar().getJieQiTable()[f.q];
+            if(sd){
+                const d = new Date(sd.getYear(), sd.getMonth()-1, sd.getDay());
+                if(d >= today) allFests.push({n:f.n, d:d, m:sd.getMonth(), dy:sd.getDay()});
+            }
+        });
+    });
+    allFests.sort((a,b)=>a.d-b.d);
+    renderFest();
+}
+
+function renderFest() {
+    const target = allFests[currentFestIdx];
+    if(!target) return;
+    const diff = Math.ceil((target.d - new Date().setHours(0,0,0,0)) / 86400000);
+    const name = s2t(`${target.n} (${target.dy}/${target.m})`);
+    
+    const content = document.getElementById('fest-content');
+    if(diff === 0) {
+        content.innerHTML = `<span>${s2t('今天是')}</span> <span style="font-weight:bold; color:var(--text-main)">${name}</span>`;
+    } else {
+        content.innerHTML = `<span>${s2t('距离')}</span> <span style="font-weight:bold; color:var(--text-main)">${name}</span> 
+                             <span>${s2t('还有')}</span> <span class="days">${diff}</span> <span>${s2t('天')}</span>`;
+    }
+    
+    document.getElementById('prevFest').classList.toggle('disabled', currentFestIdx === 0);
+    document.getElementById('nextFest').classList.toggle('disabled', currentFestIdx === allFests.length - 1);
+}
+
+function navFest(dir) {
+    const newIdx = currentFestIdx + dir;
+    if(newIdx >= 0 && newIdx < allFests.length) {
+        currentFestIdx = newIdx;
+        renderFest();
+    }
+}
+
+// 优化后的月历渲染：初一显示月份
+function renderCalendar(date) {
+    const y = date.getFullYear(), m = date.getMonth(), now = new Date();
+    document.getElementById('cal-title').innerText = s2t(`${y}年 ${m+1}月`);
+    const fDay = new Date(y, m, 1).getDay(), lDate = new Date(y, m+1, 0).getDate();
+    const fList = [{n:"春节",m:1,d:1,t:"l"},{n:"端午",m:5,d:5,t:"l"},{n:"中秋",m:8,d:15,t:"l"},{n:"清明",q:"清明",t:"j"},{n:"冬至",q:"冬至",t:"j"}];
+    
+    let html = '<tr>';
+    for(let i=0; i<fDay; i++) html += '<td></td>';
+    for(let d=1; d<=lDate; d++) {
+        if((d+fDay-1)%7===0 && d!==1) html += '</tr><tr>';
+        const ld = Solar.fromYmd(y, m+1, d).getLunar();
+        const jq = ld.getJieQi();
+        
+        // 初一显示为农历月份
+        let display = (ld.getDayInChinese()==="初一") ? ld.getMonthInChinese()+"月" : ld.getDayInChinese();
+        
+        fList.forEach(f => {
+            if((f.t==="l"&&ld.getMonth()===f.m&&ld.getDay()===f.d) || (f.t==="j"&&jq===f.q)) display = f.n;
+        });
+        
+        const isToday = (d===now.getDate() && m===now.getMonth() && y===now.getFullYear()) ? "cur-day" : "";
+        const isF = (jq || display.includes("月") || display.length > 2) ? "is-fest" : "";
+        
+        html += `<td class="${isToday}"><span style="font-weight:bold">${d}</span><br><small class="${isF}" style="font-size:0.75em">${s2t(display)}</small></td>`;
+    }
+    document.getElementById('calendar-body').innerHTML = html + '</tr>';
+}
+
+function toggleTheme() {
+    const t = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', t);
+    localStorage.setItem('theme', t);
+    document.getElementById('themeBtn').innerText = t === 'dark' ? "☀️" : "🌙";
+}
+function toggleLang() { isTrad = !isTrad; document.getElementById('langBtn').innerText = isTrad ? "简" : "繁"; update(); renderCalendar(viewDate); }
+function toggleCalendar() { document.getElementById('calWrapper').classList.toggle('show'); }
+function changeMonth(d) { viewDate.setMonth(viewDate.getMonth()+d); renderCalendar(viewDate); }
+function shareApp() { navigator.share ? navigator.share({title:'农历万年历', url:location.href}) : alert(location.href); }
+
+setInterval(update, 1000);
+update();
+renderCalendar(viewDate);
+</script>
+</body>
+</html>
