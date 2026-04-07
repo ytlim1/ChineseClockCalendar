@@ -1,186 +1,165 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html lang="zh">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>農曆萬年曆 V18</title>
+    <title>農曆萬年曆 V33</title>
     <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.min.js"></script>
     <style>
-        :root { --bg-gray: #f5f3ef; --card-bg: #ffffff; --main-red: #b71c1c; --fest-red: #cf1322; --text-main: #111111; --text-sec: #888888; --line-color: #eeeeee; --btn-bg: #fff1f0; --btn-border: #ffa39e; }
-        [data-theme='dark'] { --bg-gray: #121212; --card-bg: #1e1e1e; --main-red: #ff5252; --fest-red: #ff7875; --text-main: #e0e0e0; --text-sec: #aaaaaa; --line-color: #333333; --btn-bg: #2a1215; --btn-border: #5c2223; }
+        :root { --bg: #f5f3ef; --card: #ffffff; --red: #b71c1c; --f-red: #cf1322; --t-main: #111111; --t-sec: #888888; --line: #eeeeee; }
+        [data-theme='dark'] { --bg: #121212; --card: #1e1e1e; --red: #ff5252; --f-red: #ff7875; --t-main: #e0e0e0; --t-sec: #aaaaaa; --line: #333333; }
+        body { background: var(--bg); font-family: -apple-system, sans-serif; display: flex; flex-direction: column; align-items: center; padding: 15px 0; color: var(--t-main); margin: 0; }
+        .card { background: var(--card); padding: 25px 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 340px; text-align: center; border-top: 6px solid var(--red); box-sizing: border-box; }
+        .nav-btn { width: 34px; height: 34px; background: none; border: 1px solid var(--red); border-radius: 50%; color: var(--red); cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; }
+        .time { font-size: 2.8em; font-weight: bold; color: var(--red); margin: 10px 0; font-variant-numeric: tabular-nums; }
+        .lunar-big { font-size: 2.2em; font-weight: bold; margin: 10px 0; }
+        .tag { display: inline-block; color: var(--f-red); padding: 2px 14px; border-radius: 50px; font-size: 0.9em; margin: 10px 0; background: #fff1f0; border: 1px solid #ffa39e; font-weight: bold; }
         
-        body { background-color: var(--bg-gray); font-family: -apple-system, sans-serif; display: flex; flex-direction: column; align-items: center; padding: 15px 0; color: var(--text-main); margin: 0; }
-        .card { background: var(--card-bg); padding: 25px 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 340px; text-align: center; border-top: 6px solid var(--main-red); box-sizing: border-box; }
-        
-        .nav-circle { width: 34px; height: 34px; background: var(--btn-bg); border: 1px solid var(--btn-border); border-radius: 50%; color: var(--fest-red); cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; }
-        .time { font-size: 2.8em; font-weight: bold; color: var(--main-red); margin: 10px 0; font-variant-numeric: tabular-nums; }
-        .jieqi-tag { display: inline-block; color: var(--fest-red); padding: 2px 14px; border-radius: 50px; font-size: 0.9em; margin: 10px 0; background: var(--btn-bg); border: 1px solid var(--btn-border); font-weight: bold; min-height: 24px; }
-        
-        .countdown { margin: 15px 0; padding: 15px 0; border-top: 1px dashed var(--line-color); display: flex; align-items: center; justify-content: space-between; }
-        .fest-text-box { flex: 1; display: flex; align-items: center; justify-content: center; gap: 4px; min-height: 40px; font-size: 1.05em; }
-        .days { color: var(--main-red); font-size: 1.6em; font-weight: bold; }
-        
-        .arrow-btn { background: none; border: none; font-size: 1.5em; color: var(--main-red); cursor: pointer; width: 40px; display: flex; align-items: center; justify-content: center; }
-        .arrow-btn:disabled { color: #ccc !important; cursor: not-allowed; }
+        /* 修正節慶對齊佈局 */
+        .countdown-wrap { margin: 15px 0; padding: 15px 0; border-top: 1px dashed var(--line); display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 50px; }
+        .fest-content { flex: 1; font-size: 0.95em; line-height: 1.4; display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 4px; }
+        .fest-nav { border: none; background: none; color: var(--red); cursor: pointer; font-size: 1.2em; padding: 0 5px; transition: opacity 0.3s; }
+        .fest-nav:disabled { opacity: 0.2; cursor: default; }
 
-        .action-btn { flex: 1; background: var(--card-bg); color: var(--main-red); border: 1px solid var(--line-color); padding: 12px; border-radius: 12px; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        
-        .calendar-wrapper { display: none; background: var(--card-bg); width: 340px; border-radius: 20px; padding: 15px 0; box-shadow: 0 10px 25px rgba(0,0,0,0.15); margin-top: 10px; border: 1px solid var(--line-color); }
-        .calendar-wrapper.show { display: block; }
+        .action-btn { flex: 1; background: var(--card); color: var(--red); border: 1px solid var(--line); padding: 12px; border-radius: 12px; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 5px; }
+        .cal-wrap { display: none; background: var(--card); width: 340px; border-radius: 20px; padding: 15px 0; margin-top: 10px; border: 1px solid var(--line); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        .cal-wrap.show { display: block; }
         table { width: 95%; margin: 0 auto; border-collapse: collapse; }
-        td { height: 55px; text-align: center; border-radius: 8px; font-size: 0.92em; line-height: 1.3; }
-        .cur-day { background: var(--main-red) !important; color: #fff !important; }
-        .is-fest { color: var(--fest-red) !important; font-weight: bold; }
+        td { height: 50px; text-align: center; border-radius: 8px; font-size: 0.9em; }
+        .cur-day { background: var(--red) !important; color: #fff !important; }
+        .is-f { color: var(--f-red) !important; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="card">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-        <button class="nav-circle" onclick="toggleTheme()" id="themeBtn">🌙</button>
-        <div id="solar-date" style="color:var(--text-sec); font-size:1.05em">---</div>
-        <button class="nav-circle" onclick="toggleLang()" id="langBtn">繁</button>
+        <button class="nav-btn" onclick="toggleTheme()" id="themeBtn">🌙</button>
+        <div id="solar-title" style="color:var(--t-sec);"></div>
+        <button class="nav-btn" onclick="toggleLang()" id="langBtn">繁</button>
     </div>
-    <div id="clock" class="time">00:00:00</div>
-    <div id="jieqi-tag" class="jieqi-tag"></div>
-    <div id="lunar-main" class="lunar-main">---</div>
-    <div id="gz-year" style="color:var(--main-red); font-weight:bold; font-size:1.1em;">---</div>
-    <div id="gz-detail" style="color: var(--text-sec); font-size: 0.85em; margin-bottom: 10px;">---</div>
-    <div id="shichen-info" style="background:var(--bg-gray); padding:8px; border-radius:8px; font-size:0.95em; border:1px solid var(--line-color);">---</div>
+    <div id="clock" class="time"></div>
+    <div id="jieqi-tag" class="tag"></div>
+    <div id="lunar-main" class="lunar-big"></div>
+    <div id="gz-y" style="color:var(--red); font-weight:bold; font-size:1.1em;"></div>
+    <div id="gz-d" style="color:var(--t-sec); font-size:0.85em; margin-bottom:10px;"></div>
+    <div id="shi-info" style="background:var(--bg); padding:8px; border-radius:8px; font-size:0.95em; border:1px solid var(--line);"></div>
     
-    <div class="countdown">
-        <button class="arrow-btn" id="prevFest" onclick="navFest(-1)">❮</button>
-        <div id="fest-content" class="fest-text-box"></div>
-        <button class="arrow-btn" id="nextFest" onclick="navFest(1)">❯</button>
+    <div class="countdown-wrap">
+        <button class="fest-nav" id="festPrev" onclick="navFest(-1)">❮</button>
+        <div class="fest-content" id="fest-box"></div>
+        <button class="fest-nav" id="festNext" onclick="navFest(1)">❯</button>
     </div>
 
     <div style="display: flex; gap: 10px;">
-        <button class="action-btn" onclick="toggleCalendar()">🗓️ <span id="btn-text">月曆</span></button>
-        <button class="action-btn" onclick="shareApp()">📤 <span id="share-text">分享</span></button>
+        <button class="action-btn" onclick="toggleCal()">🗓️ <span id="btn-cal-txt"></span></button>
+        <button class="action-btn" onclick="share()">📤 <span id="btn-share-txt"></span></button>
     </div>
 </div>
 
-<div class="calendar-wrapper" id="calWrapper">
-    <div style="display:flex; justify-content:space-between; align-items:center; padding:0 20px 10px;">
-        <button class="arrow-btn" onclick="changeMonth(-1)">❮</button>
-        <h4 id="cal-title" style="margin:0">---</h4>
-        <button class="arrow-btn" onclick="changeMonth(1)">❯</button>
+<div class="cal-wrap" id="calWrapper">
+    <div style="display:flex; justify-content:space-between; padding:0 20px 10px; align-items:center;">
+        <button style="border:none; background:none; color:var(--red);" onclick="chgM(-1)">❮</button>
+        <h4 id="cal-m-title" style="margin:0"></h4>
+        <button style="border:none; background:none; color:var(--red);" onclick="chgM(1)">❯</button>
     </div>
     <table>
-        <thead><tr style="color:var(--text-sec); font-size:0.85em;"><th>日</th><th>一</th><th>二</th><th>三</th><th>四</th><th>五</th><th>六</th></tr></thead>
-        <tbody id="calendar-body"></tbody>
+        <thead><tr id="cal-head" style="color:var(--t-sec); font-size:0.8em;"></tr></thead>
+        <tbody id="cal-body"></tbody>
     </table>
 </div>
 
 <script>
-let viewDate = new Date(), isTrad = false, allFests = [], currentFestIdx = 0;
+let isTrad = false, viewD = new Date(), currentFIdx = 0, allF = [];
 
-// 全量文字映射 (確保馬/龍/時等關鍵字雙向正確)
-function getLangText(text) {
-    if (isTrad) {
-        return text.replace(/马/g, '馬').replace(/龙/g, '龍').replace(/鸡/g, '雞').replace(/猪/g, '豬').replace(/时/g, '時');
-    } else {
-        return text.replace(/馬/g, '马').replace(/龍/g, '龙').replace(/雞/g, '鸡').replace(/豬/g, '猪').replace(/時/g, '时');
-    }
+const TRAD = {"惊":"驚","蛰":"蟄","芒":"芒","种":"種","马":"馬","时":"時","礼":"禮","拜":"拜","历":"曆","节":"節","当":"當","离":"離","还":"還","有":"有","隐藏":"隱藏","月历":"月曆","分享":"分享","春节":"春節","端午":"端午","中秋":"中秋","距离":"距離","还有":"還有","今天是":"今天是","农历":"農曆","当前时辰":"當前時辰","天":"天","月":"月","年":"年","份":"份","星期":"禮拜"};
+const SIMP = {"驚":"惊","蟄":"蛰","時":"时","禮":"礼","拜":"拜","曆":"历","節":"节","離":"离","還":"还","農":"农","馬":"马","距離":"距离","還有":"还有","月曆":"月历","當前時辰":"当前时辰","禮拜":"礼拜","農曆":"农历"};
+
+function t(str) {
+    if (!str) return "";
+    let r = str;
+    const dict = isTrad ? TRAD : SIMP;
+    for (let k in dict) r = r.split(k).join(dict[k]);
+    return r;
 }
 
 function update() {
-    const now = new Date(), solar = Solar.fromDate(now), lunar = solar.getLunar();
+    const now = new Date(), sol = Solar.fromDate(now), lun = sol.getLunar();
     document.getElementById('clock').innerText = now.toTimeString().split(' ')[0];
-    
-    // 頂部日期
-    const weekStr = isTrad ? "禮拜" : "礼拜";
-    document.getElementById('solar-date').innerText = `${solar.getYear()}年${solar.getMonth()}月${solar.getDay()}日 ${weekStr}${solar.getWeekInChinese()}`;
-    
-    // 農曆主文字 (馬年/龍年處理)
-    document.getElementById('lunar-main').innerText = `${lunar.getMonthInChinese()}月${lunar.getDayInChinese()}`;
-    const shengXiao = getLangText(lunar.getYearShengXiao());
-    document.getElementById('gz-year').innerText = `${lunar.getYearInGanZhi()}${shengXiao}年`;
-    document.getElementById('gz-detail').innerText = `${lunar.getYearInGanZhi()}年 ${lunar.getMonthInGanZhi()}月 ${lunar.getDayInGanZhi()}日`;
-    
-    // 時辰處理
-    const shichenLabel = isTrad ? "當前時辰" : "当前时辰";
-    const shichenVal = lunar.getEightChar().getTimeZhi() + (isTrad ? '時' : '时');
-    document.getElementById('shichen-info').innerText = `${shichenLabel}：${shichenVal}`;
-    
-    document.getElementById('jieqi-tag').innerText = isTrad ? (lunar.getJieQi() || "農曆") : (lunar.getJieQi() || "农历");
-
-    const isShow = document.getElementById('calWrapper').classList.contains('show');
-    document.getElementById('btn-text').innerText = isTrad ? (isShow ? "隱藏月曆" : "月曆") : (isShow ? "隐藏月历" : "月历");
+    const weeks = ["日","一","二","三","四","五","六"];
+    document.getElementById('solar-title').innerText = t(`${sol.getYear()}年${sol.getMonth()}月${sol.getDay()}日 禮拜${weeks[now.getDay()]}`);
+    document.getElementById('lunar-main').innerText = t(`${lun.getMonthInChinese()}月${lun.getDayInChinese()}`);
+    document.getElementById('gz-y').innerText = t(`${lun.getYearInGanZhi()}${lun.getYearShengXiao()}年`);
+    document.getElementById('gz-d').innerText = t(`${lun.getYearInGanZhi()}年 ${lun.getMonthInGanZhi()}月 ${lun.getDayInGanZhi()}日`);
+    document.getElementById('shi-info').innerText = t(`當前時辰：${lun.getEightChar().getTimeZhi()}時`);
+    document.getElementById('jieqi-tag').innerText = t(lun.getJieQi() || "農曆");
+    document.getElementById('btn-cal-txt').innerText = t(document.getElementById('calWrapper').classList.contains('show') ? "隱藏月曆" : "月曆");
+    document.getElementById('btn-share-txt').innerText = t("分享");
     document.getElementById('langBtn').innerText = isTrad ? "簡" : "繁";
-
-    refreshFests(now);
+    refreshF(now);
 }
 
-function refreshFests(now) {
-    allFests = [];
+function refreshF(now) {
+    allF = [];
     const today = new Date().setHours(0,0,0,0);
-    const fDefs = [{n:"春節",m:1,d:1,t:"l"},{n:"端午節",m:5,d:5,t:"l"},{n:"中秋節",m:8,d:15,t:"l"},{n:"清明節",q:"清明",t:"j"},{n:"冬至",q:"冬至",t:"j"}];
-    
+    const defs = [{n:"春節",m:1,d:1,type:"l"},{n:"端午節",m:5,d:5,type:"l"},{n:"中秋節",m:8,d:15,type:"l"},{n:"清明",q:"清明",type:"j"},{n:"冬至",q:"冬至",type:"j"}];
     [now.getFullYear(), now.getFullYear()+1].forEach(y => {
-        fDefs.forEach(f => {
-            let sd = (f.t==="l") ? (function(){try{return Lunar.fromYmd(y,f.m,f.d).getSolar()}catch(e){}})() : Solar.fromDate(new Date(y,0,1)).getLunar().getJieQiTable()[f.q];
-            if(sd){
-                const d = new Date(sd.getYear(), sd.getMonth()-1, sd.getDay());
-                if(d >= today) allFests.push({n:f.n, d:d, m:sd.getMonth(), dy:sd.getDay()});
+        defs.forEach(f => {
+            let sDate = (f.type==="l") ? (function(){ try{return Lunar.fromYmd(y,f.m,f.d).getSolar()}catch(e){}})() : Solar.fromDate(new Date(y,0,1)).getLunar().getJieQiTable()[f.q];
+            if(sDate) {
+                const d = new Date(sDate.getYear(), sDate.getMonth()-1, sDate.getDay());
+                if(d >= today) allF.push({n:f.n, d:d, m:sDate.getMonth(), dy:sDate.getDay()});
             }
         });
     });
-    allFests.sort((a,b)=>a.d-b.d);
+    allF.sort((a,b)=>a.d-b.d);
     
-    const target = allFests[currentFestIdx];
+    // 更新箭頭狀態
+    document.getElementById('festPrev').disabled = (currentFIdx <= 0);
+    document.getElementById('festNext').disabled = (currentFIdx >= allF.length - 1);
+
+    const target = allF[currentFIdx];
     if(target) {
         const diff = Math.ceil((target.d - today)/86400000);
-        const l = isTrad ? ["距離","還有","天","今天是"] : ["距离","还有","天","今天是"];
-        const name = isTrad ? target.n : target.n.replace(/節/g, '节');
-        document.getElementById('fest-content').innerHTML = diff === 0 
-            ? `<span>${l[3]}</span> <b style="color:var(--main-red)">${name} (${target.dy}/${target.m})</b>` 
-            : `<span>${l[0]}</span> <b>${name} (${target.dy}/${target.m})</b> <span>${l[1]}</span> <span class="days">${diff}</span> <span>${l[2]}</span>`;
+        const l = { dist: t("距離"), have: t("還有"), day: t("天"), today: t("今天是") };
+        document.getElementById('fest-box').innerHTML = diff === 0 
+            ? `<span>${l.today}</span> <b style="color:var(--red)">${t(target.n)} (${target.dy}/${target.m})</b>` 
+            : `<span>${l.dist}</span> <b style="white-space:nowrap;">${t(target.n)} (${target.dy}/${target.m})</b> <span>${l.have}</span> <span style="color:var(--red); font-size:1.4em; font-weight:bold;">${diff}</span> <span>${l.day}</span>`;
     }
 }
 
-function renderCalendar(date) {
+function renderCal(date) {
     const y = date.getFullYear(), m = date.getMonth(), now = new Date();
-    document.getElementById('cal-title').innerText = `${y}年 ${m+1}月`;
+    document.getElementById('cal-m-title').innerText = t(`${y}年 ${m+1}月份`);
+    const weeks = ["日","一","二","三","四","五","六"];
+    document.getElementById('cal-head').innerHTML = weeks.map(w => `<th>${t(w)}</th>`).join('');
     const fDay = new Date(y, m, 1).getDay(), lDate = new Date(y, m+1, 0).getDate();
-    const jqTable = Solar.fromDate(new Date(y, m, 1)).getLunar().getJieQiTable();
-    
+    const jqs = Solar.fromDate(new Date(y, m, 1)).getLunar().getJieQiTable();
     let html = '<tr>';
     for(let i=0; i<fDay; i++) html += '<td></td>';
     for(let d=1; d<=lDate; d++) {
         if((d+fDay-1)%7===0 && d!==1) html += '</tr><tr>';
         const sol = Solar.fromYmd(y, m+1, d), lun = sol.getLunar(), lDayStr = lun.getDayInChinese();
-        let festName = "";
-        if(lun.getMonth()===1 && lun.getDay()===1) festName = isTrad ? "春節" : "春节";
-        if(lun.getMonth()===5 && lun.getDay()===5) festName = "端午";
-        if(lun.getMonth()===8 && lun.getDay()===15) festName = "中秋";
-
-        let isTodayJieQi = false;
-        for(let key in jqTable) {
-            let jqd = jqTable[key];
-            if(jqd.getYear()===y && jqd.getMonth()===(m+1) && jqd.getDay()===d) {
-                isTodayJieQi = true; festName = key; break;
-            }
-        }
-
-        const display = festName || (lDayStr === "初一" ? lun.getMonthInChinese() + "月" : lDayStr);
+        let fName = "";
+        if(lun.getMonth()===1 && lun.getDay()===1) fName = "春節";
+        if(lun.getMonth()===5 && lun.getDay()===5) fName = "端午節";
+        if(lun.getMonth()===8 && lun.getDay()===15) fName = "中秋節";
+        for(let k in jqs) { if(jqs[k].getYear()===y && jqs[k].getMonth()===(m+1) && jqs[k].getDay()===d) { fName = k; break; } }
         const isToday = (d===now.getDate() && m===now.getMonth() && y===now.getFullYear()) ? "cur-day" : "";
-        // 🚨 嚴格標紅判斷：只有真正的節氣、大節日或初一
-        const isF = (isTodayJieQi || (lun.getMonth()===1&&lun.getDay()===1) || (lun.getMonth()===5&&lun.getDay()===5) || (lun.getMonth()===8&&lun.getDay()===15) || lDayStr === "初一") ? "is-fest" : "";
-        
-        html += `<td class="${isToday}"><span style="font-weight:bold">${d}</span><br><small class="${isF}" style="font-size:0.75em">${getLangText(display)}</small></td>`;
+        const disp = t(fName || (lDayStr === "初一" ? lun.getMonthInChinese() + "月" : lDayStr));
+        html += `<td class="${isToday}"><span style="font-weight:bold">${d}</span><br><small class="${(fName || lDayStr === "初一") ? "is-f" : ""}" style="font-size:0.75em">${disp}</small></td>`;
     }
-    document.getElementById('calendar-body').innerHTML = html + '</tr>';
+    document.getElementById('cal-body').innerHTML = html + '</tr>';
 }
 
-function toggleLang() { isTrad = !isTrad; update(); renderCalendar(viewDate); }
-function toggleTheme() { const t = document.documentElement.getAttribute('data-theme')==='dark'?'light':'dark'; document.documentElement.setAttribute('data-theme',t); document.getElementById('themeBtn').innerText = t==='dark'?"☀️":"🌙"; }
-function toggleCalendar() { document.getElementById('calWrapper').classList.toggle('show'); update(); }
-function changeMonth(n) { viewDate.setMonth(viewDate.getMonth()+n); renderCalendar(viewDate); }
-function navFest(n) { currentFestIdx = Math.max(0, Math.min(allFests.length-1, currentFestIdx+n)); update(); }
-function shareApp() { navigator.share ? navigator.share({title:'農曆', url:location.href}) : alert(location.href); }
+function toggleLang() { isTrad = !isTrad; update(); renderCal(viewD); }
+function toggleTheme() { const d = document.documentElement; d.getAttribute('data-theme')==='dark' ? d.removeAttribute('data-theme') : d.setAttribute('data-theme','dark'); }
+function toggleCal() { document.getElementById('calWrapper').classList.toggle('show'); update(); }
+function chgM(n) { viewD.setMonth(viewD.getMonth()+n); renderCal(viewD); }
+function navFest(n) { currentFIdx = Math.max(0, Math.min(allF.length-1, currentFIdx+n)); update(); }
+function share() { navigator.share ? navigator.share({title:t('農曆'), url:location.href}) : alert(location.href); }
 
-setInterval(update, 1000); update(); renderCalendar(viewDate);
+setInterval(update, 1000); update(); renderCal(viewD);
 </script>
 </body>
 </html>
