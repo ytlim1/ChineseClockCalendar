@@ -44,7 +44,6 @@
         .gz-detail { color: var(--text-sec); font-size: 0.85em; margin-bottom: 12px; }
         .shichen-box { background: var(--shichen-bg); padding: 8px; border-radius: 8px; color: var(--text-sec); border: 1px solid var(--line-color); }
         
-        /* 导航对齐修正 */
         .countdown { 
             margin: 15px 0; 
             padding-top: 15px; 
@@ -106,7 +105,7 @@
 
     <div class="action-row">
         <button class="action-btn" onclick="toggleCalendar()">🗓️ <span id="btn-text">月历</span></button>
-        <button class="action-btn" onclick="shareApp()">📤 分享</button>
+        <button class="action-btn" onclick="shareApp()">📤 <span id="share-text">分享</span></button>
     </div>
 </div>
 
@@ -127,8 +126,8 @@ let viewDate = new Date(), isTrad = false, allFests = [], currentFestIdx = 0;
 
 function s2t(t) {
     if(!isTrad || !t) return t;
-    const s="农历,农,查看月历,隐藏月历,距离,还有,天,今日节气,当前时辰,礼拜,春节,端午节,中秋节,清明节,冬至,立春,雨水,惊蛰,春分,清明,谷雨,立夏,小满,芒种,夏至,小暑,大暑,立秋,处暑,白露,秋分,寒露,霜降,立冬,小雪,大雪,冬至,小寒,大寒,正月,二月,三月,四月,五月,六月,七月,八月,九月,十月,冬月,腊月,鼠,牛,虎,兔,龙,蛇,马,羊,猴,鸡,狗,猪,甲,乙,丙,丁,戊,己,庚,辛,壬,癸,子,丑,寅,卯,辰,巳,午,未,申,酉,戌,亥,年,月,日,历,时,钟,月历,今天是",
-          t2="農曆,農,查看月曆,隱藏月曆,距離,還有,天,今日節氣,當前時辰,禮拜,春節,端午節,中秋節,清明節,冬至,立春,雨水,驚蟄,春分,清明,穀雨,立夏,小滿,芒種,夏至,小暑,大暑,立秋,處暑,白露,秋分,寒露,霜降,立冬,小雪,大雪,冬至,小寒,大寒,正月,二月,三月,四月,五月,六月,七月,八月,九月,十月,冬月,臘月,鼠,牛,虎,兔,龍,蛇,馬,羊,猴,雞,狗,豬,甲,乙,丙,丁,戊,己,庚,辛,壬,癸,子,丑,寅,卯,辰,巳,午,未,申,酉,戌,亥,年,月,日,曆,時,鐘,月曆,今天是";
+    const s="农历,农,查看月历,隐藏月历,距离,还有,天,今日节气,当前时辰,礼拜,春节,端午节,中秋节,清明节,冬至,立春,雨水,惊蛰,春分,清明,谷雨,立夏,小满,芒种,夏至,小暑,大暑,立秋,处暑,白露,秋分,寒露,霜降,立冬,小雪,大雪,冬至,小寒,大寒,正月,二月,三月,四月,五月,六月,七月,八月,九月,十月,冬月,腊月,鼠,牛,虎,兔,龙,蛇,马,羊,猴,鸡,狗,猪,甲,乙,丙,丁,戊,己,庚,辛,壬,癸,子,丑,寅,卯,辰,巳,午,未,申,酉,戌,亥,年,月,日,历,时,钟,月历,今天是,分享",
+          t2="農曆,農,查看月曆,隱藏月曆,距離,還有,天,今日節氣,當前時辰,禮拜,春節,端午節,中秋節,清明節,冬至,立春,雨水,驚蟄,春分,清明,穀雨,立夏,小滿,芒種,夏至,小暑,大暑,立秋,處暑,白露,秋分,寒露,霜降,立冬,小雪,大雪,冬至,小寒,大寒,正月,二月,三月,四月,五月,六月,七月,八月,九月,十月,冬月,臘月,鼠,牛,虎,龍,蛇,馬,羊,猴,雞,狗,豬,甲,乙,丙,丁,戊,己,庚,辛,壬,癸,子,丑,寅,卯,辰,巳,午,未,申,酉,戌,亥,年,月,日,曆,時,鐘,月曆,今天是,分享";
     let res = t, sa = s.split(','), ta = t2.split(',');
     sa.forEach((x,i)=>res=res.split(x).join(ta[i]));
     return res;
@@ -211,7 +210,17 @@ function toggleTheme() {
     localStorage.setItem('theme', t);
     document.getElementById('themeBtn').innerText = t === 'dark' ? "☀️" : "🌙";
 }
-function toggleLang() { isTrad = !isTrad; document.getElementById('langBtn').innerText = isTrad ? "简" : "繁"; update(); renderCalendar(viewDate); }
+
+// 修正後的語言切換函數
+function toggleLang() { 
+    isTrad = !isTrad; 
+    document.getElementById('langBtn').innerText = isTrad ? "简" : "繁"; 
+    document.getElementById('btn-text').innerText = s2t("月历"); // 強制更新按鈕文字
+    document.getElementById('share-text').innerText = s2t("分享"); // 同步更新分享文字
+    update(); 
+    renderCalendar(viewDate); 
+}
+
 function toggleCalendar() { document.getElementById('calWrapper').classList.toggle('show'); }
 function changeMonth(d) { viewDate.setMonth(viewDate.getMonth()+d); renderCalendar(viewDate); }
 function shareApp() { navigator.share ? navigator.share({title:'农历万年历', url:location.href}) : alert(location.href); }
