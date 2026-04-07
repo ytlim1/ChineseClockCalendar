@@ -10,8 +10,17 @@
     <link rel="apple-touch-icon" href="icon-192.png">
     <meta name="theme-color" id="theme-color-meta" content="#b71c1c">
 
+    <script>
+        window.goatcounter = {
+            path: function(p) {
+                const isPWA = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+                return isPWA ? '/pwa-app' : '/web-page';
+            }
+        };
+    </script>
+    <script data-goatcounter="https://ytlim-clock.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
+
     <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.min.js"></script>
-    <script data-goatcounter="https://ytlim-clock.goatcounter.com/count" async defer src="https://gc.zgo.at/count.js"></script>
 
     <style>
         :root {
@@ -35,19 +44,19 @@
         .gz-detail { color: var(--text-sec); font-size: 0.85em; margin-bottom: 12px; }
         .shichen-box { background: var(--shichen-bg); padding: 8px; border-radius: 8px; color: var(--text-sec); border: 1px solid var(--line-color); }
         
-        /* 修正后的导航区域布局 */
+        /* 导航对齐修正 */
         .countdown { 
             margin: 15px 0; 
             padding-top: 15px; 
             border-top: 1px dashed var(--line-color); 
             display: flex; 
-            align-items: center;        /* 垂直居中核心逻辑 */
+            align-items: center; 
             justify-content: space-between; 
         }
         #fest-content { 
             flex: 1; 
             display: flex; 
-            align-items: center;        /* 文字内容垂直居中 */
+            align-items: center; 
             justify-content: center; 
             gap: 5px; 
             line-height: 1; 
@@ -58,7 +67,7 @@
             color: var(--main-red); 
             padding: 0 10px; 
             user-select: none; 
-            line-height: 1;             /* 确保箭头本身不带多余行高 */
+            line-height: 1; 
         }
         .nav-arrow.disabled { color: var(--text-sec); opacity: 0.3; cursor: default; }
         .days { color: var(--main-red); font-size: 1.8em; font-weight: bold; }
@@ -69,8 +78,6 @@
         .calendar-wrapper.show { display: block; }
         table { width: 95%; margin: 0 auto; border-collapse: collapse; }
         td { height: 50px; text-align: center; border-radius: 8px; }
-        
-        /* 选中状态文字变白修正 */
         .cur-day { background: var(--main-red) !important; color: #fff !important; }
         .cur-day small { color: #fff !important; }
         .is-fest { color: var(--fest-red) !important; font-weight: bold; }
@@ -93,8 +100,7 @@
     
     <div class="countdown">
         <span id="prevFest" class="nav-arrow" onclick="navFest(-1)">❮</span>
-        <div id="fest-content">
-            </div>
+        <div id="fest-content"></div>
         <span id="nextFest" class="nav-arrow" onclick="navFest(1)">❯</span>
     </div>
 
@@ -138,7 +144,6 @@ function update() {
     document.getElementById('jieqi-tag').innerText = s2t(lunar.getJieQi() || "农历");
     document.getElementById('shichen-info').innerText = s2t(`当前时辰：${lunar.getEightChar().getTimeZhi()}时`);
 
-    // 节日列表逻辑：仅限未来
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     allFests = [];
     const fDefs = [{n:"春节",t:"l",m:1,d:1},{n:"端午节",t:"l",m:5,d:5},{n:"中秋节",t:"l",m:8,d:15},{n:"清明节",t:"j",q:"清明"},{n:"冬至",t:"j",q:"冬至"}];
@@ -160,15 +165,12 @@ function renderFest() {
     if(!target) return;
     const diff = Math.ceil((target.d - new Date().setHours(0,0,0,0)) / 86400000);
     const name = s2t(`${target.n} (${target.dy}/${target.m})`);
-    
     const content = document.getElementById('fest-content');
     if(diff === 0) {
         content.innerHTML = `<span>${s2t('今天是')}</span> <span style="font-weight:bold; color:var(--text-main)">${name}</span>`;
     } else {
-        content.innerHTML = `<span>${s2t('距离')}</span> <span style="font-weight:bold; color:var(--text-main)">${name}</span> 
-                             <span>${s2t('还有')}</span> <span class="days">${diff}</span> <span>${s2t('天')}</span>`;
+        content.innerHTML = `<span>${s2t('距离')}</span> <span style="font-weight:bold; color:var(--text-main)">${name}</span> <span>${s2t('还有')}</span> <span class="days">${diff}</span> <span>${s2t('天')}</span>`;
     }
-    
     document.getElementById('prevFest').classList.toggle('disabled', currentFestIdx === 0);
     document.getElementById('nextFest').classList.toggle('disabled', currentFestIdx === allFests.length - 1);
 }
@@ -181,30 +183,23 @@ function navFest(dir) {
     }
 }
 
-// 优化后的月历渲染：初一显示月份
 function renderCalendar(date) {
     const y = date.getFullYear(), m = date.getMonth(), now = new Date();
     document.getElementById('cal-title').innerText = s2t(`${y}年 ${m+1}月`);
     const fDay = new Date(y, m, 1).getDay(), lDate = new Date(y, m+1, 0).getDate();
     const fList = [{n:"春节",m:1,d:1,t:"l"},{n:"端午",m:5,d:5,t:"l"},{n:"中秋",m:8,d:15,t:"l"},{n:"清明",q:"清明",t:"j"},{n:"冬至",q:"冬至",t:"j"}];
-    
     let html = '<tr>';
     for(let i=0; i<fDay; i++) html += '<td></td>';
     for(let d=1; d<=lDate; d++) {
         if((d+fDay-1)%7===0 && d!==1) html += '</tr><tr>';
         const ld = Solar.fromYmd(y, m+1, d).getLunar();
         const jq = ld.getJieQi();
-        
-        // 初一显示为农历月份
         let display = (ld.getDayInChinese()==="初一") ? ld.getMonthInChinese()+"月" : ld.getDayInChinese();
-        
         fList.forEach(f => {
             if((f.t==="l"&&ld.getMonth()===f.m&&ld.getDay()===f.d) || (f.t==="j"&&jq===f.q)) display = f.n;
         });
-        
         const isToday = (d===now.getDate() && m===now.getMonth() && y===now.getFullYear()) ? "cur-day" : "";
         const isF = (jq || display.includes("月") || display.length > 2) ? "is-fest" : "";
-        
         html += `<td class="${isToday}"><span style="font-weight:bold">${d}</span><br><small class="${isF}" style="font-size:0.75em">${s2t(display)}</small></td>`;
     }
     document.getElementById('calendar-body').innerHTML = html + '</tr>';
