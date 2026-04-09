@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lunar Calendar V61 - Font Tuning</title>
+    <title>Lunar Calendar V69 - Fixed Nav Logic</title>
     <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.min.js"></script>
     <style>
         :root { --bg: #f5f3ef; --card: #ffffff; --red: #b71c1c; --f-red: #cf1322; --t-main: #111111; --t-sec: #888888; --line: #eeeeee; }
@@ -13,9 +13,12 @@
         .nav-btn { width: 34px; height: 34px; background: none; border: 1px solid var(--red); border-radius: 50%; color: var(--red); cursor: pointer; font-weight: bold; font-size: 0.8em; display: flex; align-items: center; justify-content: center; }
         .time { font-size: 2.4em; font-weight: bold; color: var(--red); margin: 5px 0; font-variant-numeric: tabular-nums; }
         .badge-label { display: inline-block; color: var(--f-red); padding: 2px 14px; border-radius: 50px; font-size: 0.85em; margin: 10px 0; background: #fff1f0; border: 1px solid #ffa39e; font-weight: bold; }
-        .countdown-wrap { margin: 15px 0; padding: 10px 0; border-top: 1px dashed var(--line); display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 50px; font-size: 0.95em; } /* Festival line size base */
+        .countdown-wrap { margin: 15px 0; padding: 10px 0; border-top: 1px dashed var(--line); display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 50px; font-size: 0.95em; }
         .fest-content { flex: 1; line-height: 1.3; font-weight: bold; }
+        /* Grey out when disabled */
         .fest-nav { border: none; background: none; color: var(--red); cursor: pointer; font-size: 1.2em; padding: 0 8px; transition: opacity 0.3s; }
+        .fest-nav:disabled { color: #ccc; cursor: not-allowed; opacity: 0.5; }
+        
         .action-btn { flex: 1; background: var(--card); color: var(--red); border: 1px solid var(--line); padding: 12px; border-radius: 12px; cursor: pointer; font-weight: bold; font-size: 0.9em; min-height: 55px; }
         .cal-wrap { display: none; background: var(--card); width: 340px; border-radius: 20px; padding: 15px 0; margin-top: 10px; border: 1px solid var(--line); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
         .cal-wrap.show { display: block; }
@@ -25,11 +28,9 @@
         .special-day { color: var(--f-red) !important; font-weight: bold; -webkit-tap-highlight-color: transparent; }
         .tip { visibility: hidden; width: 110px; background-color: #333; color: #fff; text-align: center; border-radius: 6px; padding: 6px; position: absolute; z-index: 10; bottom: 110%; left: 50%; transform: translateX(-50%); opacity: 0; transition: opacity 0.3s; font-size: 0.75em; font-weight: normal; line-height: 1.2; pointer-events: none; }
         .tip::after { content: ""; position: absolute; top: 100%; left: 50%; margin-left: -5px; border-width: 5px; border-style: solid; border-color: #333 transparent transparent transparent; }
-        .en-mode .special-day:hover .tip, .en-mode .special-day.active-tip .tip { visibility: visible; opacity: 1; }
-        
-        /* Font Size Adjustments */
-        #lunar-main { font-size: 2.5em; font-weight: bold; margin: 5px 0; } /* Increased for better emphasis */
-        #zodiac-year { font-size: 0.95em; font-weight: bold; color: var(--red); margin-bottom: 2px; } /* Matches festival line size */
+        .special-day:hover .tip, .special-day.active-tip .tip { visibility: visible; opacity: 1; }
+        #lunar-main { font-size: 2.5em; font-weight: bold; margin: 5px 0; }
+        #zodiac-year { font-size: 0.95em; font-weight: bold; color: var(--red); margin-bottom: 2px; }
         #en-lunar-sub { font-size: 1.35em; margin: 8px 0 2px 0; color: var(--red); }
     </style>
 </head>
@@ -72,13 +73,13 @@
 </div>
 
 <script>
-const TRAD_MAP = { "惊蛰":"驚蟄", "芒种":"芒種", "节":"節", "时":"時", "礼拜":"禮拜", "离":"離", "还":"還", "历":"曆", "览":"覽", "农":"農", "马":"馬", "丑":"醜", "未":"未", "当前时辰":"當前時辰", "距离":"距離", "天":"天", "年":"年", "月":"月", "日":"日", "隐藏月历":"隱藏月曆", "月历":"月曆", "端午节":"端午節" };
+const TRAD_MAP = { "惊蛰":"驚蟄", "芒种":"芒種", "处暑":"處暑", "节":"節", "时":"時", "礼拜":"禮拜", "离":"離", "还":"還", "历":"曆", "览":"覽", "农":"農", "马":"馬", "丑":"醜", "未":"未", "当前时辰":"當前時辰", "距离":"距離", "天":"天", "年":"年", "月":"月", "日":"日", "隐藏月历":"隱藏月曆", "月历":"月曆", "端午节":"端午節" };
 const DATA = { simp: { badge: "农历", cal: "月历", share: "分享", hide: "隐藏月历", shi: "当前时辰：", unit: "天", dist: "距离", weeks: ["日","一","二","三","四","五","六"], fNames: {"春節":"春节","端午節":"端午节","中秋節":"中秋节","清明":"清明","冬至":"冬至"}, wPre: "礼拜" }, trad: { badge: "農曆", cal: "月曆", share: "分享", hide: "隱藏月曆", shi: "當前時辰：", unit: "天", dist: "距離", weeks: ["日","一","二","三","四","五","六"], fNames: {"春節":"春節","端午節":"端午節","中秋節":"中秋節","清明":"清明","冬至":"冬至"}, wPre: "禮拜" }, en: { badge: "Lunar Calendar", cal: "Monthly Calendar", share: "Share", hide: "Hide Calendar", shi: "Current Time: ", weeks: ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"], fNames: {"春節":"Lunar New Year","端午節":"Dragon Boat Festival","中秋節":"Mid-Autumn Festival","清明":"Qingming Festival","冬至":"Winter Solstice"}, wPre: "" } };
-const INFO_EN = { "立春":"Spring Begins","雨水":"Rain Water","驚蟄":"Awakening of Insects","春分":"Spring Equinox","清明":"Qingming Festival","穀雨":"Grain Rain", "立夏":"Summer Begins","小滿":"Grain Buds","芒種":"Grain in Ear","夏至":"Summer Solstice","小暑":"Slight Heat","大暑":"Great Heat", "立秋":"Autumn Begins","處暑":"End of Heat","白露":"White Dew","秋分":"Autumn Equinox","寒露":"Cold Dew","霜降":"Frost Descends", "立冬":"Winter Begins","小雪":"Light Snow","大雪":"Heavy Snow","冬至":"Winter Solstice","小寒":"Slight Cold","大寒":"Great Cold", "春節":"Lunar New Year","端午節":"Dragon Boat Festival","中秋節":"Mid-Autumn Festival" };
+const INFO_EN = { "立春":"Spring Begins","雨水":"Rain Water","驚蟄":"Insects Awakening","春分":"Spring Equinox","清明":"Qingming Festival","穀雨":"Grain Rain", "立夏":"Summer Begins","小滿":"Grain Buds","芒種":"Grain in Ear","夏至":"Summer Solstice","小暑":"Slight Heat","大暑":"Great Heat", "立秋":"Autumn Begins","處暑":"End of Heat","白露":"White Dew","秋分":"Autumn Equinox","寒露":"Cold Dew","霜降":"Frost Descends","立冬":"Winter Begins","小雪":"Light Snow","大雪":"Heavy Snow","冬至":"Winter Solstice","小寒":"Slight Cold","大寒":"Great Cold", "春節":"Lunar New Year","端午節":"Dragon Boat Festival","中秋節":"Mid-Autumn Festival" };
 let lang = 'simp', viewD = new Date(), currentFIdx = 0, allF = [];
 
 function fixTrad(str) { if (lang !== 'trad') return str; let s = str; for (let k in TRAD_MAP) s = s.split(k).join(TRAD_MAP[k]); return s; }
-function handleTip(el) { if (lang !== 'en') return; const isActive = el.classList.contains('active-tip'); clearTips(); if (!isActive) el.classList.add('active-tip'); }
+function handleTip(el) { const isActive = el.classList.contains('active-tip'); clearTips(); if (!isActive) el.classList.add('active-tip'); }
 function clearTips() { document.querySelectorAll('.special-day').forEach(d => d.classList.remove('active-tip')); }
 
 function update() {
@@ -113,15 +114,32 @@ function update() {
 }
 
 function refreshF(now) {
-    allF = []; const today = new Date().setHours(0,0,0,0);
-    const defs = [{n:"春節",m:1,d:1,type:"l"},{n:"端午節",m:5,d:5,type:"l"},{n:"中秋節",m:8,d:15,type:"l"},{n:"清明",q:"清明",type:"j"},{n:"冬至",q:"冬至",type:"j"}];
-    [now.getFullYear(), now.getFullYear()+1].forEach(y => { defs.forEach(f => { let sDate = (f.type==="l") ? (function(){ try{return Lunar.fromYmd(y,f.m,f.d).getSolar()}catch(e){}})() : Solar.fromDate(new Date(y,0,1)).getLunar().getJieQiTable()[f.q]; if(sDate) { const d = new Date(sDate.getYear(), sDate.getMonth()-1, sDate.getDay()); if(d >= today) allF.push({raw:f.n, d:d}); } }); });
-    allF.sort((a,b)=>a.d-b.d);
-    document.getElementById('fest-prev').disabled = (currentFIdx <= 0); document.getElementById('fest-next').disabled = (currentFIdx >= allF.length - 1);
+    const today = new Date().setHours(0,0,0,0);
+    // Build list only if it's empty
+    if(allF.length === 0) {
+        const defs = [{n:"春節",m:1,d:1,type:"l"},{n:"端午節",m:5,d:5,type:"l"},{n:"中秋節",m:8,d:15,type:"l"},{n:"清明",q:"清明",type:"j"},{n:"冬至",q:"冬至",type:"j"}];
+        [now.getFullYear(), now.getFullYear()+1].forEach(y => { 
+            defs.forEach(f => { 
+                let sDate = (f.type==="l") ? (function(){ try{return Lunar.fromYmd(y,f.m,f.d).getSolar()}catch(e){}})() : Solar.fromDate(new Date(y,0,1)).getLunar().getJieQiTable()[f.q]; 
+                if(sDate) { 
+                    const d = new Date(sDate.getYear(), sDate.getMonth()-1, sDate.getDay()); 
+                    if(d >= today) allF.push({raw:f.n, d:d}); 
+                } 
+            }); 
+        });
+        allF.sort((a,b)=>a.d-b.d);
+    }
+
+    // Update navigation buttons
+    document.getElementById('fest-prev').disabled = (currentFIdx <= 0);
+    document.getElementById('fest-next').disabled = (currentFIdx >= allF.length - 1);
+
     const target = allF[currentFIdx];
     if(target) {
-        const diff = Math.ceil((target.d - today)/86400000); const name = DATA[lang].fNames[target.raw];
-        document.getElementById('fest-box').innerHTML = (lang === 'en') ? `<div style="color:var(--f-red)">${name}</div><div style="font-weight:normal; color:var(--t-sec); font-size:0.85em;">${diff} Days to go</div>` : `<span style="color:var(--t-main)">${fixTrad(DATA[lang].dist + " " + name)}</span> <span style="color:var(--red); font-size:1.1em">${diff}</span> ${fixTrad(DATA[lang].unit)}`;
+        const diff = Math.ceil((target.d - today)/86400000); 
+        const name = DATA[lang].fNames[target.raw];
+        const gDate = `(${target.d.getDate()}/${target.d.getMonth()+1})`; 
+        document.getElementById('fest-box').innerHTML = (lang === 'en') ? `<div style="color:var(--f-red)">${name} ${gDate}</div><div style="font-weight:normal; color:var(--t-sec); font-size:0.85em;">${diff} Days to go</div>` : `<span style="color:var(--t-main)">${fixTrad(DATA[lang].dist + " " + name + " " + gDate)}</span> <span style="color:var(--red); font-size:1.1em">${diff}</span> ${fixTrad(DATA[lang].unit)}`;
     }
 }
 
@@ -136,13 +154,41 @@ function renderCal(date) {
         if((d+fDay-1)%7===0 && d!==1) html += '</tr><tr>';
         const sol = Solar.fromYmd(y, m+1, d), lun = sol.getLunar();
         const isToday = sol.toYmd() === todayStr ? "cur-day" : "";
-        let lStr = fixTrad(lun.getDayInChinese());
+        
+        let lStr = ""; 
         let isSpecial = false, tipText = "";
-        if(lun.getDay() === 1) { lStr = fixTrad(lun.getMonthInChinese() + "月"); isSpecial = true; tipText = (lang==='en') ? `Lunar Month ${lun.getMonth()}` : ""; }
-        const jq = lun.getJieQi(); if(jq) { lStr = fixTrad(jq); isSpecial = true; tipText = (lang === 'en') ? (INFO_EN[fixTrad(jq)] || jq) : ""; }
+        
         const fests = lun.getFestivals();
-        if(fests.length > 0) { for(let key in DATA.en.fNames) { if(fests[0].includes(key) || fixTrad(fests[0]).includes(fixTrad(key))) { lStr = fixTrad(key.replace("節","")); isSpecial = true; tipText = (lang === 'en') ? DATA.en.fNames[key] : ""; break; } } }
-        const tooltipHtml = (isSpecial && lang === 'en') ? `<span class="tip">${tipText}</span>` : "";
+        const jq = lun.getJieQi();
+        const isDragonBoat = (lun.getMonth() === 5 && lun.getDay() === 5);
+        const isSpring = (lun.getMonth() === 1 && lun.getDay() === 1);
+        const isMidAutumn = (lun.getMonth() === 8 && lun.getDay() === 15);
+        
+        if (isDragonBoat || fests.join(",").includes("端午")) {
+            lStr = fixTrad("端午");
+            isSpecial = true;
+            tipText = (lang === 'en') ? "Dragon Boat Festival" : "";
+        } else if (isSpring || fests.join(",").includes("春節")) {
+            lStr = fixTrad("春节");
+            isSpecial = true;
+            tipText = (lang === 'en') ? "Lunar New Year" : "";
+        } else if (isMidAutumn || fests.join(",").includes("中秋")) {
+            lStr = fixTrad("中秋");
+            isSpecial = true;
+            tipText = (lang === 'en') ? "Mid-Autumn Festival" : "";
+        } else if (jq) {
+            lStr = fixTrad(jq);
+            isSpecial = true;
+            tipText = (lang === 'en') ? (INFO_EN[fixTrad(jq)] || jq) : "";
+        } else if (lun.getDay() === 1) {
+            lStr = fixTrad(lun.getMonthInChinese() + "月");
+            isSpecial = true;
+            tipText = (lang === 'en') ? `Lunar Month ${lun.getMonth()}` : "";
+        } else {
+            lStr = fixTrad(lun.getDayInChinese());
+        }
+
+        const tooltipHtml = isSpecial ? `<span class="tip">${tipText || lStr}</span>` : "";
         html += `<td class="${isToday} ${isSpecial ? 'special-day' : ''}" onclick="handleTip(this)">${tooltipHtml}<span style="font-weight:bold">${d}</span><br><small style="font-size:0.75em">${lStr}</small></td>`;
     }
     document.getElementById('cal-body').innerHTML = html + '</tr>';
