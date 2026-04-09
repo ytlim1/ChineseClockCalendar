@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lunar Calendar V70 - English Tooltips Only</title>
+    <title>Lunar Calendar V72 - Fixed En Hover</title>
     <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.min.js"></script>
     <style>
         :root { --bg: #f5f3ef; --card: #ffffff; --red: #b71c1c; --f-red: #cf1322; --t-main: #111111; --t-sec: #888888; --line: #eeeeee; }
@@ -21,16 +21,16 @@
         .cal-wrap { display: none; background: var(--card); width: 340px; border-radius: 20px; padding: 15px 0; margin-top: 10px; border: 1px solid var(--line); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
         .cal-wrap.show { display: block; }
         table { width: 95%; margin: 0 auto; border-collapse: collapse; }
-        td { height: 52px; text-align: center; border-radius: 8px; font-size: 0.85em; position: relative; width: 14.28%; }
+        td { height: 52px; text-align: center; border-radius: 8px; font-size: 0.85em; position: relative; width: 14.28%; cursor: pointer; }
         .cur-day { background: var(--red) !important; color: #fff !important; }
-        .special-day { color: var(--f-red) !important; font-weight: bold; -webkit-tap-highlight-color: transparent; }
-        
-        /* Tooltip Style */
-        .tip { visibility: hidden; width: 110px; background-color: #333; color: #fff; text-align: center; border-radius: 6px; padding: 6px; position: absolute; z-index: 10; bottom: 110%; left: 50%; transform: translateX(-50%); opacity: 0; transition: opacity 0.3s; font-size: 0.75em; font-weight: normal; line-height: 1.2; pointer-events: none; }
+        .special-day { color: var(--f-red) !important; font-weight: bold; }
+
+        /* Tooltip logic */
+        .tip { visibility: hidden; width: 100px; background-color: #333; color: #fff; text-align: center; border-radius: 6px; padding: 5px; position: absolute; z-index: 10; bottom: 115%; left: 50%; transform: translateX(-50%); opacity: 0; transition: opacity 0.2s; font-size: 0.75em; font-weight: normal; pointer-events: none; line-height: 1.2; }
         .tip::after { content: ""; position: absolute; top: 100%; left: 50%; margin-left: -5px; border-width: 5px; border-style: solid; border-color: #333 transparent transparent transparent; }
         
-        /* Only show tooltips when active-tip class is present (triggered by En mode) */
-        .special-day.active-tip .tip { visibility: visible; opacity: 1; }
+        /* Show on hover or when class added via click */
+        .special-day:hover .tip, .special-day.active-tip .tip { visibility: visible; opacity: 1; }
         
         #lunar-main { font-size: 2.5em; font-weight: bold; margin: 5px 0; }
         #zodiac-year { font-size: 0.95em; font-weight: bold; color: var(--red); margin-bottom: 2px; }
@@ -83,10 +83,8 @@ let lang = 'simp', viewD = new Date(), currentFIdx = 0, allF = [];
 
 function fixTrad(str) { if (lang !== 'trad') return str; let s = str; for (let k in TRAD_MAP) s = s.split(k).join(TRAD_MAP[k]); return s; }
 function clearTips() { document.querySelectorAll('.special-day').forEach(d => d.classList.remove('active-tip')); }
-
-// Modified click handler to check for language
 function handleTip(el) { 
-    if (lang !== 'en') return; // Exit if not in English mode
+    if (lang !== 'en') return;
     const isActive = el.classList.contains('active-tip'); 
     clearTips(); 
     if (!isActive) el.classList.add('active-tip'); 
@@ -169,27 +167,21 @@ function renderCal(date) {
         const isMidAutumn = (lun.getMonth() === 8 && lun.getDay() === 15);
         
         if (isDragonBoat || fests.join(",").includes("端午")) {
-            lStr = fixTrad("端午"); isSpecial = true;
-            tipText = "Dragon Boat Festival";
+            lStr = fixTrad("端午"); isSpecial = true; tipText = "Dragon Boat Festival";
         } else if (isSpring || fests.join(",").includes("春節")) {
-            lStr = fixTrad("春节"); isSpecial = true;
-            tipText = "Lunar New Year";
+            lStr = fixTrad("春节"); isSpecial = true; tipText = "Lunar New Year";
         } else if (isMidAutumn || fests.join(",").includes("中秋")) {
-            lStr = fixTrad("中秋"); isSpecial = true;
-            tipText = "Mid-Autumn Festival";
+            lStr = fixTrad("中秋"); isSpecial = true; tipText = "Mid-Autumn Festival";
         } else if (jq) {
-            lStr = fixTrad(jq); isSpecial = true;
-            tipText = INFO_EN[fixTrad(jq)] || jq;
+            lStr = fixTrad(jq); isSpecial = true; tipText = INFO_EN[fixTrad(jq)] || jq;
         } else if (lun.getDay() === 1) {
-            lStr = fixTrad(lun.getMonthInChinese() + "月"); isSpecial = true;
-            tipText = `Lunar Month ${lun.getMonth()}`;
+            lStr = fixTrad(lun.getMonthInChinese() + "月"); isSpecial = true; tipText = `Lunar Month ${lun.getMonth()}`;
         } else {
             lStr = fixTrad(lun.getDayInChinese());
         }
 
-        // TOOLTIP HTML ONLY USED IF MODE IS ENGLISH
-        const tooltipHtml = (isSpecial && lang === 'en') ? `<span class="tip">${tipText}</span>` : "";
-        html += `<td class="${isToday} ${isSpecial ? 'special-day' : ''}" onclick="handleTip(this)">${tooltipHtml}<span style="font-weight:bold">${d}</span><br><small style="font-size:0.75em">${lStr}</small></td>`;
+        const tooltip = (isSpecial && lang === 'en') ? `<span class="tip">${tipText}</span>` : "";
+        html += `<td class="${isToday} ${isSpecial ? 'special-day' : ''}" onclick="handleTip(this); event.stopPropagation();">${tooltip}<span style="font-weight:bold">${d}</span><br><small style="font-size:0.75em">${lStr}</small></td>`;
     }
     document.getElementById('cal-body').innerHTML = html + '</tr>';
 }
