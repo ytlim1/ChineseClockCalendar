@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lunar Calendar V72 - Fixed En Hover</title>
+    <title>Lunar Calendar V74 - Final Contrast Fix</title>
     <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.min.js"></script>
     <style>
         :root { --bg: #f5f3ef; --card: #ffffff; --red: #b71c1c; --f-red: #cf1322; --t-main: #111111; --t-sec: #888888; --line: #eeeeee; }
@@ -22,14 +22,16 @@
         .cal-wrap.show { display: block; }
         table { width: 95%; margin: 0 auto; border-collapse: collapse; }
         td { height: 52px; text-align: center; border-radius: 8px; font-size: 0.85em; position: relative; width: 14.28%; cursor: pointer; }
-        .cur-day { background: var(--red) !important; color: #fff !important; }
+        
+        /* FIXED: Ensuring both the Day Number (span) and Lunar Text (small) are white */
+        .cur-day { background: var(--red) !important; color: #ffffff !important; }
+        .cur-day span { color: #ffffff !important; text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
+        .cur-day small { color: #ffffff !important; opacity: 0.95; }
+        
         .special-day { color: var(--f-red) !important; font-weight: bold; }
 
-        /* Tooltip logic */
         .tip { visibility: hidden; width: 100px; background-color: #333; color: #fff; text-align: center; border-radius: 6px; padding: 5px; position: absolute; z-index: 10; bottom: 115%; left: 50%; transform: translateX(-50%); opacity: 0; transition: opacity 0.2s; font-size: 0.75em; font-weight: normal; pointer-events: none; line-height: 1.2; }
         .tip::after { content: ""; position: absolute; top: 100%; left: 50%; margin-left: -5px; border-width: 5px; border-style: solid; border-color: #333 transparent transparent transparent; }
-        
-        /* Show on hover or when class added via click */
         .special-day:hover .tip, .special-day.active-tip .tip { visibility: visible; opacity: 1; }
         
         #lunar-main { font-size: 2.5em; font-weight: bold; margin: 5px 0; }
@@ -181,7 +183,7 @@ function renderCal(date) {
         }
 
         const tooltip = (isSpecial && lang === 'en') ? `<span class="tip">${tipText}</span>` : "";
-        html += `<td class="${isToday} ${isSpecial ? 'special-day' : ''}" onclick="handleTip(this); event.stopPropagation();">${tooltip}<span style="font-weight:bold">${d}</span><br><small style="font-size:0.75em">${lStr}</small></td>`;
+        html += `<td class="${isToday} ${isSpecial ? 'special-day' : ''}" onclick="handleTip(this); event.stopPropagation();">${tooltip}<span>${d}</span><br><small style="font-size:0.75em">${lStr}</small></td>`;
     }
     document.getElementById('cal-body').innerHTML = html + '</tr>';
 }
