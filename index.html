@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lunar Calendar V83</title>
+    <title>Lunar Calendar V84</title>
     <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.min.js"></script>
     <style>
         :root { --bg: #f5f3ef; --card: #ffffff; --red: #b71c1c; --f-red: #cf1322; --t-main: #111111; --t-sec: #888888; --line: #eeeeee; }
@@ -15,18 +15,19 @@
         .badge-label { display: inline-block; color: var(--f-red); padding: 2px 14px; border-radius: 50px; font-size: 0.85em; margin: 10px 0; background: #fff1f0; border: 1px solid #ffa39e; font-weight: bold; min-width: 60px; }
         .countdown-wrap { margin: 15px 0; padding: 10px 0; border-top: 1px dashed var(--line); display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 55px; font-size: 0.95em; }
         .fest-content { flex: 1; line-height: 1.3; font-weight: bold; }
-        
-        /* Updated navigation arrow styling */
         .fest-nav { border: none; background: none; color: var(--red); cursor: pointer; font-size: 1.2em; padding: 0 8px; transition: opacity 0.3s; }
         .fest-nav:disabled { color: var(--t-sec); opacity: 0.3; cursor: not-allowed; }
-        
         .action-btn { flex: 1; background: var(--card); color: var(--red); border: 1px solid var(--line); padding: 12px; border-radius: 12px; cursor: pointer; font-weight: bold; font-size: 0.9em; min-height: 55px; }
         .cal-wrap { display: none; background: var(--card); width: 340px; border-radius: 20px; padding: 15px 0; margin-top: 10px; border: 1px solid var(--line); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
         .cal-wrap.show { display: block; }
         table { width: 95%; margin: 0 auto; border-collapse: collapse; }
         td { height: 52px; text-align: center; border-radius: 8px; font-size: 0.85em; position: relative; width: 14.28%; cursor: pointer; }
+        
+        /* Highlighting Logic */
         .cur-day { background: var(--red) !important; color: #ffffff !important; }
         .cur-day span, .cur-day small { color: #ffffff !important; font-weight: bold; }
+        .special-day { color: var(--f-red) !important; font-weight: bold; }
+        
         #lunar-main { font-size: 2.5em; font-weight: bold; margin: 5px 0; line-height: 1.1; }
         #zodiac-year { font-size: 0.95em; font-weight: bold; color: var(--red); margin-bottom: 2px; }
         #en-lunar-sub { font-size: 1.2em; margin: 8px 0 2px 0; color: var(--red); font-weight: bold; }
@@ -59,7 +60,7 @@
         <button class="action-btn" onclick="toggleCal()" id="btn-cal"></button>
         <button class="action-btn" onclick="share()" id="btn-share"></button>
     </div>
-    <div class="rev-tag">2026-05-15-v4</div>
+    <div class="rev-tag">2026-05-15-v5</div>
 </div>
 
 <div class="cal-wrap" id="calWrapper">
@@ -139,11 +140,8 @@ function refreshF(now) {
         });
         allF.sort((a,b)=>a.d-b.d);
     }
-    
-    // Grey out arrows at bounds
     document.getElementById('fest-prev').disabled = currentFIdx <= 0;
     document.getElementById('fest-next').disabled = currentFIdx >= allF.length - 1;
-
     const target = allF[currentFIdx];
     if(target) {
         const diff = Math.ceil((target.d - today)/86400000); 
@@ -167,14 +165,16 @@ function renderCal(date) {
     for(let i=0; i<fDay; i++) html += '<td></td>';
     for(let d=1; d<=lDate; d++) {
         if((d+fDay-1)%7===0 && d!==1) html += '</tr><tr>';
-        const sol = Solar.fromYmd(y, m+1, d), lun = sol.getLunar(), isToday = sol.toYmd() === todayStr ? "cur-day" : "";
-        let jq = lun.getJieQi();
+        const sol = Solar.fromYmd(y, m+1, d), lun = sol.getLunar();
+        const isToday = sol.toYmd() === todayStr ? "cur-day" : "";
+        const jq = lun.getJieQi();
+        const fest = lun.getFestivals()[0] || "";
+        const isSpecial = (jq || fest) ? "special-day" : "";
         
-        // Solar terms always in Chinese; Tooltip for English
-        let lStr = jq ? jq : (lun.getDay() === 1 ? lun.getMonthInChinese() + "月" : lun.getDayInChinese());
-        let titleAttr = (lang === 'en' && jq) ? `title="${TERMS_EN[jq]}"` : "";
+        let lStr = jq ? jq : (fest ? fest.substring(0,2) : (lun.getDay() === 1 ? lun.getMonthInChinese() + "月" : lun.getDayInChinese()));
+        let clickAction = (lang === 'en' && jq) ? `onclick="alert('${TERMS_EN[jq]}')" title="${TERMS_EN[jq]}"` : "";
         
-        html += `<td class="${isToday}" ${titleAttr}><span>${d}</span><br><small>${fixTrad(lStr)}</small></td>`;
+        html += `<td class="${isToday} ${isSpecial}" ${clickAction}><span>${d}</span><br><small>${fixTrad(lStr)}</small></td>`;
     }
     document.getElementById('cal-body').innerHTML = html + '</tr>';
 }
