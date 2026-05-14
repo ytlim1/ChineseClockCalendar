@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lunar Calendar V86</title>
+    <title>Lunar Calendar V87</title>
     <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.min.js"></script>
     <style>
         :root { --bg: #f5f3ef; --card: #ffffff; --red: #b71c1c; --f-red: #cf1322; --t-main: #111111; --t-sec: #888888; --line: #eeeeee; }
         [data-theme='dark'] { --bg: #121212; --card: #1e1e1e; --red: #ff5252; --f-red: #ff7875; --t-main: #e0e0e0; --t-sec: #aaaaaa; --line: #333333; }
-        body { background: var(--bg); font-family: -apple-system, sans-serif; display: flex; flex-direction: column; align-items: center; padding: 15px 0; color: var(--t-main); margin: 0; }
+        body { background: var(--bg); font-family: -apple-system, sans-serif; display: flex; flex-direction: column; align-items: center; padding: 15px 0; color: var(--t-main); margin: 0; overflow-x: hidden; }
         .card { background: var(--card); padding: 25px 20px 10px 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 340px; text-align: center; border-top: 6px solid var(--red); box-sizing: border-box; position: relative; }
         .nav-btn { width: 34px; height: 34px; background: none; border: 1px solid var(--red); border-radius: 50%; color: var(--red); cursor: pointer; font-weight: bold; font-size: 0.8em; display: flex; align-items: center; justify-content: center; }
         .time { font-size: 2.4em; font-weight: bold; color: var(--red); margin: 5px 0; font-variant-numeric: tabular-nums; }
@@ -21,10 +21,15 @@
         .cal-wrap { display: none; background: var(--card); width: 340px; border-radius: 20px; padding: 15px 0; margin-top: 10px; border: 1px solid var(--line); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
         .cal-wrap.show { display: block; }
         table { width: 95%; margin: 0 auto; border-collapse: collapse; }
-        td { height: 52px; text-align: center; border-radius: 8px; font-size: 0.85em; position: relative; width: 14.28%; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+        td { height: 52px; text-align: center; border-radius: 8px; font-size: 0.85em; position: relative; width: 14.28%; cursor: pointer; -webkit-tap-highlight-color: transparent; user-select: none; }
         .cur-day { background: var(--red) !important; color: #ffffff !important; }
         .cur-day span, .cur-day small { color: #ffffff !important; font-weight: bold; }
         .special-day { color: var(--f-red) !important; font-weight: bold; }
+        
+        /* New Custom Tooltip */
+        #tooltip { position: fixed; background: rgba(0,0,0,0.85); color: white; padding: 6px 12px; border-radius: 6px; font-size: 0.85em; pointer-events: none; display: none; z-index: 1000; transform: translate(-50%, -120%); white-space: nowrap; }
+        #tooltip::after { content: ''; position: absolute; top: 100%; left: 50%; margin-left: -5px; border-width: 5px; border-style: solid; border-color: rgba(0,0,0,0.85) transparent transparent transparent; }
+
         #lunar-main { font-size: 2.5em; font-weight: bold; margin: 5px 0; line-height: 1.1; }
         #zodiac-year { font-size: 0.95em; font-weight: bold; color: var(--red); margin-bottom: 2px; }
         #en-lunar-sub { font-size: 1.2em; margin: 8px 0 2px 0; color: var(--red); font-weight: bold; }
@@ -32,6 +37,8 @@
     </style>
 </head>
 <body>
+
+<div id="tooltip"></div>
 
 <div class="card">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
@@ -57,7 +64,7 @@
         <button class="action-btn" onclick="toggleCal()" id="btn-cal"></button>
         <button class="action-btn" onclick="share()" id="btn-share"></button>
     </div>
-    <div class="rev-tag">2026-05-15-v7</div>
+    <div class="rev-tag">2026-05-15-v8</div>
 </div>
 
 <div class="cal-wrap" id="calWrapper">
@@ -84,8 +91,20 @@ const DATA = {
 };
 
 let lang = 'simp', viewD = new Date(), currentFIdx = 0, allF = [];
+const tip = document.getElementById('tooltip');
 
 function fixTrad(str) { if (lang !== 'trad') return str; let s = str; for (let k in TRAD_MAP) s = s.split(k).join(TRAD_MAP[k]); return s; }
+
+function showTip(e, text) {
+    if(!text || lang !== 'en') return;
+    const x = e.touches ? e.touches[0].clientX : e.clientX;
+    const y = e.touches ? e.touches[0].clientY : e.clientY;
+    tip.innerText = text;
+    tip.style.left = x + 'px';
+    tip.style.top = y + 'px';
+    tip.style.display = 'block';
+}
+function hideTip() { tip.style.display = 'none'; }
 
 function update() {
     const now = new Date(), sol = Solar.fromDate(now), lun = sol.getLunar();
@@ -161,14 +180,19 @@ function renderCal(date) {
         const sol = Solar.fromYmd(y, m+1, d), lun = sol.getLunar(), isToday = sol.toYmd() === todayStr ? "cur-day" : "", jq = lun.getJieQi(), fest = lun.getFestivals()[0] || "", isSpecial = (jq || fest) ? "special-day" : "";
         let lStr = jq ? jq : (fest ? fest.substring(0,2) : (lun.getDay() === 1 ? lun.getMonthInChinese() + "月" : lun.getDayInChinese()));
         
-        // Logic for English festival/term translation in calendar
-        let tooltip = "";
+        let trans = "";
         if(lang === 'en') {
-            if(jq) tooltip = TERMS_EN[jq];
-            else if(fest) tooltip = FESTS_EN[fest] || fest;
+            if(jq) trans = TERMS_EN[jq];
+            else if(fest) trans = FESTS_EN[fest] || fest;
         }
         
-        html += `<td class="${isToday} ${isSpecial}" title="${tooltip}"><span>${d}</span><br><small>${fixTrad(lStr)}</small></td>`;
+        html += `<td class="${isToday} ${isSpecial}" 
+                    ontouchstart="showTip(event, '${trans}')" 
+                    ontouchend="hideTip()" 
+                    onmousedown="showTip(event, '${trans}')" 
+                    onmouseup="hideTip()">
+                    <span>${d}</span><br><small>${fixTrad(lStr)}</small>
+                </td>`;
     }
     document.getElementById('cal-body').innerHTML = html + '</tr>';
 }
