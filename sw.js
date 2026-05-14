@@ -1,18 +1,15 @@
-const CACHE_NAME = 'lunar-clock-2026-05-05-v1';
-const ASSETS_TO_CACHE = [
+const CACHE_NAME = 'lunar-clock-2026-05-15-v1';
+const ASSETS = [
   './',
   './index.html',
-  './manifest.json',
-  './icon-192.png',
-  './icon-512.png',
-  './screenshot_mobile.png',
-  './screenshot_wide.png',
   'https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.min.js'
 ];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS_TO_CACHE))
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(ASSETS);
+    })
   );
   self.skipWaiting();
 });
@@ -20,9 +17,10 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
-      return Promise.all(keys.map((key) => {
-        if (key !== CACHE_NAME) return caches.delete(key);
-      }));
+      return Promise.all(
+        keys.filter((key) => key !== CACHE_NAME)
+            .map((key) => caches.delete(key))
+      );
     })
   );
   self.clients.claim();
@@ -31,11 +29,7 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(event.request).then((response) => {
-      return response || fetch(event.request).catch(() => {
-        if (event.request.mode === 'navigate') {
-          return caches.match('./index.html');
-        }
-      });
+      return response || fetch(event.request);
     })
   );
 });
