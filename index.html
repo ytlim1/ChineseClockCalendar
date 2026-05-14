@@ -3,30 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lunar Calendar V89</title>
+    <title>Lunar Calendar V90</title>
     <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.min.js"></script>
     <style>
         :root { --bg: #f5f3ef; --card: #ffffff; --red: #b71c1c; --f-red: #cf1322; --t-main: #111111; --t-sec: #888888; --line: #eeeeee; }
-        [data-theme='dark'] { --bg: #121212; --card: #1e1e1e; --red: #ff5252; --f-red: #ff7875; --t-main: #e0e0e0; --t-sec: #aaaaaa; --line: #333333; }
-        body { background: var(--bg); font-family: -apple-system, sans-serif; display: flex; flex-direction: column; align-items: center; padding: 15px 0; color: var(--t-main); margin: 0; overflow-x: hidden; }
-        .card { background: var(--card); padding: 25px 20px 10px 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 340px; text-align: center; border-top: 6px solid var(--red); box-sizing: border-box; position: relative; }
+        /* Explicit Dark Theme Selectors */
+        [data-theme='dark'], [data-theme='dark'] body { --bg: #121212; --card: #1e1e1e; --red: #ff5252; --f-red: #ff7875; --t-main: #e0e0e0; --t-sec: #aaaaaa; --line: #333333; }
+        
+        body { background: var(--bg); font-family: -apple-system, sans-serif; display: flex; flex-direction: column; align-items: center; padding: 15px 0; color: var(--t-main); margin: 0; overflow-x: hidden; transition: background 0.3s, color 0.3s; }
+        .card { background: var(--card); padding: 25px 20px 10px 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 340px; text-align: center; border-top: 6px solid var(--red); box-sizing: border-box; position: relative; transition: background 0.3s; }
         .nav-btn { width: 34px; height: 34px; background: none; border: 1px solid var(--red); border-radius: 50%; color: var(--red); cursor: pointer; font-weight: bold; font-size: 0.8em; display: flex; align-items: center; justify-content: center; }
         .time { font-size: 2.4em; font-weight: bold; color: var(--red); margin: 5px 0; font-variant-numeric: tabular-nums; }
         .badge-label { display: inline-block; color: var(--f-red); padding: 2px 14px; border-radius: 50px; font-size: 0.85em; margin: 10px 0; background: #fff1f0; border: 1px solid #ffa39e; font-weight: bold; min-width: 60px; }
+        [data-theme='dark'] .badge-label { background: #2a1215; border-color: var(--f-red); }
+        
         .countdown-wrap { margin: 15px 0; padding: 10px 0; border-top: 1px dashed var(--line); display: flex; align-items: center; justify-content: center; gap: 8px; min-height: 55px; font-size: 0.95em; }
         .fest-content { flex: 1; line-height: 1.3; font-weight: bold; }
-        .fest-nav { border: none; background: none; color: var(--red); cursor: pointer; font-size: 1.2em; padding: 0 8px; transition: opacity 0.3s; }
-        .fest-nav:disabled { color: var(--t-sec); opacity: 0.3; cursor: not-allowed; }
+        .fest-nav { border: none; background: none; color: var(--red); cursor: pointer; font-size: 1.2em; padding: 0 8px; }
+        .fest-nav:disabled { color: var(--t-sec); opacity: 0.3; }
+        
         .action-btn { flex: 1; background: var(--card); color: var(--red); border: 1px solid var(--line); padding: 12px; border-radius: 12px; cursor: pointer; font-weight: bold; font-size: 0.9em; min-height: 55px; }
         .cal-wrap { display: none; background: var(--card); width: 340px; border-radius: 20px; padding: 15px 0; margin-top: 10px; border: 1px solid var(--line); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
         .cal-wrap.show { display: block; }
+        
         table { width: 95%; margin: 0 auto; border-collapse: collapse; }
-        td { height: 52px; text-align: center; border-radius: 8px; font-size: 0.85em; position: relative; width: 14.28%; cursor: pointer; -webkit-tap-highlight-color: transparent; user-select: none; }
+        td { height: 52px; text-align: center; border-radius: 8px; font-size: 0.85em; position: relative; width: 14.28%; cursor: pointer; -webkit-tap-highlight-color: transparent; user-select: none; color: var(--t-main); }
         .cur-day { background: var(--red) !important; color: #ffffff !important; }
         .cur-day span, .cur-day small { color: #ffffff !important; font-weight: bold; }
         .special-day { color: var(--f-red) !important; font-weight: bold; }
         
-        #tooltip { position: fixed; background: rgba(0,0,0,0.9); color: white; padding: 8px 12px; border-radius: 6px; font-size: 0.9em; pointer-events: none; display: none; z-index: 9999; transform: translate(-50%, -130%); white-space: nowrap; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        #tooltip { position: fixed; background: rgba(0,0,0,0.9); color: white; padding: 8px 12px; border-radius: 6px; font-size: 0.9em; pointer-events: none; display: none; z-index: 9999; transform: translate(-50%, -130%); white-space: nowrap; }
         #tooltip::after { content: ''; position: absolute; top: 100%; left: 50%; margin-left: -6px; border-width: 6px; border-style: solid; border-color: rgba(0,0,0,0.9) transparent transparent transparent; }
 
         #lunar-main { font-size: 2.5em; font-weight: bold; margin: 5px 0; line-height: 1.1; }
@@ -41,7 +47,7 @@
 
 <div class="card">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
-        <button class="nav-btn" onclick="toggleTheme()">🌙</button>
+        <button class="nav-btn" onclick="toggleTheme()" id="themeBtn">🌙</button>
         <div id="solar-title" style="color:var(--t-sec); font-size: 0.85em;"></div>
         <button class="nav-btn" onclick="toggleLang()" id="langBtn">繁</button>
     </div>
@@ -51,7 +57,7 @@
     <div id="lunar-main"></div>
     <div id="zodiac-year"></div>
     <div id="gz-d" style="color:var(--t-sec); font-size:0.8em; margin-bottom:10px;"></div>
-    <div id="shi-info" style="background:var(--bg); padding:10px; border-radius:8px; font-size:0.9em; border:1px solid var(--line);"></div>
+    <div id="shi-info" style="background:var(--bg); padding:10px; border-radius:8px; font-size:0.9em; border:1px solid var(--line); transition: background 0.3s;"></div>
     
     <div class="countdown-wrap">
         <button id="fest-prev" class="fest-nav" onclick="navFest(-1)">❮</button>
@@ -63,7 +69,7 @@
         <button class="action-btn" onclick="toggleCal()" id="btn-cal"></button>
         <button class="action-btn" onclick="share()" id="btn-share"></button>
     </div>
-    <div class="rev-tag">2026-05-15-v9</div>
+    <div class="rev-tag">2026-05-15-v10</div>
 </div>
 
 <div class="cal-wrap" id="calWrapper">
@@ -115,6 +121,7 @@ function update() {
     let badgeText = jq ? jq : cfg.badge;
     if(lang === 'en' && jq) badgeText = TERMS_EN[jq] || jq;
     document.getElementById('badge-lunar').innerText = fixTrad(badgeText);
+    
     if(lang === 'en') {
         document.getElementById('en-lunar-sub').innerText = `Lunar Month ${lun.getMonth()}, Day ${lun.getDay()}`;
         document.getElementById('lunar-main').innerText = fixTrad(lun.getMonthInChinese() + "月" + lun.getDayInChinese());
@@ -189,11 +196,18 @@ function renderCal(date) {
 }
 
 function toggleLang() { lang = (lang === 'simp') ? 'trad' : (lang === 'trad' ? 'en' : 'simp'); update(); renderCal(viewD); }
-function toggleTheme() { document.documentElement.toggleAttribute('data-theme'); }
+
+function toggleTheme() { 
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+    document.getElementById('themeBtn').innerText = isDark ? '🌙' : '☀️';
+}
+
 function toggleCal() { document.getElementById('calWrapper').classList.toggle('show'); update(); }
 function chgM(n) { viewD.setMonth(viewD.getMonth()+n); renderCal(viewD); }
 function navFest(n) { currentFIdx = Math.max(0, Math.min(allF.length-1, currentFIdx+n)); refreshF(new Date()); }
 function share() { navigator.share ? navigator.share({title:'Lunar Calendar', url:location.href}) : alert(location.href); }
+
 setInterval(update, 1000); update(); renderCal(viewD);
 if ('serviceWorker' in navigator) { navigator.serviceWorker.register('./sw.js'); }
 </script>
