@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lunar Calendar V87</title>
+    <title>Lunar Calendar V89</title>
     <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.min.js"></script>
     <style>
         :root { --bg: #f5f3ef; --card: #ffffff; --red: #b71c1c; --f-red: #cf1322; --t-main: #111111; --t-sec: #888888; --line: #eeeeee; }
@@ -26,9 +26,8 @@
         .cur-day span, .cur-day small { color: #ffffff !important; font-weight: bold; }
         .special-day { color: var(--f-red) !important; font-weight: bold; }
         
-        /* New Custom Tooltip */
-        #tooltip { position: fixed; background: rgba(0,0,0,0.85); color: white; padding: 6px 12px; border-radius: 6px; font-size: 0.85em; pointer-events: none; display: none; z-index: 1000; transform: translate(-50%, -120%); white-space: nowrap; }
-        #tooltip::after { content: ''; position: absolute; top: 100%; left: 50%; margin-left: -5px; border-width: 5px; border-style: solid; border-color: rgba(0,0,0,0.85) transparent transparent transparent; }
+        #tooltip { position: fixed; background: rgba(0,0,0,0.9); color: white; padding: 8px 12px; border-radius: 6px; font-size: 0.9em; pointer-events: none; display: none; z-index: 9999; transform: translate(-50%, -130%); white-space: nowrap; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        #tooltip::after { content: ''; position: absolute; top: 100%; left: 50%; margin-left: -6px; border-width: 6px; border-style: solid; border-color: rgba(0,0,0,0.9) transparent transparent transparent; }
 
         #lunar-main { font-size: 2.5em; font-weight: bold; margin: 5px 0; line-height: 1.1; }
         #zodiac-year { font-size: 0.95em; font-weight: bold; color: var(--red); margin-bottom: 2px; }
@@ -64,7 +63,7 @@
         <button class="action-btn" onclick="toggleCal()" id="btn-cal"></button>
         <button class="action-btn" onclick="share()" id="btn-share"></button>
     </div>
-    <div class="rev-tag">2026-05-15-v8</div>
+    <div class="rev-tag">2026-05-15-v9</div>
 </div>
 
 <div class="cal-wrap" id="calWrapper">
@@ -97,6 +96,7 @@ function fixTrad(str) { if (lang !== 'trad') return str; let s = str; for (let k
 
 function showTip(e, text) {
     if(!text || lang !== 'en') return;
+    e.preventDefault();
     const x = e.touches ? e.touches[0].clientX : e.clientX;
     const y = e.touches ? e.touches[0].clientY : e.clientY;
     tip.innerText = text;
@@ -116,21 +116,18 @@ function update() {
     if(lang === 'en' && jq) badgeText = TERMS_EN[jq] || jq;
     document.getElementById('badge-lunar').innerText = fixTrad(badgeText);
     if(lang === 'en') {
-        document.getElementById('en-lunar-sub').style.display = "block"; 
         document.getElementById('en-lunar-sub').innerText = `Lunar Month ${lun.getMonth()}, Day ${lun.getDay()}`;
-        document.getElementById('lunar-main').style.fontSize = "1.2em";
-        document.getElementById('lunar-main').style.color = "var(--t-sec)";
         document.getElementById('lunar-main').innerText = fixTrad(lun.getMonthInChinese() + "月" + lun.getDayInChinese());
         document.getElementById('zodiac-year').innerText = "Year of the Horse";
         document.getElementById('solar-title').innerText = `${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()}, ${cfg.weeks[now.getDay()]}`;
     } else {
-        document.getElementById('en-lunar-sub').style.display = "none";
-        document.getElementById('lunar-main').style.fontSize = "2.5em";
-        document.getElementById('lunar-main').style.color = "var(--t-main)";
         document.getElementById('lunar-main').innerText = fixTrad(lun.getMonthInChinese() + "月" + lun.getDayInChinese());
         document.getElementById('zodiac-year').innerText = fixTrad(lun.getYearInGanZhi() + lun.getYearShengXiao() + "年");
         document.getElementById('solar-title').innerText = fixTrad(`${sol.getYear()}年${sol.getMonth()}月${sol.getDay()}日 ${cfg.wPre}${cfg.weeks[now.getDay()]}`);
     }
+    document.getElementById('en-lunar-sub').style.display = lang === 'en' ? "block" : "none";
+    document.getElementById('lunar-main').style.fontSize = lang === 'en' ? "1.2em" : "2.5em";
+    document.getElementById('lunar-main').style.color = lang === 'en' ? "var(--t-sec)" : "var(--t-main)";
     document.getElementById('gz-d').innerText = fixTrad(lun.getYearInGanZhi() + "年 " + lun.getMonthInGanZhi() + "月 " + lun.getDayInGanZhi() + "日");
     document.getElementById('shi-info').innerText = cfg.shi + fixTrad(lun.getEightChar().getTimeZhi()) + fixTrad("时");
     document.getElementById('langBtn').innerText = lang === 'simp' ? "繁" : (lang === 'trad' ? "En" : "简");
@@ -179,13 +176,7 @@ function renderCal(date) {
         if((d+fDay-1)%7===0 && d!==1) html += '</tr><tr>';
         const sol = Solar.fromYmd(y, m+1, d), lun = sol.getLunar(), isToday = sol.toYmd() === todayStr ? "cur-day" : "", jq = lun.getJieQi(), fest = lun.getFestivals()[0] || "", isSpecial = (jq || fest) ? "special-day" : "";
         let lStr = jq ? jq : (fest ? fest.substring(0,2) : (lun.getDay() === 1 ? lun.getMonthInChinese() + "月" : lun.getDayInChinese()));
-        
-        let trans = "";
-        if(lang === 'en') {
-            if(jq) trans = TERMS_EN[jq];
-            else if(fest) trans = FESTS_EN[fest] || fest;
-        }
-        
+        let trans = (lang === 'en') ? (jq ? TERMS_EN[jq] : (fest ? FESTS_EN[fest] || fest : "")) : "";
         html += `<td class="${isToday} ${isSpecial}" 
                     ontouchstart="showTip(event, '${trans}')" 
                     ontouchend="hideTip()" 
@@ -206,5 +197,6 @@ function share() { navigator.share ? navigator.share({title:'Lunar Calendar', ur
 setInterval(update, 1000); update(); renderCal(viewD);
 if ('serviceWorker' in navigator) { navigator.serviceWorker.register('./sw.js'); }
 </script>
+<script data-goatcounter="https://ytlim-clock.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>
