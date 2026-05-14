@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lunar Calendar V84</title>
+    <title>Lunar Calendar V85</title>
     <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.min.js"></script>
     <style>
         :root { --bg: #f5f3ef; --card: #ffffff; --red: #b71c1c; --f-red: #cf1322; --t-main: #111111; --t-sec: #888888; --line: #eeeeee; }
@@ -22,12 +22,9 @@
         .cal-wrap.show { display: block; }
         table { width: 95%; margin: 0 auto; border-collapse: collapse; }
         td { height: 52px; text-align: center; border-radius: 8px; font-size: 0.85em; position: relative; width: 14.28%; cursor: pointer; }
-        
-        /* Highlighting Logic */
         .cur-day { background: var(--red) !important; color: #ffffff !important; }
         .cur-day span, .cur-day small { color: #ffffff !important; font-weight: bold; }
         .special-day { color: var(--f-red) !important; font-weight: bold; }
-        
         #lunar-main { font-size: 2.5em; font-weight: bold; margin: 5px 0; line-height: 1.1; }
         #zodiac-year { font-size: 0.95em; font-weight: bold; color: var(--red); margin-bottom: 2px; }
         #en-lunar-sub { font-size: 1.2em; margin: 8px 0 2px 0; color: var(--red); font-weight: bold; }
@@ -60,7 +57,7 @@
         <button class="action-btn" onclick="toggleCal()" id="btn-cal"></button>
         <button class="action-btn" onclick="share()" id="btn-share"></button>
     </div>
-    <div class="rev-tag">2026-05-15-v5</div>
+    <div class="rev-tag">2026-05-15-v6</div>
 </div>
 
 <div class="cal-wrap" id="calWrapper">
@@ -77,7 +74,8 @@
 
 <script>
 const TRAD_MAP = { "惊蛰":"驚蟄", "芒种":"芒種", "处暑":"處暑", "节":"節", "时":"時", "礼拜":"禮拜", "离":"離", "还":"還", "历":"曆", "览":"覽", "农":"農", "马":"馬", "丑":"醜", "未":"未", "当前时辰":"當前時辰", "距离":"距離", "天":"天", "年":"年", "月":"月", "日":"日", "隐藏月历":"隱藏月曆", "月历":"月曆", "端午节":"端午節", "谷雨":"穀雨", "立夏":"立夏" };
-const TERMS_EN = { "立春":"Spring Begins","雨水":"Rain Water","惊蛰":"Insects Awakening","春分":"Spring Equinox","清明":"Pure Brightness","谷雨":"Grain Rain","立夏":"Summer Begins","小满":"Grain Buds","芒种":"Grain in Ear","夏至":"Summer Solstice","小暑":"Slight Heat","大暑":"Great Heat","立秋":"Autumn Begins","处暑":"End of Heat","白露":"White Dew","秋分":"Autumn Equinox","寒露":"Cold Dew","霜降":"Frost Descends","立冬":"Winter Begins","小雪":"Light Snow","大雪":"Heavy Snow","冬至":"Winter Solstice","小寒":"Slight Cold","大寒":"Great Cold" };
+// Improved English translations for Solar Terms
+const TERMS_EN = { "立春":"Beginning of Spring","雨水":"Rain Water","惊蛰":"Awakening of Insects","春分":"Spring Equinox","清明":"Clear and Bright","谷雨":"Grain Rain","立夏":"Beginning of Summer","小满":"Lesser Fullness","芒种":"Grain in Ear","夏至":"Summer Solstice","小暑":"Lesser Heat","大暑":"Greater Heat","立秋":"Beginning of Autumn","处暑":"End of Heat","白露":"White Dew","秋分":"Autumn Equinox","寒露":"Cold Dew","霜降":"Frost Descent","立冬":"Beginning of Winter","小雪":"Lesser Snow","大雪":"Greater Snow","冬至":"Winter Solstice","小寒":"Lesser Cold","大寒":"Greater Cold" };
 const FESTS_EN = { "春节":"Lunar New Year","端午节":"Dragon Boat Festival","中秋节":"Mid-Autumn Festival" };
 
 const DATA = { 
@@ -92,17 +90,13 @@ function fixTrad(str) { if (lang !== 'trad') return str; let s = str; for (let k
 
 function update() {
     const now = new Date(), sol = Solar.fromDate(now), lun = sol.getLunar();
-    const cfg = DATA[lang];
-    const jq = lun.getJieQi();
-    
+    const cfg = DATA[lang], jq = lun.getJieQi();
     document.getElementById('clock').innerText = now.toTimeString().split(' ')[0];
     document.getElementById('btn-share').innerText = cfg.share;
     document.getElementById('btn-cal').innerText = document.getElementById('calWrapper').classList.contains('show') ? cfg.hide : cfg.cal;
-    
     let badgeText = jq ? jq : cfg.badge;
     if(lang === 'en' && jq) badgeText = TERMS_EN[jq] || jq;
     document.getElementById('badge-lunar').innerText = fixTrad(badgeText);
-
     if(lang === 'en') {
         document.getElementById('en-lunar-sub').style.display = "block"; 
         document.getElementById('en-lunar-sub').innerText = `Lunar Month ${lun.getMonth()}, Day ${lun.getDay()}`;
@@ -165,15 +159,9 @@ function renderCal(date) {
     for(let i=0; i<fDay; i++) html += '<td></td>';
     for(let d=1; d<=lDate; d++) {
         if((d+fDay-1)%7===0 && d!==1) html += '</tr><tr>';
-        const sol = Solar.fromYmd(y, m+1, d), lun = sol.getLunar();
-        const isToday = sol.toYmd() === todayStr ? "cur-day" : "";
-        const jq = lun.getJieQi();
-        const fest = lun.getFestivals()[0] || "";
-        const isSpecial = (jq || fest) ? "special-day" : "";
-        
+        const sol = Solar.fromYmd(y, m+1, d), lun = sol.getLunar(), isToday = sol.toYmd() === todayStr ? "cur-day" : "", jq = lun.getJieQi(), fest = lun.getFestivals()[0] || "", isSpecial = (jq || fest) ? "special-day" : "";
         let lStr = jq ? jq : (fest ? fest.substring(0,2) : (lun.getDay() === 1 ? lun.getMonthInChinese() + "月" : lun.getDayInChinese()));
         let clickAction = (lang === 'en' && jq) ? `onclick="alert('${TERMS_EN[jq]}')" title="${TERMS_EN[jq]}"` : "";
-        
         html += `<td class="${isToday} ${isSpecial}" ${clickAction}><span>${d}</span><br><small>${fixTrad(lStr)}</small></td>`;
     }
     document.getElementById('cal-body').innerHTML = html + '</tr>';
@@ -186,10 +174,7 @@ function chgM(n) { viewD.setMonth(viewD.getMonth()+n); renderCal(viewD); }
 function navFest(n) { currentFIdx = Math.max(0, Math.min(allF.length-1, currentFIdx+n)); refreshF(new Date()); }
 function share() { navigator.share ? navigator.share({title:'Lunar Calendar', url:location.href}) : alert(location.href); }
 setInterval(update, 1000); update(); renderCal(viewD);
-
 if ('serviceWorker' in navigator) { navigator.serviceWorker.register('./sw.js'); }
 </script>
-
-<script data-goatcounter="https://ytlim-clock.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>
