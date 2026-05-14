@@ -1,4 +1,4 @@
-const CACHE_NAME = 'lunar-clock-2026-05-15-v7';
+const CACHE_NAME = 'lunar-clock-2026-05-15-v8';
 const ASSETS = ['./', './index.html', 'https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.min.js'];
 
 self.addEventListener('install', (event) => {
