@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lunar Calendar V90</title>
+    <title>Lunar Calendar V91</title>
     <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.min.js"></script>
     <style>
         :root { --bg: #f5f3ef; --card: #ffffff; --red: #b71c1c; --f-red: #cf1322; --t-main: #111111; --t-sec: #888888; --line: #eeeeee; }
-        /* Explicit Dark Theme Selectors */
         [data-theme='dark'], [data-theme='dark'] body { --bg: #121212; --card: #1e1e1e; --red: #ff5252; --f-red: #ff7875; --t-main: #e0e0e0; --t-sec: #aaaaaa; --line: #333333; }
         
         body { background: var(--bg); font-family: -apple-system, sans-serif; display: flex; flex-direction: column; align-items: center; padding: 15px 0; color: var(--t-main); margin: 0; overflow-x: hidden; transition: background 0.3s, color 0.3s; }
@@ -69,7 +68,7 @@
         <button class="action-btn" onclick="toggleCal()" id="btn-cal"></button>
         <button class="action-btn" onclick="share()" id="btn-share"></button>
     </div>
-    <div class="rev-tag">2026-05-15-v10</div>
+    <div class="rev-tag">2026-09-25-v11</div>
 </div>
 
 <div class="cal-wrap" id="calWrapper">
@@ -85,7 +84,7 @@
 </div>
 
 <script>
-const TRAD_MAP = { "惊蛰":"驚蟄", "芒种":"芒種", "处暑":"處暑", "节":"節", "时":"時", "礼拜":"禮拜", "离":"離", "还":"還", "历":"曆", "览":"覽", "农":"農", "马":"馬", "丑":"醜", "未":"未", "当前时辰":"當前時辰", "距离":"距離", "天":"天", "年":"年", "月":"月", "日":"日", "隐藏月历":"隱藏月曆", "月历":"月曆", "端午节":"端午節", "谷雨":"穀雨", "立夏":"立夏" };
+const TRAD_MAP = { "惊蛰":"驚蟄", "芒种":"芒種", "处暑":"處暑", "节":"節", "时":"時", "礼拜":"禮拜", "离":"離", "还":"還", "历":"曆", "览":"覽", "农":"農", "马":"馬", "丑":"醜", "未":"未", "当前时辰":"當前時辰", "距离":"距離", "天":"天", "年":"年", "月":"月", "日":"日", "隐藏月历":"隱藏月曆", "月历":"月曆", "端午节":"端午節", "中秋节":"中秋節", "谷雨":"穀雨", "立夏":"立夏" };
 const TERMS_EN = { "立春":"Beginning of Spring","雨水":"Rain Water","惊蛰":"Awakening of Insects","春分":"Spring Equinox","清明":"Clear and Bright","谷雨":"Grain Rain","立夏":"Beginning of Summer","小满":"Lesser Fullness","芒种":"Grain in Ear","夏至":"Summer Solstice","小暑":"Lesser Heat","大暑":"Greater Heat","立秋":"Beginning of Autumn","处暑":"End of Heat","白露":"White Dew","秋分":"Autumn Equinox","寒露":"Cold Dew","霜降":"Frost Descent","立冬":"Beginning of Winter","小雪":"Lesser Snow","大雪":"Greater Snow","冬至":"Winter Solstice","小寒":"Lesser Cold","大寒":"Greater Cold" };
 const FESTS_EN = { "春节":"Lunar New Year","端午节":"Dragon Boat Festival","中秋节":"Mid-Autumn Festival" };
 
@@ -164,8 +163,12 @@ function refreshF(now) {
         let name = target.raw;
         if(lang === 'en') name = FESTS_EN[target.raw] || TERMS_EN[target.raw] || target.raw;
         const gDate = `(${target.d.getDate()}/${target.d.getMonth()+1})`;
-        if(lang === 'en') {
-            document.getElementById('fest-box').innerHTML = `<div style="color:var(--f-red)">${name} ${gDate}</div><div style="font-weight:normal; color:var(--t-sec); font-size:0.85em;">${diff} Days to go</div>`;
+        
+        if(diff === 0) {
+            // Display festival name on the day of the festival
+            document.getElementById('fest-box').innerHTML = `<div style="color:var(--f-red); font-size:1.1em; font-weight:bold;">${fixTrad(name)}</div>`;
+        } else if(lang === 'en') {
+            document.getElementById('fest-box').innerHTML = `<div style="color:var(--f-red)">${name} ${gDate}</div><div style="font-weight:normal; color:var(--t-sec); font-size:0.85em;">${diff} ${diff === 1 ? "Day to go" : "Days to go"}</div>`;
         } else {
             document.getElementById('fest-box').innerHTML = `<span style="color:var(--t-main)">${fixTrad(DATA[lang].dist + " " + name + " " + gDate)}</span> <span style="color:var(--red); font-size:1.1em">${diff}</span> ${fixTrad(DATA[lang].unit)}`;
         }
